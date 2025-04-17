@@ -1,0 +1,21 @@
+name: Base CSS Workflow
+
+on:
+  push:
+    branches: [ feature/base-css-bootstrap ]
+  pull_request:
+    branches: [ dev ]
+
+jobs:
+  css-check:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: List CSS files
+      run: ls app/static/css/
+
+    - name: Confirm Bootstrap CDN usage
+      run: grep -i "bootstrap" app/templates/base.html || echo "Bootstrap link not found."
