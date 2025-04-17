@@ -1,4 +1,4 @@
-# QuizMaker 🧠📚
+# quiz.it 🧠📚
 
 A web-based AI-assisted quiz creation and practice platform built with Flask and SQLite. Users can generate quizzes from custom input or files, complete and review their results, and share quizzes with friends or groups.
 
@@ -6,6 +6,7 @@ A web-based AI-assisted quiz creation and practice platform built with Flask and
 
 - User registration and login
 - Manual and AI-generated quiz creation
+- Import and upload documents for quiz generation (compatible types TBA)
 - Support for MCQ, short answer, and fill-in-the-blank types
 - Real-time scoring and quiz attempt history
 - Visual statistics with charts (time spent, scores, question review)
@@ -19,19 +20,19 @@ A web-based AI-assisted quiz creation and practice platform built with Flask and
 
 ## 👥 Team Members
 
-| UWA ID     | Name              | GitHub Username     |
-|------------|-------------------|----------------------|
-| 12345678   | Alice Example     | alicegit             |
-| 23456789   | Bob Builder       | bobbuilds            |
-| 34567890   | Clara Code        | claracodes           |
-| 45678901   | You               | yourgithubusername   |
+| UWA ID   | Name                      | GitHub Username |
+|----------|---------------------------|-----------------|
+| 23991179 | Amanda Putri Devi Siagian | mandasgn        |
+| 23456789 | Rayhan Rayhan             | rayhannm        |
+| 34567890 | Gaby Tedjosurjono         | gabrielajt10    |
+| 24211939 | Serena McPherson          | Deltane         |
 
 ## 🧠 How to Run the App
 
 1. Clone this repository:
     ```bash
-    git clone https://github.com/your-org/quiz-maker.git
-    cd quiz-maker
+    git clone https://github.com/Deltane/CITS3403-Group-Project
+    cd TBA
     ```
 
 2. Create and activate a virtual environment:
