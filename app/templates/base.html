@@ -3,12 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <title>Quiz.it</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="../static/CSS/styles.css">
+
     <!-- link for css styling here -->
 </head>
 <body>
     <div class = 'intro'>
         <h1>Quiz.it</h1>
-        <h2>Welcome to Quiz.it! This is a simple quiz application.</h2>
+        <!-- <h2>Welcome to Quiz.it! This is a simple quiz application.</h2> -->
         <p> This is a web-based AI-assisted quiz creation and practice platform built with Flask and SQLite. Users can generate quizzes from custom input or files, complete and review their results, and share quizzes with friends or groups!</p>
         <p> To get started, please log in or create an account.</p>
         {% block content %}{% endblock %}
