@@ -1,23 +1,102 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Quiz.it</title>
-
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="../static/CSS/styles.css">
-
-    <!-- link for css styling here -->
+  <meta charset="UTF-8">
+  <title>Quiz.it</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tester.css">
 </head>
+
 <body>
-    <div class = 'intro'>
-        <h1>Quiz.it</h1>
-        <!-- <h2>Welcome to Quiz.it! This is a simple quiz application.</h2> -->
-        <p> This is a web-based AI-assisted quiz creation and practice platform built with Flask and SQLite. Users can generate quizzes from custom input or files, complete and review their results, and share quizzes with friends or groups!</p>
-        <p> To get started, please log in or create an account.</p>
-        {% block content %}{% endblock %}
+  <div class="container">
+    <div class="intro">
+      <h1 class="top-left-bottom">[Quiz.it]</h1>
+      <h2 id="typing-text">Quiz, with a twist of AI.</h2>
+      <span></span>
+      <p>Assess your knowledge across a range of topics, including:</p>
+      <span></span>
+      
+      <div class="shortcuts-wrapper">
+        <div class="shortcuts">
+          <!-- First set of shortcuts -->
+          <div class="shortcut">
+            <div class="shortcut-icon">
+                <img src="photos/music.png" alt="Music Icon">
+            </div>
+            <div class="shortcut-name">Music</div>
+        </div>
+          
+          <div class="shortcut">
+            <div class="shortcut-icon">
+                <img src="photos/movie.png" alt="Music Icon">
+            </div>
+            <div class="shortcut-name">Movies</div>
+          </div>
+          
+          <div class="shortcut">
+            <div class="shortcut-icon">
+              <div style="width: 24px; height: 24px; background-color: #000000; border-radius: 4px;"></div>
+            </div>
+            <div class="shortcut-name">Flags</div>
+          </div>
+          
+          <div class="shortcut">
+            <div class="shortcut-icon">
+              <div style="width: 24px; height: 24px; background-color: #000000; border-radius: 0px;"></div>
+            </div>
+            <div class="shortcut-name">Science</div>
+          </div>
+          
+          <div class="shortcut">
+            <div class="shortcut-icon">
+              <div style="width: 24px; height: 24px; background-color: #000000; border-radius: 4px;"></div>
+            </div>
+            <div class="shortcut-name">Languages</div>
+          </div>
+          
+          <div class="shortcut">
+            <div class="shortcut-icon">
+              <div style="width: 24px; height: 24px; background-color: #000000; border-radius: 2px;"></div>
+            </div>
+            <div class="shortcut-name">Geography</div>
+          </div>
+          
+          <div class="shortcut">
+            <div class="shortcut-icon">
+              <div style="width: 24px; height: 24px; background-color: #000000; border-radius: 4px;"></div>
+            </div>
+            <div class="shortcut-name">AI</div>
+          </div>
+          
+          <div class="shortcut">
+            <div class="shortcut-icon">
+              <div style="width: 24px; height: 24px; background-color: #000000; border-radius: 24px;"></div>
+            </div>
+            <div class="shortcut-name">Sports</div>
+          </div>
+          
+          <div class="shortcut">
+            <div class="shortcut-icon">
+              <div style="width: 24px; height: 24px; background-color: #000000; border-radius: 2px;"></div>
+            </div>
+            <div class="shortcut-name">History</div>
+          </div>
+        </div>
+      </div>
     </div>
+    
+    <div class="top-right-buttons">
+      <a>How it works</a>
+      <a href="/" class="bn5">Sign in</a>
+    </div>
+
+    <div class="top-left-buttons">
+        <a>About Us</a>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
 </body>
 </html>
