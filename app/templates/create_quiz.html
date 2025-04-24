@@ -1,6 +1,12 @@
-{% extends "base.html" %}
-
-{% block content %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Quiz</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/create_quiz.css') }}">
+</head>
+<body>
 <div class="container">
     <h2>Create a New Quiz</h2>
     <form id="quiz-setup-form">
@@ -47,6 +53,7 @@
     </form>
 </div>
 
+<script src="{{ url_for('static', filename='js/quiz_logic.js') }}"></script>
 <script>
     $(document).ready(function() {
         $('#upload-file').change(function() {
@@ -68,4 +75,5 @@
 
     // Placeholder for AI-LLM integration code
 </script>
-{% endblock %}
+</body>
+</html>
