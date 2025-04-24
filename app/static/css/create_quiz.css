@@ -1,112 +1,124 @@
+/* create_quiz.css */
+
+/* Card Container */
 .container {
-    max-width: 600px;
-    margin: 0 auto;
-    padding: 20px;
-    background-color: #f9f9f9;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 700px;
+  margin: 4rem auto;
+  padding: 2.5rem 2rem;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
+/* Page Title */
+h2 {
+  font-family: "Syne", serif;
+  font-size: 2.25rem;
+  color: #9a503b;
+  text-align: center;
+  margin-bottom: 2rem;
+}
+
+/* Form Groups */
 .form-group {
-    margin-bottom: 15px;
+  margin-bottom: 1.75rem;
 }
 
-label {
-    display: block;
-    margin-bottom: 5px;
-    font-weight: bold;
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 600;
+  color: #333;
+  font-family: "Syne", serif;
 }
 
-input,
-textarea,
-select {
-    width: 100%;
-    padding: 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    box-sizing: border-box;
+/* Inputs, Textareas, Selects */
+.form-control {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  font-size: 1rem;
+  font-family: "Syne", serif;
+  color: #333;
+  background-color: #fff;
+  border: 1px solid #ccc;
+  border-radius: 0.5rem;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
 }
 
-textarea {
-    resize: vertical;
+.form-control:focus {
+  border-color: #9a503b;
+  box-shadow: 0 0 0 3px rgba(154, 80, 59, 0.2);
+  outline: none;
 }
 
-.form-check {
+/* File & AI fields side by side on wider screens */
+@media (min-width: 576px) {
+  .form-group.upload-or-ai {
     display: flex;
-    align-items: center;
-    margin-bottom: 10px;
+    gap: 1rem;
+  }
+  .form-group.upload-or-ai > * {
+    flex: 1;
+  }
+}
+
+/* Radio buttons */
+.form-check {
+  display: flex;
+  align-items: center;
+  margin-bottom: 1rem;
 }
 
 .form-check-input {
-    margin-right: 10px;
+  width: 1.25rem;
+  height: 1.25rem;
+  margin-right: 0.5rem;
 }
 
 .form-check-label {
-    margin: 0;
+  font-family: "Syne", serif;
+  font-size: 1rem;
+  color: #333;
 }
 
-.btn {
-    display: inline-block;
-    padding: 10px 20px;
-    font-size: 16px;
-    font-weight: bold;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-}
-
+/* Button */
 .btn-primary {
-    background-color: #007bff;
+  display: block;
+  width: 100%;
+  padding: 0.75rem;
+  font-family: "Syne", serif;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  background-color: #9a503b;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  text-align: center;
+  transition: background-color 0.3s, transform 0.1s;
+  margin-top: 1.5rem;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
+  background-color: #7f3f2d;
 }
 
-/* Additional styles inspired by styles.css */
-body {
-    font-family: "Syne", serif;
-    background-color: #9a503b;
-    background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
-    background-size: 20px 20px;
+.btn-primary:active {
+  transform: scale(0.98);
 }
 
-h2 {
-    font-size: 2rem;
-    color: #9a503b;
-    text-align: center;
-    margin-bottom: 20px;
+/* Disabled fields styling */
+.form-control:disabled {
+  background-color: #f5f5f5;
+  border-color: #ddd;
+  color: #888;
 }
 
-.form-control {
-    font-family: "Syne", serif;
-    font-size: 1rem;
-    color: #333;
+/* Helper classes (optional) */
+.text-center {
+  text-align: center;
 }
 
-.form-check-label {
-    font-family: "Syne", serif;
-    font-size: 1rem;
-    color: #333;
-}
-
-.btn-primary {
-    font-family: "Syne", serif;
-    font-size: 1rem;
-    font-weight: bold;
-    color: #fff;
-    background-color: #007bff;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    text-align: center;
-    text-decoration: none;
-}
-
-.btn-primary:hover {
-    background-color: #0056b3;
-}
+.mt-1 { margin-top: 1rem; }
+.mt-2 { margin-top: 2rem; }
