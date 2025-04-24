@@ -337,7 +337,7 @@ margin-left: 4px;
   width: 3.125rem;
   height: 3.125rem;
   border-radius: 50%;
-  background-color: #f1f3f4;
+  background-color: transparent; /* Set background to transparent */
   display: flex;
   align-items: center;
   justify-content: center;
