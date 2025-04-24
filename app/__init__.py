@@ -22,6 +22,14 @@ def create_app():
     # login_manager.init_app(app)
     Migrate(app, db)
 
+    # Register blueprints
+    from app.routes.auth_routes import auth_bp
+    # from app.routes.quiz_routes import quiz_bp
+    # from app.routes.ai_routes import ai_bp
+    # from app.routes.stats_routes import stats_bp
+
+    app.register_blueprint(auth_bp)
+
     google_bp = make_google_blueprint(
         client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
         client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
@@ -34,13 +42,6 @@ def create_app():
     )
     app.register_blueprint(google_bp, url_prefix="/login")
 
-    # Register blueprints
-    from app.routes.auth_routes import auth_bp
-    # from app.routes.quiz_routes import quiz_bp
-    # from app.routes.ai_routes import ai_bp
-    # from app.routes.stats_routes import stats_bp
-
-    app.register_blueprint(auth_bp)
     # app.register_blueprint(quiz_bp)
     # app.register_blueprint(ai_bp)
     # app.register_blueprint(stats_bp)
