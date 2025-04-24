@@ -1,4 +1,3 @@
-
 @font-face {
   font-family: 'MyFont';
   src: url('../font/Hornbill-Personal Use Regular.otf') format('truetype');
@@ -8,6 +7,9 @@ body {
   margin: 0;
   padding: 0;
   font-family: "Epilogue", sans-serif;
+  background-color: white;
+  background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+  background-size: 20px 20px;
 }
 
 .epilogue-quizit {
@@ -19,50 +21,115 @@ body {
 a {
   font-family: "Epilogue", sans-serif;
   font-weight: 500;
-  font-size: small;
+  font-size: 0.875rem; /* Small text size */
   text-decoration: none;
   color: inherit;
   cursor: pointer;
 }
 
+
+.header-container {
+  position: absolute; /* Establish a positioning context */
+  display: flex; /* Use flexbox for alignment */
+  justify-content: space-between; /* Space out left, center, and right sections */
+  align-items: center; /* Align items vertically */
+  width: 100%; /* Full width of the container */
+  top: 0.8rem; /* Adjust vertical position */
+  padding: 0 2rem; /* Add padding for spacing */
+  box-sizing: border-box; /* Include padding in width calculations */
+}
+
+.top-center-page {
+  position: absolute;
+  top: 4rem; /* Adjust the vertical position */
+  left: 50%; /* Center horizontally */
+  transform: translateX(-50%); /* Offset by 50% of its width to center */
+  display: flex;
+  align-items: center; /* Align items vertically */
+  justify-content: center; /* Align items horizontally */
+  gap: 1rem; /* Add spacing between elements if needed */
+  margin: 0; /* Remove any extra margins */
+}
+
+
 /* Top-left buttons container */
 .top-left-buttons {
-position: absolute;
-top: 80px; /* Match the top value of .top-right-buttons */
-left: 70px; /* Position it on the left */
-display: flex;
-gap: 30px; /* Add spacing between buttons */
-align-items: center; /* Align items vertically */
-justify-content: flex-start; /* Align items to the left */
-margin-top: 0; /* Remove any extra margin */
+  position: absolute;
+  top: 4rem; /* Match the top value of .top-right-buttons */
+  left: 10rem; /* Position it on the left */
+  display: flex;
+  gap: 2rem; /* Add spacing between buttons */
+  align-items: center;
+  justify-content: flex-start;
+  margin-top: 0;
 }
 
-/* Top-right buttons container */
-.top-right-buttons {
-position: absolute;
-top: 80px; /* Match the top value of .top-left-buttons */
-right: 70px; /* Position it on the right */
-display: flex;
-gap: 30px; /* Add spacing between buttons */
-align-items: center; /* Align items vertically */
-justify-content: flex-end; /* Align items to the right */
-margin-top: 0; /* Remove any extra margin */
-}
-
-.top-right-buttons a:first-child {
+.top-left-buttons a {
   font-size: 1rem;
   font-weight: normal;
   color: #000;
 }
 
-.top-left-buttons a:first-child {
-    font-size: 1rem;
-    font-weight: normal;
-    color: #000;
+.top-left-buttons {
+  left: 10rem; /* Position it on the left */
 }
 
+.top-right-buttons {
+  right: 10rem; /* Position it on the right */
+}
+.profile-images {
+  display: flex;
+  margin-right: 8px;
+}
+  
+.profile-image {
+width: 32px;
+height: 32px;
+border-radius: 50%;
+background-color: #333;
+border: 2px solid white;
+margin-right: -10px;
+overflow: hidden;
+display: flex;
+justify-content: center;
+align-items: center;
+}
+
+.count {
+font-size: 14px;
+font-weight: 600;
+color: #333;
+}
+
+.followers {
+font-size: 14px;
+color: #0066cc;
+font-weight: 600;
+margin-left: 4px;
+}
+
+/* Top-right buttons container */
+.top-right-buttons {
+  position: absolute;
+  top: 5rem; /* Match the top value of .top-left-buttons */
+  right: 10rem; /* Position it on the right */
+  display: flex;
+  gap: 2rem; /* Add spacing between buttons */
+  align-items: center;
+  justify-content: flex-end;
+  margin-top: 0;
+}
+
+
+.top-right-buttons a:first-child{
+  font-size: 1rem;
+  font-weight: normal;
+  color: #000;
+}
+
+
 .bn5 {
-  padding: 0.7rem 2rem;
+  padding: 0.4375rem 1.25rem;
   border: none;
   outline: none;
   color: rgb(255, 255, 255);
@@ -70,7 +137,7 @@ margin-top: 0; /* Remove any extra margin */
   cursor: pointer;
   position: relative;
   z-index: 0;
-  border-radius: 50px;
+  border-radius: 3.125rem;
   text-decoration: none;
   font-size: 1.2rem;
   font-weight: bold;
@@ -79,40 +146,40 @@ margin-top: 0; /* Remove any extra margin */
 .bn5:before {
   content: "";
   background: linear-gradient(
-    45deg,
-    #ff0000,
-    #ff7300,
-    #fffb00,
-    #48ff00,
-    #00ffd5,
-    #002bff,
-    #7a00ff,
-    #ff00c8,
-    #ff0000
+      45deg,
+      #ff0000,
+      #ff7300,
+      #fffb00,
+      #48ff00,
+      #00ffd5,
+      #002bff,
+      #7a00ff,
+      #ff00c8,
+      #ff0000
   );
   position: absolute;
-  top: -2px;
-  left: -2px;
+  top: -0.125rem;
+  left: -0.125rem;
   background-size: 400%;
   z-index: -1;
-  filter: blur(5px);
-  width: calc(100% + 4px);
-  height: calc(100% + 4px);
+  filter: blur(0.3125rem);
+  width: calc(100% + 0.25rem);
+  height: calc(100% + 0.25rem);
   animation: glowingbn5 20s linear infinite;
   opacity: 0;
   transition: opacity 0.3s ease-in-out;
-  border-radius: 10px;
+  border-radius: 0.625rem;
 }
 
 @keyframes glowingbn5 {
   0% {
-    background-position: 0 0;
+      background-position: 0 0;
   }
   50% {
-    background-position: 400% 0;
+      background-position: 400% 0;
   }
   100% {
-    background-position: 0 0;
+      background-position: 0 0;
   }
 }
 
@@ -137,104 +204,154 @@ margin-top: 0; /* Remove any extra margin */
   background: #191919;
   left: 0;
   top: 0;
-  border-radius: 50px;
+  border-radius: 3.125rem;
 }
 
-.intro {
+.title {
+  font-size: 10rem; /* Adjust font size as needed */
+  font-weight: bold;
+  color: #000;
+  text-align: center;
+  margin: 5rem; /* Remove any default margin */
+}
+
+.title-container {
   display: flex;
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  /* Reduced height to prevent excessive vertical spacing */
+  height: auto;
+  padding-top: 10rem;
   margin: 0;
   background-color: transparent;
   font-family: 'MyFont', serif;
   color: #000;
   text-align: center;
+  margin-bottom: 2rem;
+  white-space: nowrap;
 }
 
-.intro h1 {
+.title-container h1 {
   display: inline-block;
   position: relative;
   padding: 0.5rem 1rem;
   background-color: #fff;
-  box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
-  border-radius: 8px;
+  box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+  border-radius: 0.5rem;
   color: #000;
   font-size: 3rem;
   font-weight: bold;
   text-align: center;
   width: 20%;
-  min-width: 400px;
-  margin-top: 50px;
+  min-width: 25rem;
+  margin: 10rem; /* Increased margin to lower the element */
 }
 
-.intro h2 {
+.title-container h2 {
   color: #444;
-  margin-top: 0.3rem;
+  margin-top: -8rem; /* Move it slightly upwards */
+  display: inline-block;
 }
 
-.intro p {
-  margin-top: 2rem;
-  color: #666;
-  font-size: 1.2rem;
+.title-container a {
+  color: #ffffff;
+  margin-top: 6rem; /* Move it slightly upwards */
+  display: inline-block;
+  font-family: 'MyFont', sans-serif;
+  
+
+}
+.cursor {
+  display: inline-block;
+  animation: blink 1s steps(2, start) infinite;
+  color: inherit;
+}
+
+@keyframes blink {
+  0%, 49% {
+      opacity: 1;
+  }
+  50%, 100% {
+      opacity: 0;
+  }
+}
+.title-container p {
+  color: #444;
+  margin-top: 4rem; /* Move it slightly upwards */
 }
 
 .container {
-  max-width: 1200px;
+  max-width: 75rem;
   margin: 0 auto;
   padding: 0 1rem;
   box-sizing: border-box;
   position: relative;
-  height: 100vh;
+  /* Changed fixed height to min-height for better responsiveness */
+  min-height: 100vh;
+  white-space: nowrap;
 }
 
 /* Shortcuts container */
+.shortcuts-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100vh; /* Full viewport height to center vertically */
+  text-align: center;
+  margin-top: -25rem;
+}
+
 .shortcuts-wrapper {
   width: 100%;
-  max-width: 800px;
+  max-width: 50rem;
   overflow: hidden;
   position: relative;
-  margin: 0 auto;
+  /* Reduced top margin to bring it closer to paragraph */
   margin-top: 2rem;
+  display: flex;
+  justify-content: center;
 }
 
 .shortcuts {
   display: flex;
   width: max-content;
-  animation: scroll 25s linear infinite;
+  animation: scroll 40s linear infinite;
+  margin-top: 0.2rem;
 }
 
 .shortcut {
   display: flex;
   flex-direction: column;
   align-items: center;
-  width: 90px;
+  width: 5.625rem;
   text-decoration: none;
   color: #000;
   cursor: pointer;
-  margin: 0 10px;
+  margin: 0 0.625rem;
+  margin-top: 0.2rem;
 }
 
 .shortcut-icon {
-  width: 50px;
-  height: 50px;
+  width: 3.125rem;
+  height: 3.125rem;
   border-radius: 50%;
   background-color: #f1f3f4;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 10px;
+  margin-bottom: 0.625rem;
   overflow: hidden;
 }
 
 .shortcut-icon img {
-  width: 24px;
-  height: 24px;
+  width: 1.5rem;
+  height: 1.5rem;
 }
 
 .shortcut-name {
-  font-size: 13px;
+  font-size: 0.8125rem;
   text-align: center;
   white-space: nowrap;
   overflow: hidden;
@@ -244,7 +361,7 @@ margin-top: 0; /* Remove any extra margin */
 
 .add-shortcut .shortcut-icon {
   background-color: #f1f3f4;
-  font-size: 24px;
+  font-size: 1.5rem;
   color: #5f6368;
   display: flex;
   align-items: center;
@@ -254,14 +371,16 @@ margin-top: 0; /* Remove any extra margin */
 /* Infinite scrolling animation */
 @keyframes scroll {
   0% {
-    transform: translateX(0);
+      transform: translateX(0);
   }
   100% {
-    transform: translateX(-50%);
+      transform: translateX(-50%);
   }
 }
 
 span {
   display: block;
-  height: 20px;
+  height: 1.25rem;
 }
+
+
