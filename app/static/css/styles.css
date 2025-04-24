@@ -3,27 +3,31 @@
   src: url('../font/Hornbill-Personal Use Regular.otf') format('truetype');
 }
 
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
+
 body {
   margin: 0;
   padding: 0;
-  font-family: "Epilogue", sans-serif;
-  background-color: white;
+  font-family: "Syne", serif;
+  background-color: #9a503b;
   background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
   background-size: 20px 20px;
+
 }
 
 .epilogue-quizit {
-  font-family: "Epilogue", sans-serif;
+  font-family: "Syne", serif;
   font-optical-sizing: auto;
   font-style: normal;
 }
 
 a {
-  font-family: "Epilogue", sans-serif;
+  font-family: "Syne", serif;
   font-weight: 500;
   font-size: 0.875rem; /* Small text size */
   text-decoration: none;
-  color: inherit;
+  color: #ffffff;
   cursor: pointer;
 }
 
@@ -34,7 +38,7 @@ a {
   justify-content: space-between; /* Space out left, center, and right sections */
   align-items: center; /* Align items vertically */
   width: 100%; /* Full width of the container */
-  top: 0.8rem; /* Adjust vertical position */
+  top: 2rem; /* Adjust vertical position */
   padding: 0 2rem; /* Add padding for spacing */
   box-sizing: border-box; /* Include padding in width calculations */
 }
@@ -62,6 +66,7 @@ a {
   align-items: center;
   justify-content: flex-start;
   margin-top: 0;
+  font-family: 'Inter', serif;
 }
 
 .top-left-buttons a {
@@ -118,13 +123,17 @@ margin-left: 4px;
   align-items: center;
   justify-content: flex-end;
   margin-top: 0;
+  color: #ffffff;
+  font-family: 'Inter', serif;
 }
 
 
 .top-right-buttons a:first-child{
   font-size: 1rem;
   font-weight: normal;
-  color: #000;
+  color: #ffffff;
+  font-family: 'Inter', serif;
+  font-weight: bold;
 }
 
 
@@ -184,7 +193,7 @@ margin-left: 4px;
 }
 
 .bn5:active {
-  color: #000;
+  color: #050505;
 }
 
 .bn5:active:after {
@@ -201,16 +210,17 @@ margin-left: 4px;
   position: absolute;
   width: 100%;
   height: 100%;
-  background: #191919;
+  background: #ffffff;
   left: 0;
   top: 0;
   border-radius: 3.125rem;
+  box-shadow: 0rem 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
 }
 
 .title {
   font-size: 10rem; /* Adjust font size as needed */
   font-weight: bold;
-  color: #000;
+  color:#9a503b;
   text-align: center;
   margin: 5rem; /* Remove any default margin */
 }
@@ -225,8 +235,8 @@ margin-left: 4px;
   padding-top: 10rem;
   margin: 0;
   background-color: transparent;
-  font-family: 'MyFont', serif;
-  color: #000;
+  font-family: 'Syne', serif;
+  color:#9a503b;
   text-align: center;
   margin-bottom: 2rem;
   white-space: nowrap;
@@ -234,14 +244,14 @@ margin-left: 4px;
 
 .title-container h1 {
   display: inline-block;
-  position: relative;
-  padding: 0.5rem 1rem;
+  position: center;
+  padding: 2rem 2.5rem;
   background-color: #fff;
-  box-shadow: 0rem 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0rem 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
   border-radius: 0.5rem;
-  color: #000;
-  font-size: 3rem;
-  font-weight: bold;
+  color: #9a503b;
+  font-size: 4.5rem;
+  font-weight: 900;
   text-align: center;
   width: 20%;
   min-width: 25rem;
@@ -249,16 +259,17 @@ margin-left: 4px;
 }
 
 .title-container h2 {
-  color: #444;
+  color: #ffffff;
   margin-top: -8rem; /* Move it slightly upwards */
   display: inline-block;
 }
 
 .title-container a {
-  color: #ffffff;
+  color: #000000;
   margin-top: 6rem; /* Move it slightly upwards */
   display: inline-block;
-  font-family: 'MyFont', sans-serif;
+  font-family: 'Syne', sans-serif;
+  box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.2);
   
 
 }
@@ -279,6 +290,8 @@ margin-left: 4px;
 .title-container p {
   color: #444;
   margin-top: 4rem; /* Move it slightly upwards */
+  font-family: 'Inter', serif;
+  font-weight: bold;
 }
 
 .container {
@@ -337,7 +350,7 @@ margin-left: 4px;
   width: 3.125rem;
   height: 3.125rem;
   border-radius: 50%;
-  background-color: #f1f3f4;
+  background-color: #ffffffa1;
   display: flex;
   align-items: center;
   justify-content: center;
