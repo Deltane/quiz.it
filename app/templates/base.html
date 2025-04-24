@@ -10,6 +10,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@400..800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../static/css/styles.css">
 </head>
+
 <body>
     
     <div class="container">
@@ -86,7 +87,14 @@
         
         <div class="top-right-buttons">
         <a>About</a>
-        <a href="/" class="bn5" style="color:#9a503b">Sign in</a>
+        {% if session.get('user_email') %}
+            <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: black;">Welcome, {{ session['user_email'] }}</span>
+                <img src="{{ session['user_pic'] }}" alt="Profile" style="height: 30px; border-radius: 50%;">
+            </div>
+        {% else %}
+            <a href="{{ url_for('google.login') }}" class="bn5">Sign in with Google</a>
+        {% endif %}
         </div>
 
         <div class="top-left-buttons">
