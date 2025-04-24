@@ -66,3 +66,47 @@ textarea {
 .btn-primary:hover {
     background-color: #0056b3;
 }
+
+/* Additional styles inspired by styles.css */
+body {
+    font-family: "Syne", serif;
+    background-color: #9a503b;
+    background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+    background-size: 20px 20px;
+}
+
+h2 {
+    font-size: 2rem;
+    color: #9a503b;
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.form-control {
+    font-family: "Syne", serif;
+    font-size: 1rem;
+    color: #333;
+}
+
+.form-check-label {
+    font-family: "Syne", serif;
+    font-size: 1rem;
+    color: #333;
+}
+
+.btn-primary {
+    font-family: "Syne", serif;
+    font-size: 1rem;
+    font-weight: bold;
+    color: #fff;
+    background-color: #007bff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    text-align: center;
+    text-decoration: none;
+}
+
+.btn-primary:hover {
+    background-color: #0056b3;
+}
