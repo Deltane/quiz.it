@@ -5,6 +5,9 @@ import os
 from flask_dance.contrib.google import make_google_blueprint
 from flask_session import Session
 
+from dotenv import load_dotenv
+load_dotenv()
+
 db = SQLAlchemy()
 
 def create_app():
