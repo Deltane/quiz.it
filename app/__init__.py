@@ -9,8 +9,6 @@ from app.routes.ai_routes import ai_routes
 from dotenv import load_dotenv
 load_dotenv()
 
-print(f"OPENAI_API_KEY in __init__.py: {os.getenv('OPENAI_API_KEY')}")
-
 db = SQLAlchemy()
 
 def create_app():
@@ -54,4 +52,3 @@ def create_app():
     # app.register_blueprint(stats_bp)
 
     return app
-
