@@ -4,9 +4,12 @@ from flask_migrate import Migrate
 import os
 from flask_dance.contrib.google import make_google_blueprint
 from flask_session import Session
+from app.routes.ai_routes import ai_routes
 
 from dotenv import load_dotenv
 load_dotenv()
+
+print(f"OPENAI_API_KEY in __init__.py: {os.getenv('OPENAI_API_KEY')}")
 
 db = SQLAlchemy()
 
@@ -33,6 +36,7 @@ def create_app():
 
     app.register_blueprint(auth_bp)
     app.register_blueprint(quiz_bp)
+    app.register_blueprint(ai_routes)
 
     google_bp = make_google_blueprint(
         client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
@@ -50,3 +54,4 @@ def create_app():
     # app.register_blueprint(stats_bp)
 
     return app
+
