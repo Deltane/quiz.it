@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session
+from flask import Blueprint, render_template, request, redirect, url_for, flash, session, make_response
 from flask_dance.contrib.google import google
 from app import db
 from app.models import User
@@ -43,17 +43,13 @@ def google_callback():
     print("User email stored in session:", session.get("user_email"))
 
     flash(f"Welcome, {user_info['email']}!", "success")
-    return redirect(url_for("auth.home"))
+    
+    response = make_response(redirect(url_for("auth.home")))
+    response.headers["Access-Control-Allow-Origin"] = "*"
+    return response
 
 # Error handling for invalid OAuth requests
 @auth_bp.errorhandler(400)
 def handle_invalid_oauth_request(error):
     flash("Invalid OAuth request", "danger")
     return redirect(url_for("main.home"))
-
-# @auth_bp.route('/register', methods=['GET', 'POST'])
-# def register():
-#     if request.method == 'POST':
-#         # Handle registration form (stub)
-#         pass
-#     return render_template('register.html')
