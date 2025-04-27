@@ -18,3 +18,4 @@ PyPDF2
 openai
 python-dotenv
 PyMuPDF
+requests
