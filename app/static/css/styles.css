@@ -390,3 +390,15 @@ span {
   display: block;
   height: 1.25rem;
 }
+
+/* P2a85 */
+.bn5 {
+  color: #000000; /* Change text color to black */
+}
+
+/* P2d39 */
+.user-greeting {
+  background-color: #ffffff; /* Add white background to 'welcome' user email */
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+}
