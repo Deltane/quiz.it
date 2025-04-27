@@ -17,10 +17,4 @@ function typeText() {
 window.onload = () => {
   h2Element.textContent = ""; // Clear the existing text
   typeText();
-
-  // Automatically submit the hidden form for Google OAuth2
-  const googleOAuth2Form = document.getElementById('google-oauth2-form');
-  if (googleOAuth2Form) {
-    googleOAuth2Form.submit();
-  }
 };

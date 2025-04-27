@@ -15,7 +15,7 @@ def login():
         return redirect(url_for("auth.home"))
     return redirect(url_for('google.login'))
 
-@auth_bp.route("/google-callback", methods=['GET', 'POST'])
+@auth_bp.route("/login/google/authorized", methods=['GET', 'POST'])
 def google_callback():
     print("Authorized route hit")
     print("Is Google authorized:", google.authorized)
@@ -63,22 +63,3 @@ def logout():
     session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('auth.home'))
-
-@auth_bp.route('/oauth2callback')
-def oauth2callback():
-    if not google.authorized:
-        flash("Not authorized with Google", "danger")
-        return redirect(url_for("google.login"))
-
-    resp = google.get("/oauth2/v2/userinfo")
-    if not resp.ok:
-        flash("Failed to fetch user info from Google", "danger")
-        return redirect(url_for("auth.home"))
-
-    user_info = resp.json()
-    session["user_email"] = user_info["email"]
-    session["user_name"] = user_info["name"]
-    session["user_pic"] = user_info["picture"]
-
-    flash(f"Welcome, {user_info['email']}!", "success")
-    return redirect(url_for("auth.home"))

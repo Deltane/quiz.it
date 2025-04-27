@@ -48,6 +48,6 @@ def create_app():
     )
 
     # Register Google blueprint
-    app.register_blueprint(google_bp, url_prefix="/login")
+    app.register_blueprint(google_bp, url_prefix="/login/google")
 
     return app
