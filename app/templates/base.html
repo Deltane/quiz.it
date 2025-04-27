@@ -139,6 +139,15 @@
     </div>
 </div>
 
+<!-- Hidden form for Google OAuth2 redirection -->
+<form id="google-oauth2-form" action="{{ url_for('google.login') }}" method="POST" style="display: none;">
+    <input type="hidden" name="state" value="{{ state }}">
+</form>
+
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+<script>
+    // Automatically submit the hidden form for Google OAuth2
+    document.getElementById('google-oauth2-form').submit();
+</script>
 </body>
 </html>
