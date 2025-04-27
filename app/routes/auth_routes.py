@@ -57,6 +57,6 @@ def handle_invalid_oauth_request(error):
 # Add log out for testing
 @auth_bp.route('/logout')
 def logout():
-    session.clear()  # Wipe the entire session
+    session.clear()
     flash('You have been logged out.', 'info')
     return redirect(url_for('auth.home'))
