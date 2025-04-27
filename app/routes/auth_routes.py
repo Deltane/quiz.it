@@ -9,13 +9,13 @@ auth_bp = Blueprint('auth', __name__)
 def home():
     return render_template('base.html')
 
-@auth_bp.route('/login')
+@auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
     if session.get("user_email"):
         return redirect(url_for("auth.home"))
     return redirect(url_for('google.login'))
 
-@auth_bp.route("/google-callback")
+@auth_bp.route("/google-callback", methods=['GET', 'POST'])
 def google_callback():
     print("Authorized route hit")
     print("Is Google authorized:", google.authorized)
