@@ -1,63 +1,47 @@
-from flask import Blueprint, render_template, request, redirect, url_for, flash, session, make_response
+from flask import Blueprint, render_template, redirect, url_for, session, flash
 from flask_dance.contrib.google import google
-from app import db
-from app.models import User
+from flask_dance.contrib.google import make_google_blueprint
 
 auth_bp = Blueprint('auth', __name__)
+
+google_bp = make_google_blueprint(
+    client_id="your-client-id",
+    client_secret="your-client-secret",
+    scope=["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "openid"],
+    redirect_to="auth.google_callback"
+)
 
 @auth_bp.route('/')
 def home():
     return render_template('base.html')
 
-@auth_bp.route('/login', methods=['GET', 'POST'])
+@auth_bp.route('/login')
 def login():
     if session.get("user_email"):
-        return redirect(url_for("auth.home"))
+        return redirect(url_for('auth.home'))
     return redirect(url_for('google.login'))
 
-@auth_bp.route("/login/google/authorized", methods=['GET', 'POST'])
+@auth_bp.route('/login/google/authorized')
 def google_callback():
-    print("Authorized route hit")
-    print("Is Google authorized:", google.authorized)
-
     if not google.authorized:
-        flash("Not authorized with Google", "danger")
-        return redirect(url_for("google.login"))
+        flash("Authorization failed. Please try again.", "danger")
+        return redirect(url_for('auth.home'))
 
     resp = google.get("/oauth2/v2/userinfo")
-    print("Google response status:", resp.status_code)
-
     if not resp.ok:
-        flash("Failed to fetch user info from Google", "danger")
-        print("Google response error:", resp.text)
-        return redirect(url_for("auth.home"))
+        flash("Failed to fetch user info from Google.", "danger")
+        return redirect(url_for('auth.home'))
 
     user_info = resp.json()
-    print("User info:", user_info)
 
     # Save user info in session
-    session["user_email"] = user_info["email"]
-    session["user_name"] = user_info["name"]
-    session["user_pic"] = user_info["picture"]
+    session['user_email'] = user_info.get('email')
+    session['user_name'] = user_info.get('name')
+    session['user_pic'] = user_info.get('picture')
 
-    print("User email stored in session:", session.get("user_email"))
+    flash(f"Welcome {session['user_name']}!", "success")
+    return redirect(url_for('auth.home'))
 
-    flash(f"Welcome, {user_info['email']}!", "success")
-    
-    response = make_response(redirect(url_for("auth.home")))
-    allowed_origins = ["https://trusted-domain.com", "https://another-trusted-domain.com"]
-    origin = request.headers.get("Origin")
-    if origin in allowed_origins:
-        response.headers["Access-Control-Allow-Origin"] = origin
-    return response
-
-# Error handling for invalid OAuth requests
-@auth_bp.errorhandler(400)
-def handle_invalid_oauth_request(error):
-    flash("Invalid OAuth request", "danger")
-    return redirect(url_for("auth.home"))
-
-# Add log out for testing
 @auth_bp.route('/logout')
 def logout():
     session.clear()
