@@ -44,7 +44,8 @@ def create_app():
             "https://www.googleapis.com/auth/userinfo.profile",
             "https://www.googleapis.com/auth/userinfo.email"
         ],
-        redirect_to="auth.google_callback"
+        redirect_to="auth.google_callback",
+        prompt="consent"
     )
     app.register_blueprint(google_bp, url_prefix="/login")
 

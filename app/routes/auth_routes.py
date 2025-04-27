@@ -12,7 +12,7 @@ def home():
 @auth_bp.route('/login')
 def login():
     if session.get("user_email"):
-        return redirect(url_for("main.home"))
+        return redirect(url_for("auth.home"))
     return redirect(url_for('google.login'))
 
 @auth_bp.route("/google-callback")
@@ -30,7 +30,7 @@ def google_callback():
     if not resp.ok:
         flash("Failed to fetch user info from Google", "danger")
         print("Google response error:", resp.text)
-        return redirect(url_for("main.home"))
+        return redirect(url_for("auth.home"))
 
     user_info = resp.json()
     print("User info:", user_info)
@@ -52,7 +52,7 @@ def google_callback():
 @auth_bp.errorhandler(400)
 def handle_invalid_oauth_request(error):
     flash("Invalid OAuth request", "danger")
-    return redirect(url_for("main.home"))
+    return redirect(url_for("auth.home"))
 
 # Add log out for testing
 @auth_bp.route('/logout')
