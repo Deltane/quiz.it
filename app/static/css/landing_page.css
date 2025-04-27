@@ -436,7 +436,20 @@ span {
 
 /* P2d39 */
 .user-greeting {
-  background-color: #ffffff; /* Add white background to 'welcome' user email */
+  background-color: #ffffff;
   padding: 0.5rem 1rem;
-  border-radius: 0.5rem;
+  border-radius: 2rem;
+  color: #333;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.user-greeting span {
+    font-family: "Syne", serif;
+    font-size: 1rem;
+    color: #ffffff;
+}
+
+.user-greeting img {
+    border: 2px solid #ffffff;
 }

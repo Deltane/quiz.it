@@ -45,7 +45,10 @@ def google_callback():
     flash(f"Welcome, {user_info['email']}!", "success")
     
     response = make_response(redirect(url_for("auth.home")))
-    response.headers["Access-Control-Allow-Origin"] = "*"
+    allowed_origins = ["https://trusted-domain.com", "https://another-trusted-domain.com"]
+    origin = request.headers.get("Origin")
+    if origin in allowed_origins:
+        response.headers["Access-Control-Allow-Origin"] = origin
     return response
 
 # Error handling for invalid OAuth requests
