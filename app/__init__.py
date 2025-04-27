@@ -39,12 +39,12 @@ def create_app():
     google_bp = make_google_blueprint(
         client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
         client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-        redirect_to="auth.google_callback",
         scope=[
             "openid",
-            "profile",
-            "email"
-        ]
+            "https://www.googleapis.com/auth/userinfo.profile",
+            "https://www.googleapis.com/auth/userinfo.email"
+        ],
+        redirect_to="auth.google_callback"
     )
     app.register_blueprint(google_bp, url_prefix="/login")
 

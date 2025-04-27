@@ -53,3 +53,10 @@ def google_callback():
 def handle_invalid_oauth_request(error):
     flash("Invalid OAuth request", "danger")
     return redirect(url_for("main.home"))
+
+# Add log out for testing
+@auth_bp.route('/logout')
+def logout():
+    session.clear()  # Wipe the entire session
+    flash('You have been logged out.', 'info')
+    return redirect(url_for('auth.home'))
