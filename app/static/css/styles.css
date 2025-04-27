@@ -1,10 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
 @font-face {
   font-family: 'MyFont';
   src: url('../font/Hornbill-Personal Use Regular.otf') format('truetype');
 }
-
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
-
 
 body {
   margin: 0;
@@ -130,7 +129,6 @@ margin-left: 4px;
 
 .top-right-buttons a:first-child{
   font-size: 1rem;
-  font-weight: normal;
   color: #ffffff;
   font-family: 'Inter', serif;
   font-weight: bold;
@@ -214,7 +212,7 @@ margin-left: 4px;
   left: 0;
   top: 0;
   border-radius: 3.125rem;
-  box-shadow: 0rem 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
 }
 
 .title {
@@ -233,21 +231,20 @@ margin-left: 4px;
   /* Reduced height to prevent excessive vertical spacing */
   height: auto;
   padding-top: 10rem;
-  margin: 0;
   background-color: transparent;
   font-family: 'Syne', serif;
   color:#9a503b;
   text-align: center;
-  margin-bottom: 2rem;
+  margin: 0 0 2rem;
   white-space: nowrap;
 }
 
 .title-container h1 {
   display: inline-block;
-  position: center;
+  position: relative;
   padding: 2rem 2.5rem;
   background-color: #fff;
-  box-shadow: 0rem 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
   border-radius: 0.5rem;
   color: #9a503b;
   font-size: 4.5rem;
@@ -269,8 +266,7 @@ margin-left: 4px;
   margin-top: 6rem; /* Move it slightly upwards */
   display: inline-block;
   font-family: 'Syne', sans-serif;
-  box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.2);
-  
+  box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.2);
 
 }
 .cursor {
@@ -342,8 +338,7 @@ margin-left: 4px;
   text-decoration: none;
   color: #000;
   cursor: pointer;
-  margin: 0 0.625rem;
-  margin-top: 0.2rem;
+  margin: 0.2rem 0.625rem 0;
 }
 
 .shortcut-icon {
