@@ -1,12 +1,13 @@
 from flask import Blueprint, render_template, redirect, url_for, session, flash
 from flask_dance.contrib.google import google
 from flask_dance.contrib.google import make_google_blueprint
+import os
 
 auth_bp = Blueprint('auth', __name__)
 
 google_bp = make_google_blueprint(
-    client_id="your-client-id",
-    client_secret="your-client-secret",
+    client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
     scope=["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "openid"],
     redirect_to="auth.google_callback"
 )

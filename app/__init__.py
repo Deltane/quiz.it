@@ -45,6 +45,7 @@ def create_app():
 
     # Force Google to always show account selector
     google_bp.session.params["prompt"] = "select_account"
+    google_bp.session.params["authuser"] = "0"
 
     # Register Google OAuth blueprint
     app.register_blueprint(google_bp, url_prefix="/login")
