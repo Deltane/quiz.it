@@ -40,7 +40,6 @@ def create_app():
         client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
         client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
         redirect_to="auth.google_callback",
-        redirect_uri="http://localhost:5000/login/google/authorized",
         scope=[
             "openid",
             "https://www.googleapis.com/auth/userinfo.profile",
