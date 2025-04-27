@@ -45,6 +45,12 @@ def google_callback():
     flash(f"Welcome, {user_info['email']}!", "success")
     return redirect(url_for("auth.home"))
 
+# Error handling for invalid OAuth requests
+@auth_bp.errorhandler(400)
+def handle_invalid_oauth_request(error):
+    flash("Invalid OAuth request", "danger")
+    return redirect(url_for("main.home"))
+
 # @auth_bp.route('/register', methods=['GET', 'POST'])
 # def register():
 #     if request.method == 'POST':
