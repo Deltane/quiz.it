@@ -42,7 +42,9 @@ def create_app():
         client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
         scope=["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile",
                "openid"],
-        redirect_to="auth.google_callback"
+        redirect_to="auth.google_callback",
+        access_type='offline',
+        include_granted_scopes='true'
     )
 
     # Force Google to always show account selector

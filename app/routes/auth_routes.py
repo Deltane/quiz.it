@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, redirect, url_for, session, flash
+from flask import Blueprint, render_template, redirect, url_for, session, flash, request
 from flask_dance.contrib.google import google, make_google_blueprint
 import google.oauth2.credentials
 import google_auth_oauthlib.flow
@@ -13,6 +13,8 @@ flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
             'https://www.googleapis.com/auth/calendar.readonly']
 )
 
+flow.redirect_uri = 'https://www.example.com/oauth2callback'
+
 @auth_bp.route('/')
 def home():
     return render_template('base.html')
@@ -21,7 +23,13 @@ def home():
 def login():
     if session.get("user_email"):
         return redirect(url_for('auth.home'))
-    return redirect(url_for('google.login'))
+    authorization_url, state = flow.authorization_url(
+        access_type='offline',
+        include_granted_scopes='true',
+        prompt='consent'
+    )
+    session['state'] = state
+    return redirect(authorization_url)
 
 @auth_bp.route('/login/google/authorized')
 def google_callback():
