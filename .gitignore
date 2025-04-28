@@ -1,2 +1,3 @@
 /CITS3403-Group-Project/
 .env
+config/client_secret.json
