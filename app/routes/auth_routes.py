@@ -12,6 +12,10 @@ google_bp = make_google_blueprint(
     redirect_to="auth.google_callback"
 )
 
+# Force Google to always show account selector
+google_bp.session.params["prompt"] = "select_account"
+google_bp.session.params["authuser"] = "0"
+
 @auth_bp.route('/')
 def home():
     return render_template('base.html')
