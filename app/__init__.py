@@ -20,6 +20,7 @@ def create_app():
     app.config['SESSION_TYPE'] = 'filesystem'
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quizapp.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    app.config['PREFERRED_URL_SCHEME'] = 'https'
 
     # Initialize plugins
     Session(app)
