@@ -5,17 +5,6 @@ import os
 
 auth_bp = Blueprint('auth', __name__)
 
-google_bp = make_google_blueprint(
-    client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
-    client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-    scope=["https://www.googleapis.com/auth/userinfo.email", "https://www.googleapis.com/auth/userinfo.profile", "openid"],
-    redirect_to="auth.google_callback"
-)
-
-# Force Google to always show account selector
-google_bp.session.params["prompt"] = "select_account"
-google_bp.session.params["authuser"] = "0"
-
 @auth_bp.route('/')
 def home():
     return render_template('base.html')
