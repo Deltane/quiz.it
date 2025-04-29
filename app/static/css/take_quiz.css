@@ -30,6 +30,8 @@ body {
 
 /* Answer options */
 .form-check {
+    display: flex; /* Use flexbox to align items horizontally */
+    align-items: center; /* Vertically align the radio button and text */
     background-color: #1c1c1e;
     border-radius: 10px;
     margin-bottom: 1rem;
@@ -44,13 +46,14 @@ body {
 }
 
 .form-check-input {
-    margin-right: 10px;
+    margin-right: 10px; 
+    flex-shrink: 0; 
 }
 
 .form-check-label {
     font-size: 1.2rem;
-    display: inline-block;
-    width: calc(100% - 30px);
+    flex-grow: 1; 
+    margin: 0; 
 }
 
 /* Button styling */
