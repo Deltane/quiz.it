@@ -2,9 +2,84 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="../static/css/take_quiz.css">
 </head>
 <body>
+<div class="container">
+    <h2 id="quiz-title">Quiz</h2>
+    <div id="question-container" style="margin-top: 20px;"></div>
+    <button id="next-question" class="btn btn-primary" style="display: none;">Next Question</button>
+</div>
 
+<script>
+    $(document).ready(function () {
+        let currentQuestionIndex = 0;
+
+        // Load the first question
+        function loadQuestion() {
+            fetch(`/get_question/${currentQuestionIndex}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.question) {
+                        const questionContainer = $('#question-container');
+                        questionContainer.empty(); // Clear previous question
+
+                        // Display the question
+                        questionContainer.append(`<p><strong>Q${currentQuestionIndex + 1}:</strong> ${data.question}</p>`);
+
+                        // Display the options
+                        data.options.forEach((option, index) => {
+                            const optionId = `option${index}`;
+                            questionContainer.append(`
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="answer" id="${optionId}" value="${option}">
+                                    <label class="form-check-label" for="${optionId}">${option}</label>
+                                </div>
+                            `);
+                        });
+
+                        // Show the "Next Question" button
+                        $('#next-question').show();
+                    } else {
+                        $('#question-container').html('<p>Quiz completed! Thank you for participating.</p>');
+                        $('#next-question').hide();
+                    }
+                })
+                .catch(err => {
+                    $('#question-container').html('<p>Error loading question: ' + err.message + '</p>');
+                });
+        }
+
+        // Submit the current question and load the next one
+        $('#next-question').on('click', function () {
+            const selectedAnswer = $('input[name="answer"]:checked').val();
+            if (!selectedAnswer) {
+                alert('Please select an answer before proceeding.');
+                return;
+            }
+
+            fetch('/submit_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ questionIndex: currentQuestionIndex, answer: selectedAnswer })
+            })
+            .then(() => {
+                currentQuestionIndex++;
+                loadQuestion(); // Load the next question
+            })
+            .catch(err => {
+                alert('Error submitting answer: ' + err.message);
+            });
+        });
+
+        // Load the first question on page load
+        loadQuestion();
+    });
+</script>
 </body>
 </html>
