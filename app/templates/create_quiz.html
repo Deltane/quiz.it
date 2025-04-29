@@ -57,7 +57,6 @@
     <h3>Generated Quiz:</h3>
     <pre id="quiz-result" style="background-color: #f0f0f0; padding: 10px; border-radius: 8px;"></pre>
 </div>
-
 <script>
     $(document).ready(function () {
         // Disable AI prompt when file is uploaded
@@ -68,7 +67,7 @@
                 $('#ai-prompt').prop('disabled', false);
             }
         });
-    
+
         // Disable file upload when AI prompt is typed
         $('#ai-prompt').on('input', function () {
             if ($(this).val()) {
@@ -77,14 +76,14 @@
                 $('#upload-file').prop('disabled', false);
             }
         });
-    
+
         // Submit the form via AJAX
         $('#quiz-setup-form').on('submit', function (e) {
             e.preventDefault();
-    
+
             const formData = new FormData(this);
             $('#quiz-result').text('Generating quiz...');
-    
+
             fetch('/generate_quiz', {
                 method: 'POST',
                 body: formData
@@ -92,64 +91,30 @@
             .then(response => response.json())
             .then(data => {
                 if (data.quiz) {
-                    const quizContainer = $('#quiz-result');
-                    quizContainer.empty(); // Clear previous content
-    
-                    // Render the quiz as a form
-                    const quizForm = $('<form id="quiz-form"></form>');
-                    data.quiz.forEach((question, index) => {
-                        const questionDiv = $('<div class="question"></div>');
-                        questionDiv.append(`<p><strong>Q${index + 1}:</strong> ${question.question}</p>`);
-    
-                        // Add options as radio buttons
-                        question.options.forEach((option, optionIndex) => {
-                            const optionId = `q${index}_option${optionIndex}`;
-                            questionDiv.append(`
-                                <div class="form-check">
-                                    <input class="form-check-input" type="radio" name="q${index}" id="${optionId}" value="${option}">
-                                    <label class="form-check-label" for="${optionId}">${option}</label>
-                                </div>
-                            `);
-                        });
-    
-                        quizForm.append(questionDiv);
-                    });
-    
-                    // Add a submit button for the quiz
-                    quizForm.append('<button type="submit" class="btn btn-success">Submit Quiz</button>');
-    
-                    // Append the form to the quiz container
-                    quizContainer.append(quizForm);
-    
-                    // Handle quiz submission
-                    quizForm.on('submit', function (e) {
-                        e.preventDefault();
-                        const answers = $(this).serializeArray();
-                        console.log('User answers:', answers); // Debug: Log user answers
-    
-                        // Send answers to the server for scoring
-                        fetch('/submit_quiz', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ answers, quiz: data.quiz }) // Send answers and quiz data
-                        })
-                        .then(response => response.json())
-                        .then(scoreData => {
-                            alert(`Your score: ${scoreData.score}/${data.quiz.length}`);
-                        })
-                        .catch(err => {
-                            alert('Error submitting quiz: ' + err.message);
-                        });
+                    // Store the quiz data in the session or backend
+                    fetch('/store_quiz', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ quiz: data.quiz })
+                    })
+                    .then(() => {
+                        // Redirect to the quiz page
+                        window.location.href = '/take_quiz';
+                    })
+                    .catch(err => {
+                        $('#quiz-result').text('Error storing quiz: ' + err.message);
                     });
                 } else {
                     $('#quiz-result').text(data.error || 'Something went wrong.');
                 }
             })
             .catch(err => {
-                $('#quiz-result').text('Error: ' + err.message);
+                $('#quiz-result').text('Error generating quiz: ' + err.message);
             });
         });
     });
-    </script>
+</script>
+</body>
+</html>
