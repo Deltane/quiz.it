@@ -1,67 +1,62 @@
-from flask import Blueprint, render_template, redirect, url_for, session, flash, request
-from flask_dance.contrib.google import google, make_google_blueprint
-import google.oauth2.credentials
-import google_auth_oauthlib.flow
+from flask import Blueprint, redirect, url_for, session, current_app, request
+from app import oauth  # Import the oauth object
 import os
-from flask_dance.consumer.storage.session import SessionStorage
+import logging
+import uuid
 
 auth_bp = Blueprint('auth', __name__)
 
-flow = google_auth_oauthlib.flow.Flow.from_client_secrets_file(
-    'config/client_secret.json',
-    scopes=['https://www.googleapis.com/auth/drive.metadata.readonly',
-            'https://www.googleapis.com/auth/calendar.readonly']
-)
-
-flow.redirect_uri = 'https://www.example.com/oauth2callback'
-
-@auth_bp.route('/')
-def home():
-    return render_template('base.html')
+def init_oauth(oauth):
+    oauth.register(
+        name='google',
+        client_id=os.getenv("GOOGLE_CLIENT_ID"),
+        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+        client_kwargs={
+            'scope': 'openid email profile'
+        }
+    )
 
 @auth_bp.route('/login')
 def login():
-    if session.get("user_email"):
-        return redirect(url_for('auth.home'))
-    authorization_url, state = flow.authorization_url(
-        access_type='offline',
-        include_granted_scopes='true',
-        prompt='consent'
-    )
-    session['state'] = state
-    return redirect(authorization_url)
-
-@auth_bp.route('/login/google/authorized')
-def google_callback():
-    if not google.authorized:
-        flash("Authorization failed. Please try again.", "danger")
-        return redirect(url_for('auth.home'))
-
-    # Debugging: Log the OAuth response
-    from flask import current_app
-    current_app.logger.info("Google OAuth response: %s", google.token)
-
-    resp = google.get("/oauth2/v2/userinfo")
-    if not resp or not resp.ok:
-        flash("Failed to fetch user info from Google.", "danger")
-        return redirect(url_for('auth.home'))
-
     try:
-        user_info = resp.json()
-    except ValueError:
-        flash("Invalid response from Google.", "danger")
-        return redirect(url_for('auth.home'))
+        redirect_uri = url_for('auth.authorize', _external=True)
+        nonce = str(uuid.uuid4())  # Generate a unique nonce
+        state = str(uuid.uuid4())  # Generate a unique state
+        session['oauth_nonce'] = nonce  # Store the nonce in the session
+        session['oauth_state'] = state  # Store the state in the session
+        current_app.logger.info(f"Redirect URI: {redirect_uri}, Nonce: {nonce}, State: {state}")
+        return oauth.google.authorize_redirect(redirect_uri, nonce=nonce, state=state)
+    except Exception as e:
+        current_app.logger.error(f"Error in /auth/login: {e}")
+        return "An error occurred during login. Check server logs for details.", 500
 
-    # Save user info in session
-    session['user_email'] = user_info.get('email')
-    session['user_name'] = user_info.get('name')
-    session['user_pic'] = user_info.get('picture')
+@auth_bp.route('/authorize')
+def authorize():
+    try:
+        token = oauth.google.authorize_access_token()
+        nonce = session.pop('oauth_nonce', None)  # Retrieve and remove the nonce from the session
+        state = session.pop('oauth_state', None)  # Retrieve and remove the state from the session
+        if not nonce or not state:
+            raise ValueError("Missing nonce or state in session")
 
-    flash("Welcome {session['user_name']}!", "success")
-    return redirect(url_for('auth.home'))
+        # Validate the ID token with the nonce
+        user_info = oauth.google.parse_id_token(token, nonce=nonce) or {}
+        userinfo_response = oauth.google.get('https://openidconnect.googleapis.com/v1/userinfo')
+        user_info.update(userinfo_response.json() or {})
+        session['user_email'] = user_info['email']
+        session['user_name'] = user_info.get('name', user_info['email'])
+        session['user_pic'] = user_info.get('picture', '')
+
+        current_app.logger.info(f"User {session['user_email']} logged in successfully.")
+        return redirect(url_for('quiz.index'))
+    except Exception as e:
+        current_app.logger.error(f"Error in /auth/authorize: {e}")
+        return "An error occurred during authorization. Check server logs for details.", 500
 
 @auth_bp.route('/logout')
 def logout():
     session.clear()
-    flash('You have been logged out.', 'info')
-    return redirect(url_for('auth.home'))
+    current_app.logger.info("User logged out and session cleared.")
+    return redirect(url_for('quiz.index'))
+
