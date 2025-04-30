@@ -1,54 +1,71 @@
-from flask import Flask, session
+from dotenv import load_dotenv
+import os
+# import shutil
+
+load_dotenv()  # Load environment variables from .env
+
+from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
-import os
-from flask_dance.contrib.google import make_google_blueprint
 from flask_session import Session
-from app.routes.ai_routes import ai_routes
+from authlib.integrations.flask_client import OAuth
+import requests
 
-from dotenv import load_dotenv
-load_dotenv()
 
+# Initialize extensions globally
 db = SQLAlchemy()
+migrate = Migrate()
+session_manager = Session()
+oauth = OAuth()
 
 def create_app():
     app = Flask(__name__, template_folder='templates', static_folder='static')
 
-    # Load config
-    app.config['SECRET_KEY'] = 'your-secret-key'
-    app.config['SESSION_TYPE'] = 'filesystem'
-    Session(app)
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///quizapp.db'
+    # Load secret key
+    app.secret_key = os.getenv('SECRET_KEY')  # Load SECRET_KEY from .env
+    if not app.secret_key:
+        raise ValueError("SECRET_KEY environment variable not set")
+
+    # Database config
+    app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///app.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
-    # Init plugins
+    # Flask-Session config
+    app.config['SESSION_TYPE'] = 'filesystem'  # <- Important for server-side sessions
+    session_manager.init_app(app)  # <- Correctly initialize server-side session
     db.init_app(app)
-    # login_manager.init_app(app)
-    Migrate(app, db)
+    migrate.init_app(app, db)
+    oauth.init_app(app)
+
+    # Log app initialization
+    app.logger.info("Flask app initialized with configuration:")
+    app.logger.info("SECRET_KEY: {'Set' if app.secret_key else 'Not Set'}")
+    app.logger.info("DATABASE_URL: {app.config['SQLALCHEMY_DATABASE_URI']}")
+
+    # Check for Google OAuth environment variables
+    google_client_id = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
+    google_client_secret = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
+    if not google_client_id or not google_client_secret:
+        app.logger.error("GOOGLE_OAUTH_CLIENT_ID or GOOGLE_OAUTH_CLIENT_SECRET environment variable not set")
+        raise ValueError("GOOGLE_OAUTH_CLIENT_ID or GOOGLE_OAUTH_CLIENT_SECRET environment variable not set")
+
+    # Configure OAuth
+    from app.routes.auth_routes import init_oauth
+    init_oauth(oauth)
 
     # Register blueprints
+    from app.routes.quiz_routes import quiz_bp
     from app.routes.auth_routes import auth_bp
-    from app.routes.quiz_routes import quiz_routes
-    # from app.routes.ai_routes import ai_bp
-    # from app.routes.stats_routes import stats_bp
-
-    app.register_blueprint(auth_bp)
-    app.register_blueprint(quiz_routes)
+    from app.routes.ai_routes import ai_routes
+    app.register_blueprint(quiz_bp)
+    app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(ai_routes)
-
-    google_bp = make_google_blueprint(
-        client_id=os.getenv("GOOGLE_OAUTH_CLIENT_ID"),
-        client_secret=os.getenv("GOOGLE_OAUTH_CLIENT_SECRET"),
-        redirect_to="auth.google_callback",
-        scope=[
-            "openid",
-            "https://www.googleapis.com/auth/userinfo.profile",
-            "https://www.googleapis.com/auth/userinfo.email"
-        ]
-    )
-    app.register_blueprint(google_bp, url_prefix="/login")
-
-    # app.register_blueprint(ai_bp)
     # app.register_blueprint(stats_bp)
+
+# function to clear flask sessions if wanted, can make it intervals for cleaning
+    # def clear_flask_sessions(session_path):
+    #     if os.path.exists(session_path):
+    #         shutil.rmtree(session_path)  # Remove the directory and its contents
+    #     os.makedirs(session_path)  # Recreate the directory
 
     return app
