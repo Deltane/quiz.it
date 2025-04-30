@@ -1,6 +1,29 @@
+# Environment files
 .env
 config/client_secret.json.env
 flask_session/
-*.pyc
-__pycache__/
 venv/
+.venv/
+
+# Python bytecode
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+
+# IDE-specific files
+.idea/
+.vscode/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.swp
+
+# OS-specific files
+.DS_Store
+
+# Build artifacts
+build/
+dist/
+*.egg-info/
