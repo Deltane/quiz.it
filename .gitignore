@@ -1,3 +1,6 @@
 .env
 config/client_secret.json.env
 flask_session/
+*.pyc
+__pycache__/
+venv/
