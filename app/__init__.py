@@ -28,12 +28,12 @@ def create_app():
 
     # Register blueprints
     from app.routes.auth_routes import auth_bp
-    from app.routes.quiz_routes import quiz_bp
+    from app.routes.quiz_routes import quiz_routes
     # from app.routes.ai_routes import ai_bp
     # from app.routes.stats_routes import stats_bp
 
     app.register_blueprint(auth_bp)
-    app.register_blueprint(quiz_bp)
+    app.register_blueprint(quiz_routes)
     app.register_blueprint(ai_routes)
 
     google_bp = make_google_blueprint(
