@@ -13,6 +13,7 @@ __pycache__/
 
 # IDE-specific files
 .idea/
+.idea/cl
 .vscode/
 
 # Logs and temporary files
