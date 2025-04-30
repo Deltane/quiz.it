@@ -7,10 +7,17 @@ import uuid
 auth_bp = Blueprint('auth', __name__)
 
 def init_oauth(oauth):
+    google_client_id = os.getenv("GOOGLE_OAUTH_CLIENT_ID")
+    google_client_secret = os.getenv("GOOGLE_OAUTH_CLIENT_SECRET")
+    
+    if not google_client_id or not google_client_secret:
+        current_app.logger.error("GOOGLE_OAUTH_CLIENT_ID or GOOGLE_OAUTH_CLIENT_SECRET environment variable not set")
+        raise ValueError("GOOGLE_OAUTH_CLIENT_ID or GOOGLE_OAUTH_CLIENT_SECRET environment variable not set")
+    
     oauth.register(
         name='google',
-        client_id=os.getenv("GOOGLE_CLIENT_ID"),
-        client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+        client_id=google_client_id,
+        client_secret=google_client_secret,
         server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
         client_kwargs={
             'scope': 'openid email profile'
