@@ -1,5 +1,2 @@
-# Ignore the `.env` file in the repository
 .env
-
-# Ignore the `config/client_secret.json` file
 config/client_secret.json
