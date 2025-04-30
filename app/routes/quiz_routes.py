@@ -29,9 +29,23 @@ def submit_answer():
     question_index = data['questionIndex']
     answer = data['answer']
 
-    # Store the user's answer (you can save it in the session or database)
+    # Store the user's answer 
     if 'answers' not in session:
         session['answers'] = {}
     session['answers'][question_index] = answer
+
+    # Check if the quiz is completed
+    quiz = session.get('quiz', [])
+    if len(session['answers']) == len(quiz):
+        # Calculate the score
+        score = 0
+        for index, question in enumerate(quiz):
+            # Ensure both values are strings for comparison
+            if str(session['answers'].get(index)) == str(question['answer']):
+                score += 1
+        session['score'] = score
+        return jsonify({'completed': True, 'score': score})
+
+    return jsonify({'completed': False})
 
     return '', 204
