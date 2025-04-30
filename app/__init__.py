@@ -1,7 +1,8 @@
 from dotenv import load_dotenv
 import os
-# Load environment variables
-load_dotenv()
+# import shutil
+
+load_dotenv()  # Load environment variables from .env
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
@@ -9,6 +10,7 @@ from flask_migrate import Migrate
 from flask_session import Session
 from authlib.integrations.flask_client import OAuth
 import requests
+
 
 # Initialize extensions globally
 db = SQLAlchemy()
@@ -37,8 +39,8 @@ def create_app():
 
     # Log app initialization
     app.logger.info("Flask app initialized with configuration:")
-    app.logger.info(f"SECRET_KEY: {'Set' if app.secret_key else 'Not Set'}")
-    app.logger.info(f"DATABASE_URL: {app.config['SQLALCHEMY_DATABASE_URI']}")
+    app.logger.info("SECRET_KEY: {'Set' if app.secret_key else 'Not Set'}")
+    app.logger.info("DATABASE_URL: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
     # Configure OAuth
     from app.routes.auth_routes import init_oauth
@@ -49,5 +51,11 @@ def create_app():
     from app.routes.auth_routes import auth_bp
     app.register_blueprint(quiz_bp)
     app.register_blueprint(auth_bp, url_prefix='/auth')
+
+# function to clear flask sessions if wanted, can make it intervals for cleaning
+    # def clear_flask_sessions(session_path):
+    #     if os.path.exists(session_path):
+    #         shutil.rmtree(session_path)  # Remove the directory and its contents
+    #     os.makedirs(session_path)  # Recreate the directory
 
     return app
