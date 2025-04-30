@@ -1,138 +1,147 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Quiz.it</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@400..800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz.it</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap"
+          rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@400..800&display=swap"
+          rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/landing_page.css') }}">
 </head>
 
 <body>
-    
-    <div class="container">
-        <!-- Title Section -->
-        <div class="title-container">
-            <h1 class="title">[Quiz.it]</h1>
-            <h2 id="text">Quiz, with a twist of AI<h2 class="cursor">_</h2></h2>
-            <a href="/" class="bn5" style="color:#9a503b">Learn More</a>
-            <p style="color:#ffff">Assess your knowledge across a range of topics, including:</p>
-        </div>
+
+<div class="container">
+    <!-- Title Section -->
+    <div class="title-container">
+        <h1 class="title">[Quiz.it]</h1>
+        <h2 id="text">Quiz, with a twist of AI<h2 class="cursor">_</h2></h2>
+        <a href="/" class="bn5" style="color:#290900">Learn More</a>
+        <p style="color:#ffff">Assess your knowledge across a range of topics, including:</p>
+    </div>
 
     <!-- Shortcuts Section -->
     <div class="shortcuts-container">
-      <div class="shortcuts-wrapper">
-        <div class="shortcuts">
-          <!-- Shortcut Items -->
-          <div class="shortcut">
-            <div class="shortcut-icon">
-              <img src="{{ url_for('static', filename='photos/music.png') }}" alt="Music Icon">
+        <div class="shortcuts-wrapper">
+            <div class="shortcuts">
+                <div class="scrolling-track">
+                    <!-- Shortcut Items -->
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/music.png') }}" alt="Music Icon">
+                        </div>
+                        <div class="shortcut-name">Music</div>
+                    </div>
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/movie.png') }}" alt="Movie Icon">
+                        </div>
+                        <div class="shortcut-name">Movies</div>
+                    </div>
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/flag.png') }}" alt="Flag Icon">
+                        </div>
+                        <div class="shortcut-name">Flags</div>
+                    </div>
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/science.png') }}" alt="Science Icon">
+                        </div>
+                        <div class="shortcut-name">Science</div>
+                    </div>
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/language.png') }}" alt="Language Icon">
+                        </div>
+                        <div class="shortcut-name">Languages</div>
+                    </div>
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/geography.png') }}" alt="Geography Icon">
+                        </div>
+                        <div class="shortcut-name">Geography</div>
+                    </div>
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/ai.png') }}" alt="AI Icon">
+                        </div>
+                        <div class="shortcut-name">AI</div>
+                    </div>
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/history.png') }}" alt="History Icon">
+                        </div>
+                        <div class="shortcut-name">History</div>
+                    </div>
+                </div>
             </div>
-            <div class="shortcut-name">Music</div>
-          </div>
-          <div class="shortcut">
-            <div class="shortcut-icon">
-              <img src="{{ url_for('static', filename='photos/movie.png') }}" alt="Movie Icon">
-            </div>
-            <div class="shortcut-name">Movies</div>
-          </div>
-          <div class="shortcut">
-            <div class="shortcut-icon">
-              <img src="{{ url_for('static', filename='photos/flag.png') }}" alt="Flag Icon">
-            </div>
-            <div class="shortcut-name">Flags</div>
-          </div>
-          <div class="shortcut">
-            <div class="shortcut-icon">
-              <img src="{{ url_for('static', filename='photos/science.png') }}" alt="Science Icon">
-            </div>
-            <div class="shortcut-name">Science</div>
-          </div>
-          <div class="shortcut">
-            <div class="shortcut-icon">
-              <img src="{{ url_for('static', filename='photos/language.png') }}" alt="Language Icon">
-            </div>
-            <div class="shortcut-name">Languages</div>
-          </div>
-          <div class="shortcut">
-            <div class="shortcut-icon">
-              <img src="{{ url_for('static', filename='photos/geography.png') }}" alt="Geography Icon">
-            </div>
-            <div class="shortcut-name">Geography</div>
-          </div>
-          <div class="shortcut">
-            <div class="shortcut-icon">
-              <img src="{{ url_for('static', filename='photos/ai.png') }}" alt="AI Icon">
-            </div>
-            <div class="shortcut-name">AI</div>
-          </div>
-          <div class="shortcut">
-            <div class="shortcut-icon">
-              <img src="{{ url_for('static', filename='photos/history.png') }}" alt="History Icon">
-            </div>
-            <div class="shortcut-name">History</div>
-          </div>
         </div>
-      </div>
     </div>
-  </div>
+</div>
 
-    <div class="header-container">
-        <div class="top-center-page">
-            <!-- <h2>/q/<h2> -->
-        </div>
-        
-        <div class="top-right-buttons">
-        <a>About</a>
+<div class="header-container">
+    <div class="top-center-page">
+        <!-- <h2>/q/<h2> -->
+    </div>
+
+    <div class="top-right-buttons">
+        <a href="#about">About</a>  <!-- keep About clickable if needed -->
         {% if session.get('user_email') %}
             <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
-                <span style="color: black;">Welcome, {{ session['user_email'] }}</span>
-                <img src="{{ session['user_pic'] }}" alt="Profile" style="height: 30px; border-radius: 50%;">
+            <span style="color: #000000; font-weight: bold;">
+                👤 {{ session.get('user_name', session['user_email']) }}
+            </span>
+                <img src="{{ session['user_pic'] }}" alt="Profile"
+                     style="height: 30px; width: 30px; border-radius: 50%; object-fit: cover;">
+                <a href="{{ url_for('auth.logout') }}" class="bn5">Sign Out</a>
             </div>
         {% else %}
-            <a href="{{ url_for('google.login') }}" class="bn5">Sign in with Google</a>
-        {% endif %}
-        </div>
+            <a href="{{ url_for('auth.login') }}" rel="nofollow" class="bn5">Sign In with Google</a>
 
-        <div class="top-left-buttons">
-            <h2>/q/</h2>
-            <div class="profile-images">
-                <div class="profile-image">
-                    <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
-                        <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
-                            <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"/>
-                        </svg>
-                    </a>
-                </div>
-                <div class="profile-image">
-                    <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
-                        <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
-                            <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"/>
-                        </svg>
-                    </a>
-                </div>
-                <div class="profile-image">
-                    <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
-                        <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
-                            <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"/>
-                        </svg>
-                    </a>
-                </div>
-                <div class="profile-image">
-                    <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
-                        <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
-                            <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"/>
-                        </svg>
-                    </a>
-                </div>
-            </div>
-            <!-- <a>About Us</a> -->
-        </div>
+        {% endif %}
     </div>
 
-  <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <div class="top-left-buttons">
+        <h2>/q/</h2>
+        <div class="profile-images">
+            <div class="profile-image">
+                <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
+                    <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
+                        <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"></path>
+                    </svg>
+                </a>
+            </div>
+            <div class="profile-image">
+                <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
+                    <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
+                        <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"></path>
+                    </svg>
+                </a>
+            </div>
+            <div class="profile-image">
+                <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
+                    <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
+                        <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"></path>
+                    </svg>
+                </a>
+            </div>
+            <div class="profile-image">
+                <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
+                    <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
+                        <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"></path>
+                    </svg>
+                </a>
+            </div>
+        </div>
+        <!-- <a>About Us</a> -->
+    </div>
+</div>
+
+<script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
 </html>

@@ -1,19 +1,16 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
 @font-face {
   font-family: 'MyFont';
   src: url('../font/Hornbill-Personal Use Regular.otf') format('truetype');
 }
 
-@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
-
-
 body {
-  margin: 0;
-  padding: 0;
-  font-family: "Syne", serif;
   background-color: #9a503b;
   background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
   background-size: 20px 20px;
-
+  font-family: "Syne", serif;
+  color: #333;
 }
 
 .epilogue-quizit {
@@ -116,24 +113,25 @@ margin-left: 4px;
 /* Top-right buttons container */
 .top-right-buttons {
   position: absolute;
-  top: 5rem; /* Match the top value of .top-left-buttons */
-  right: 10rem; /* Position it on the right */
+  top: 2rem;
+  right: 4rem;
   display: flex;
-  gap: 2rem; /* Add spacing between buttons */
+  gap: 1.5rem;
   align-items: center;
-  justify-content: flex-end;
-  margin-top: 0;
-  color: #ffffff;
-  font-family: 'Inter', serif;
+  font-family: 'Syne', serif;
 }
 
-
-.top-right-buttons a:first-child{
+.top-right-buttons a {
   font-size: 1rem;
-  font-weight: normal;
   color: #ffffff;
-  font-family: 'Inter', serif;
-  font-weight: bold;
+  font-weight: 600;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  transition: background-color 0.3s;
+}
+
+.top-right-buttons a:hover {
+  background-color: rgba(255, 255, 255, 0.2);
 }
 
 
@@ -142,7 +140,7 @@ margin-left: 4px;
   border: none;
   outline: none;
   color: rgb(255, 255, 255);
-  background: grey;
+  background: #9a503b; /* Changed to a darker shade for better contrast */
   cursor: pointer;
   position: relative;
   z-index: 0;
@@ -214,7 +212,7 @@ margin-left: 4px;
   left: 0;
   top: 0;
   border-radius: 3.125rem;
-  box-shadow: 0rem 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
 }
 
 .title {
@@ -233,27 +231,26 @@ margin-left: 4px;
   /* Reduced height to prevent excessive vertical spacing */
   height: auto;
   padding-top: 10rem;
-  margin: 0;
   background-color: transparent;
   font-family: 'Syne', serif;
   color:#9a503b;
   text-align: center;
-  margin-bottom: 2rem;
+  margin: 0 0 2rem;
   white-space: nowrap;
 }
 
 .title-container h1 {
   display: inline-block;
-  position: center;
+  position: relative;
   padding: 2rem 2.5rem;
   background-color: #fff;
-  box-shadow: 0rem 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
   border-radius: 0.5rem;
   color: #9a503b;
   font-size: 4.5rem;
   font-weight: 900;
   text-align: center;
-  width: 20%;
+  width: fit-content;
   min-width: 25rem;
   margin: 10rem; /* Increased margin to lower the element */
 }
@@ -269,8 +266,7 @@ margin-left: 4px;
   margin-top: 6rem; /* Move it slightly upwards */
   display: inline-block;
   font-family: 'Syne', sans-serif;
-  box-shadow: 0rem 0.25rem 0.25rem rgba(0, 0, 0, 0.2);
-  
+  box-shadow: 0 0.25rem 0.25rem rgba(0, 0, 0, 0.2);
 
 }
 .cursor {
@@ -288,88 +284,72 @@ margin-left: 4px;
   }
 }
 .title-container p {
-  color: #444;
+  color: #ffffff;
   margin-top: 4rem; /* Move it slightly upwards */
-  font-family: 'Inter', serif;
+  font-family: 'Syne', serif;
   font-weight: bold;
 }
 
 .container {
-  max-width: 75rem;
+  max-width: 90rem;
   margin: 0 auto;
-  padding: 0 1rem;
-  box-sizing: border-box;
+  padding: 0 2rem;
   position: relative;
-  /* Changed fixed height to min-height for better responsiveness */
   min-height: 100vh;
-  white-space: nowrap;
 }
 
 /* Shortcuts container */
-.shortcuts-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100vh; /* Full viewport height to center vertically */
-  text-align: center;
-  margin-top: -25rem;
-}
-
-.shortcuts-wrapper {
-  width: 100%;
-  max-width: 50rem;
-  overflow: hidden;
-  position: relative;
-  /* Reduced top margin to bring it closer to paragraph */
-  margin-top: 2rem;
-  display: flex;
-  justify-content: center;
-}
-
 .shortcuts {
   display: flex;
+  justify-content: center;
+  overflow: hidden;
+  margin-top: 1rem;
+}
+
+.scrolling-track {
+  display: flex;
   width: max-content;
-  animation: scroll 40s linear infinite;
-  margin-top: 0.2rem;
+  animation: scroll 60s linear infinite;
 }
 
 .shortcut {
   display: flex;
+  justify-content: center;
   flex-direction: column;
   align-items: center;
-  width: 5.625rem;
+  width: 6.5rem;
   text-decoration: none;
   color: #000;
   cursor: pointer;
-  margin: 0 0.625rem;
-  margin-top: 0.2rem;
+  margin: 0.5rem 1rem;
+  transition: transform 0.3s ease;
+}
+
+.shortcut:hover {
+  transform: scale(1.1);
 }
 
 .shortcut-icon {
-  width: 3.125rem;
-  height: 3.125rem;
+  width: 4rem;
+  height: 4rem;
   border-radius: 50%;
-  background-color: transparent; /* Set background to transparent */
+  background-color: white;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.2);
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 0.625rem;
-  overflow: hidden;
+  margin-bottom: 0.5rem;
 }
 
 .shortcut-icon img {
-  width: 1.5rem;
-  height: 1.5rem;
+  width: 2rem;
+  height: 2rem;
 }
 
 .shortcut-name {
-  font-size: 0.8125rem;
-  text-align: center;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  width: 100%;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #222;
 }
 
 .add-shortcut .shortcut-icon {
@@ -396,4 +376,87 @@ span {
   height: 1.25rem;
 }
 
+/* P2a85 */
+.bn5 {
+  position: relative;
+  padding: 0.5rem 1.5rem;
+  font-size: 1.2rem;
+  font-weight: bold;
+  border: none;
+  border-radius: 3rem;
+  cursor: pointer;
+  font-family: "Syne", serif;
+  background-color: #7f3f2d; /* 🔥 Always visible background */
+  color: #ffffff; /* 🔥 Always visible text */
+  overflow: hidden;
+  transition: background-color 0.3s ease;
+  z-index: 1;
+}
 
+.bn5:before {
+  content: "";
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  width: calc(100% + 4px);
+  height: calc(100% + 4px);
+  background: linear-gradient(
+      45deg,
+      #ff0000, #ff7300, #fffb00, #48ff00, #00ffd5, #002bff, #7a00ff, #ff00c8, #ff0000
+  );
+  background-size: 400%;
+  filter: blur(5px);
+  opacity: 0; /* 🔥 Start invisible */
+  transition: opacity 0.3s ease-in-out;
+  z-index: -1;
+  border-radius: 3rem;
+}
+
+.bn5:hover:before {
+  opacity: 1; /* 🔥 Only visible on hover */
+  animation: glowingbn5 20s linear infinite;
+}
+
+@keyframes glowingbn5 {
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 400% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
+}
+
+.bn5:after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: 3rem;
+  background: transparent; /* 🔥 No white mask anymore */
+  z-index: -1;
+}
+
+/* P2d39 */
+.user-greeting {
+  background-color: #ffffff;
+  padding: 0.5rem 1rem;
+  border-radius: 2rem;
+  color: #333;
+  font-weight: bold;
+  font-size: 1rem;
+}
+
+.user-greeting span {
+    font-family: "Syne", serif;
+    font-size: 1rem;
+    color: #ffffff;
+}
+
+.user-greeting img {
+    border: 2px solid #ffffff;
+}
