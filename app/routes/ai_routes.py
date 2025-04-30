@@ -28,9 +28,9 @@ def generate_quiz():
     uploaded_file = request.files.get('upload-file')
 
     # Extract text from the uploaded PDF or use the provided text input
-    if uploaded_file and uploaded_file.filename.endswith('.pdf', '.docx'):
+    if uploaded_file and uploaded_file.filename.endswith('.pdf'):
         filename = secure_filename(uploaded_file.filename)
-        filepath = os.path.join('uploads', filename)  
+        filepath = os.path.join('uploads', filename)  # Use a relative path
         os.makedirs('uploads', exist_ok=True)  # Ensure the uploads directory exists
         uploaded_file.save(filepath)
 
