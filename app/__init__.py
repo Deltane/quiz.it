@@ -43,11 +43,11 @@ def create_app():
     app.logger.info("DATABASE_URL: {app.config['SQLALCHEMY_DATABASE_URI']}")
 
     # Check for Google OAuth environment variables
-    google_client_id = os.getenv('GOOGLE_CLIENT_ID')
-    google_client_secret = os.getenv('GOOGLE_CLIENT_SECRET')
+    google_client_id = os.getenv('GOOGLE_OAUTH_CLIENT_ID')
+    google_client_secret = os.getenv('GOOGLE_OAUTH_CLIENT_SECRET')
     if not google_client_id or not google_client_secret:
-        app.logger.error("GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variable not set")
-        raise ValueError("GOOGLE_CLIENT_ID or GOOGLE_CLIENT_SECRET environment variable not set")
+        app.logger.error("GOOGLE_OAUTH_CLIENT_ID or GOOGLE_OAUTH_CLIENT_SECRET environment variable not set")
+        raise ValueError("GOOGLE_OAUTH_CLIENT_ID or GOOGLE_OAUTH_CLIENT_SECRET environment variable not set")
 
     # Configure OAuth
     from app.routes.auth_routes import init_oauth
