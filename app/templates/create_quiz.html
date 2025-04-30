@@ -5,7 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Quiz</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <link rel="stylesheet" href="../static/css/create_quiz.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@400..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/create_quiz.css') }}">
+    <link rel="stylesheet" href="../static/css/create_quiz.css">  
 </head>
 <body>
 <div class="container">
@@ -91,6 +96,7 @@
             .then(response => response.json())
             .then(data => {
                 if (data.quiz) {
+                    console.log("Generated Quiz Data:", data.quiz);
                     // Store the quiz data in the session or backend
                     fetch('/store_quiz', {
                         method: 'POST',

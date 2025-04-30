@@ -92,6 +92,7 @@
     <div class="top-right-buttons">
         <a href="#about">About</a>  <!-- keep About clickable if needed -->
         {% if session.get('user_email') %}
+            <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
             <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #000000; font-weight: bold;">
                 👤 {{ session.get('user_name', session['user_email']) }}

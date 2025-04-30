@@ -1,3 +1,18 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
+@font-face {
+  font-family: 'MyFont';
+  src: url('../font/Hornbill-Personal Use Regular.otf') format('truetype');
+}
+
+body {
+  background-color: #9a503b;
+  background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+  background-size: 20px 20px;
+  font-family: "Syne", serif;
+  color: #333;
+}
+
 /* create_quiz.css */
 
 /* Card Container */

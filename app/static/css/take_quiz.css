@@ -1,8 +1,16 @@
 /* General styling */
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
+@font-face {
+  font-family: 'MyFont';
+  src: url('../font/Hornbill-Personal Use Regular.otf') format('truetype');
+}
+
 body {
-    font-family: Arial, sans-serif;
-    background-color: #000;
-    color: white;
+    font-family: "Syne", sans-serif;
+    background-color: #9a503b;
+    background-image: radial-gradient(#e0e0e0 1px, transparent 1px);
+    color: #333;
     margin: 0;
     padding: 0;
     display: flex;
@@ -32,7 +40,7 @@ body {
 #timer-container {
     width: 100%;
     height: 10px;
-    background-color: #333; /* Background of the timer bar */
+    background-color: #5a281a; /* Background of the timer bar */
     border-radius: 5px;
     overflow: hidden;
     margin: 1rem 0;
@@ -42,7 +50,7 @@ body {
 /* Timer progress bar */
 #timer-progress {
     height: 100%;
-    background-color: #ccff33; /* Bright green for the timer */
+    background-color: #ffffff; /* Bright green for the timer */
     width: 100%; /* Start fully filled */
     transition: width 0.1s linear; /* Smooth shrinking effect */
 }
@@ -51,7 +59,7 @@ body {
 .form-check {
     display: flex; 
     align-items: center; 
-    background-color: #1c1c1e;
+    background-color: #ffffff;
     border-radius: 10px;
     margin-bottom: 1rem;
     padding: 1rem;
@@ -61,7 +69,7 @@ body {
 }
 
 .form-check:hover {
-    background-color: #2c2c2e;
+    background-color: #ffffff;
 }
 
 .form-check-input {
@@ -77,8 +85,8 @@ body {
 
 /* Button styling */
 .btn {
-    background-color: #ccff33;
-    color: #000;
+    background-color: #ffffff;
+    color: #9a503b;
     font-size: 1.2rem;
     padding: 0.7rem 2rem;
     border: none;
@@ -89,7 +97,7 @@ body {
 }
 
 .btn:hover {
-    background-color: #bbee22;
+    background-color: #290900;
 }
 
 /* Theme button styling */
@@ -156,7 +164,7 @@ body {
 }
 
 .form-check-input:checked {
-    border-color: #ccff33;
+    border-color: #ffffff;
 }
 
 .form-check-input:checked::after {
@@ -167,8 +175,7 @@ body {
     width: 12px;
     height: 12px;
     border-radius: 50%;
-    background-color: #ccff33;
-}
+    background-color: #9a503b;
 
 /* Responsive adjustments */
 @media (max-width: 768px) {

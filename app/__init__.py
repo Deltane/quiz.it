@@ -54,10 +54,10 @@ def create_app():
     init_oauth(oauth)
 
     # Register blueprints
-    from app.routes.quiz_routes import quiz_bp
+    from app.routes.quiz_routes import quiz_routes
     from app.routes.auth_routes import auth_bp
     from app.routes.ai_routes import ai_routes
-    app.register_blueprint(quiz_bp)
+    app.register_blueprint(quiz_routes)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(ai_routes)
     # app.register_blueprint(stats_bp)
