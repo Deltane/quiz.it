@@ -140,7 +140,7 @@ margin-left: 4px;
   border: none;
   outline: none;
   color: rgb(255, 255, 255);
-  background: #7f3f2d; /* Changed to a darker shade for better contrast */
+  background: #9a503b; /* Changed to a darker shade for better contrast */
   cursor: pointer;
   position: relative;
   z-index: 0;
@@ -250,7 +250,7 @@ margin-left: 4px;
   font-size: 4.5rem;
   font-weight: 900;
   text-align: center;
-  width: 20%;
+  width: fit-content;
   min-width: 25rem;
   margin: 10rem; /* Increased margin to lower the element */
 }
@@ -284,9 +284,9 @@ margin-left: 4px;
   }
 }
 .title-container p {
-  color: #444;
+  color: #ffffff;
   margin-top: 4rem; /* Move it slightly upwards */
-  font-family: 'Inter', serif;
+  font-family: 'Syne', serif;
   font-weight: bold;
 }
 
@@ -301,13 +301,20 @@ margin-left: 4px;
 /* Shortcuts container */
 .shortcuts {
   display: flex;
-  width: max-content;
-  animation: scroll 60s linear infinite; /* slower scroll */
+  justify-content: center;
+  overflow: hidden;
   margin-top: 1rem;
+}
+
+.scrolling-track {
+  display: flex;
+  width: max-content;
+  animation: scroll 60s linear infinite;
 }
 
 .shortcut {
   display: flex;
+  justify-content: center;
   flex-direction: column;
   align-items: center;
   width: 6.5rem;

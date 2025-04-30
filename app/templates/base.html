@@ -20,7 +20,7 @@
     <div class="title-container">
         <h1 class="title">[Quiz.it]</h1>
         <h2 id="text">Quiz, with a twist of AI<h2 class="cursor">_</h2></h2>
-        <a href="/" class="bn5" style="color:#9a503b">Learn More</a>
+        <a href="/" class="bn5" style="color:#290900">Learn More</a>
         <p style="color:#ffff">Assess your knowledge across a range of topics, including:</p>
     </div>
 
@@ -28,54 +28,56 @@
     <div class="shortcuts-container">
         <div class="shortcuts-wrapper">
             <div class="shortcuts">
-                <!-- Shortcut Items -->
-                <div class="shortcut">
-                    <div class="shortcut-icon">
-                        <img src="{{ url_for('static', filename='photos/music.png') }}" alt="Music Icon">
+                <div class="scrolling-track">
+                    <!-- Shortcut Items -->
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/music.png') }}" alt="Music Icon">
+                        </div>
+                        <div class="shortcut-name">Music</div>
                     </div>
-                    <div class="shortcut-name">Music</div>
-                </div>
-                <div class="shortcut">
-                    <div class="shortcut-icon">
-                        <img src="{{ url_for('static', filename='photos/movie.png') }}" alt="Movie Icon">
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/movie.png') }}" alt="Movie Icon">
+                        </div>
+                        <div class="shortcut-name">Movies</div>
                     </div>
-                    <div class="shortcut-name">Movies</div>
-                </div>
-                <div class="shortcut">
-                    <div class="shortcut-icon">
-                        <img src="{{ url_for('static', filename='photos/flag.png') }}" alt="Flag Icon">
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/flag.png') }}" alt="Flag Icon">
+                        </div>
+                        <div class="shortcut-name">Flags</div>
                     </div>
-                    <div class="shortcut-name">Flags</div>
-                </div>
-                <div class="shortcut">
-                    <div class="shortcut-icon">
-                        <img src="{{ url_for('static', filename='photos/science.png') }}" alt="Science Icon">
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/science.png') }}" alt="Science Icon">
+                        </div>
+                        <div class="shortcut-name">Science</div>
                     </div>
-                    <div class="shortcut-name">Science</div>
-                </div>
-                <div class="shortcut">
-                    <div class="shortcut-icon">
-                        <img src="{{ url_for('static', filename='photos/language.png') }}" alt="Language Icon">
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/language.png') }}" alt="Language Icon">
+                        </div>
+                        <div class="shortcut-name">Languages</div>
                     </div>
-                    <div class="shortcut-name">Languages</div>
-                </div>
-                <div class="shortcut">
-                    <div class="shortcut-icon">
-                        <img src="{{ url_for('static', filename='photos/geography.png') }}" alt="Geography Icon">
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/geography.png') }}" alt="Geography Icon">
+                        </div>
+                        <div class="shortcut-name">Geography</div>
                     </div>
-                    <div class="shortcut-name">Geography</div>
-                </div>
-                <div class="shortcut">
-                    <div class="shortcut-icon">
-                        <img src="{{ url_for('static', filename='photos/ai.png') }}" alt="AI Icon">
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/ai.png') }}" alt="AI Icon">
+                        </div>
+                        <div class="shortcut-name">AI</div>
                     </div>
-                    <div class="shortcut-name">AI</div>
-                </div>
-                <div class="shortcut">
-                    <div class="shortcut-icon">
-                        <img src="{{ url_for('static', filename='photos/history.png') }}" alt="History Icon">
+                    <div class="shortcut">
+                        <div class="shortcut-icon">
+                            <img src="{{ url_for('static', filename='photos/history.png') }}" alt="History Icon">
+                        </div>
+                        <div class="shortcut-name">History</div>
                     </div>
-                    <div class="shortcut-name">History</div>
                 </div>
             </div>
         </div>
@@ -91,7 +93,7 @@
         <a href="#about">About</a>  <!-- keep About clickable if needed -->
         {% if session.get('user_email') %}
             <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
-            <span style="color: #ffffff; font-weight: bold;">
+            <span style="color: #000000; font-weight: bold;">
                 👤 {{ session.get('user_name', session['user_email']) }}
             </span>
                 <img src="{{ session['user_pic'] }}" alt="Profile"
