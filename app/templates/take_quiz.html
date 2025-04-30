@@ -2,9 +2,140 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <link rel="stylesheet" href="../static/css/take_quiz.css">
 </head>
 <body>
+<div class="container">
+    <h2 id="quiz-title">Quiz</h2>
+    <div id="timer-container"> 
+        <div id="timer-progress"></div>
+    </div>
+    <div id="question-container" style="margin-top: 20px;"></div>
+    <button id="next-question" class="btn btn-primary" style="display: none;">Next Question</button>
+</div>
+<script>
+    $(document).ready(function () {
+        let currentQuestionIndex = 0;
+        let score = 0;
+        let timerInterval;
+        const questionTimeLimit = 30; // 30 seconds per question (too short?)
+
+        // Start the timer
+        function startTimer() {
+            const timerProgress = $('#timer-progress');
+            let timeLeft = questionTimeLimit * 1000;
+            const interval = 100; 
+            const decrement = 100 / (timeLeft / interval);
+
+            // Reset the progress bar to full width
+            timerProgress.css('width', '100%');
+
+            // Calculate the decrement per second
+
+
+            timerInterval = setInterval(() => {
+                timeLeft-= interval;
+                const percentage = (timeLeft / (questionTimeLimit * 1000)) * 100;
+                timerProgress.css('width', `${percentage}%`); // Update the width of the progress bar
+
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    alert('Time is up for this question! Moving to the next question.');
+                    submitAnswer(null); // Submit no answer if time runs out
+                }
+            }, interval);
+        }
+
+        // Stop the timer
+        function stopTimer() {
+            clearInterval(timerInterval);
+        }
+
+        // Load the current question
+        function loadQuestion() {
+            fetch(`/get_question/${currentQuestionIndex}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.question) {
+                        const questionContainer = $('#question-container');
+                        questionContainer.empty(); // Clear previous question
+
+                        // Display the question
+                        questionContainer.append(`<p><strong>Q${currentQuestionIndex + 1}:</strong> ${data.question}</p>`);
+
+                        // Display the options
+                        data.options.forEach((option, index) => {
+                            const optionId = `option${index}`;
+                            questionContainer.append(`
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="answer" id="${optionId}" value="${option}">
+                                    <label class="form-check-label" for="${optionId}">${option}</label>
+                                </div>
+                            `);
+                        });
+
+                        // Show the "Next Question" button
+                        $('#next-question').show();
+
+                        // Start the timer for the question
+                        startTimer();
+                    } else {
+                        // Quiz completed
+                        $('#question-container').html(`<p>Quiz completed! Your score is: ${score}</p>`);
+                        $('#next-question').hide();
+                        $('#timer-container').hide();
+                    }
+                })
+                .catch(err => {
+                    $('#question-container').html('<p>Error loading question: ' + err.message + '</p>');
+                });
+        }
+
+        // Submit the current question and load the next one
+        function submitAnswer(selectedAnswer) {
+            stopTimer(); // Stop the timer when submitting the answer
+
+            fetch('/submit_answer', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ questionIndex: currentQuestionIndex, answer: selectedAnswer })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.completed) {
+                    // Quiz completed, show the final score
+                    $('#question-container').html(`<p>Quiz completed! Your score is: ${data.score}</p>`);
+                    $('#next-question').hide();
+                    $('#timer-container').hide();
+                } else {
+                    // Increment the question index and load the next question
+                    currentQuestionIndex++;
+                    loadQuestion();
+                }
+            })
+            .catch(err => {
+                alert('Error submitting answer: ' + err.message);
+            });
+        }
+
+        $('#next-question').on('click', function () {
+            const selectedAnswer = $('input[name="answer"]:checked').val();
+            if (!selectedAnswer) {
+                alert('Please select an answer before proceeding.');
+                return;
+            }
+            submitAnswer(selectedAnswer);
+        });
+
+        // Load the first question on page load
+        loadQuestion();
+    });
+</script>
 
 </body>
 </html>

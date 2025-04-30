@@ -2,6 +2,7 @@ import os
 from flask import Blueprint, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF
+import json
 from openai import OpenAI
 from dotenv import load_dotenv
 
@@ -26,9 +27,11 @@ def generate_quiz():
     text_input = request.form.get('ai-prompt', '')
     uploaded_file = request.files.get('upload-file')
 
+    # Extract text from the uploaded PDF or use the provided text input
     if uploaded_file and uploaded_file.filename.endswith('.pdf'):
         filename = secure_filename(uploaded_file.filename)
         filepath = os.path.join('uploads', filename)  # Use a relative path
+        os.makedirs('uploads', exist_ok=True)  # Ensure the uploads directory exists
         uploaded_file.save(filepath)
 
         # Extract text from PDF using PyMuPDF
@@ -62,7 +65,7 @@ def generate_quiz():
         )
 
         # Parse the response content
-        quiz_data = eval(response.choices[0].message.content)  # Replace eval with json.loads if possible
+        quiz_data = json.loads(response.choices[0].message.content)  # Use json.loads for safety
         if isinstance(quiz_data, list):  # Ensure the response is a list
             return jsonify({"quiz": quiz_data})
         else:
