@@ -84,7 +84,7 @@
     </div>
 </div>
 
-<div id="learn-more-section">
+<div id="learn-more-section" class="learn-more-container">
     <h2>Learn More Section</h2>
     <p>Welcome to the learn more section. Here you can find more information about our platform and its features.</p>
 </div>
@@ -95,7 +95,6 @@
     </div>
 
     <div class="top-right-buttons">
-        <a href="#about">About</a>  <!-- keep About clickable if needed -->
         {% if session.get('user_email') %}
             <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
             <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
