@@ -4,7 +4,7 @@ quiz_routes = Blueprint('quiz_routes', __name__)
 
 @quiz_routes.route('/')
 def home():
-    return render_template('base.html')
+    return render_template('landing_page.html')
 
 @quiz_routes.route('/take_quiz')
 def take_quiz():
