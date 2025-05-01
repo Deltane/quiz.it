@@ -18,3 +18,9 @@ window.onload = () => {
   h2Element.textContent = ""; // Clear the existing text
   typeText();
 };
+
+// Add event listener to the "Learn More" button
+document.getElementById("learn-more-button").addEventListener("click", function(event) {
+  event.preventDefault(); // Prevent the default link behavior
+  document.getElementById("learn-more-section").scrollIntoView({ behavior: "smooth" }); // Smooth scroll to the learn more section
+});
