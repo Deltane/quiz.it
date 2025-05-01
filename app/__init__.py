@@ -57,9 +57,12 @@ def create_app():
     from app.routes.quiz_routes import quiz_routes
     from app.routes.auth_routes import auth_bp
     from app.routes.ai_routes import ai_routes
+    from app.routes.dashboard_routes import dashboard
     app.register_blueprint(quiz_routes)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(ai_routes)
+    app.register_blueprint(dashboard)
+
     # app.register_blueprint(stats_bp)
 
 # function to clear flask sessions if wanted, can make it intervals for cleaning
