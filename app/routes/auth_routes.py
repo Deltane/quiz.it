@@ -56,7 +56,7 @@ def authorize():
         session['user_pic'] = user_info.get('picture', '')
 
         current_app.logger.info(f"User {session['user_email']} logged in successfully.")
-        return redirect(url_for('quiz_routes.index'))
+        return redirect(url_for('quiz_routes.home'))
     except Exception as e:
         current_app.logger.error(f"Error in /auth/authorize: {e}")
         return "An error occurred during authorization. Check server logs for details.", 500

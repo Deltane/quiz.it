@@ -25,6 +25,7 @@ def create_quiz():
 @ai_routes.route('/generate_quiz', methods=['POST'])
 def generate_quiz():
     text_input = request.form.get('ai-prompt', '')
+    question_count = int(request.form.get('question-count', 5))
     uploaded_file = request.files.get('upload-file')
 
     # Extract text from the uploaded PDF or use the provided text input
@@ -48,10 +49,12 @@ def generate_quiz():
     # Use OpenAI to generate quiz
     try:
         system_prompt = (
-            "You are a quiz maker AI. Generate a multiple-choice quiz based on the following content. "
+            f"You are a quiz maker AI. Generate a multiple-choice quiz based on the following content. "
+            f"Return exactly {question_count} questions in JSON format. "
             "Each question should have 4 options, and one correct answer. "
-            "Return the output in this JSON format: "
-            "[{'question': '...', 'options': ['...', '...', '...', '...'], 'answer': '...'}, ...]"
+            "Do not provide any explanations or preambles. "
+            "Only return a JSON array in the following format: "
+            "[{\"question\": \"...\", \"options\": [\"...\", \"...\", \"...\", \"...\"], \"answer\": \"...\"}, ...]"
         )
 
         response = client.chat.completions.create(
@@ -83,11 +86,17 @@ def submit_quiz():
         user_answers = {answer['name']: answer['value'] for answer in data['answers']}
         quiz = data['quiz']
 
-        # Calculate the score
+        # Clear any existing session or cached quiz data here if applicable
+        # (Since no session or cache is shown, this is a placeholder comment)
+
+        print("User Answers:", user_answers)
+        print("Quiz Data:", quiz)
+
         score = 0
         for index, question in enumerate(quiz):
             correct_answer = question['answer']
             user_answer = user_answers.get(f'q{index}')
+            print(f"Q{index} - Correct: {correct_answer}, User: {user_answer}")
             if user_answer == correct_answer:
                 score += 1
 
