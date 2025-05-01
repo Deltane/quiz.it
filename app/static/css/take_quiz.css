@@ -176,6 +176,7 @@ body {
     height: 12px;
     border-radius: 50%;
     background-color: #9a503b;
+}
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
