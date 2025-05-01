@@ -11,7 +11,6 @@ from flask_session import Session
 from authlib.integrations.flask_client import OAuth
 import requests
 
-
 # Initialize extensions globally
 db = SQLAlchemy()
 migrate = Migrate()
@@ -61,11 +60,5 @@ def create_app():
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(ai_routes)
     # app.register_blueprint(stats_bp)
-
-# function to clear flask sessions if wanted, can make it intervals for cleaning
-    # def clear_flask_sessions(session_path):
-    #     if os.path.exists(session_path):
-    #         shutil.rmtree(session_path)  # Remove the directory and its contents
-    #     os.makedirs(session_path)  # Recreate the directory
 
     return app

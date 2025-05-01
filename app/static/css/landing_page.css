@@ -83,7 +83,7 @@ a {
   display: flex;
   margin-right: 8px;
 }
-  
+
 .profile-image {
 width: 32px;
 height: 32px;
@@ -459,4 +459,25 @@ span {
 
 .user-greeting img {
     border: 2px solid #ffffff;
+}
+
+/* Learn More Container */
+.learn-more-container {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 0.5rem;
+  box-shadow: 0 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
+  margin-top: 2rem;
+}
+
+.learn-more-container h2 {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+}
+
+.learn-more-container p {
+  font-size: 1rem;
+  color: #666;
+  line-height: 1.5;
 }

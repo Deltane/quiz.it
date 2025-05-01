@@ -20,7 +20,7 @@
     <div class="title-container">
         <h1 class="title">[Quiz.it]</h1>
         <h2 id="text">Quiz, with a twist of AI<h2 class="cursor">_</h2></h2>
-        <a href="/" class="bn5" style="color:#290900">Learn More</a>
+        <a href="/" class="bn5" id="learn-more-button" style="color:#290900">Learn More</a>
         <p style="color:#ffff">Assess your knowledge across a range of topics, including:</p>
     </div>
 
@@ -84,13 +84,31 @@
     </div>
 </div>
 
+<div id="learn-more-section" class="learn-more-container">
+    <h2>Why Quiz.it?</h2>
+    <p>
+        Quiz.it is your smarter study companion. Powered by AI, our platform helps you create, customise, and share interactive quizzes
+        from any topic or document — all in seconds. Whether you're brushing up on science, music, or language,
+        our intelligent quiz engine adapts to your learning style.
+    </p>
+
+    <ul class="features-list">
+        <li>🧠 Generate quizzes instantly from files or AI prompts</li>
+        <li>📚 Choose from multiple-choice, short answer, or fill-in-the-blank formats</li>
+        <li>⏱️ Customise timers, privacy settings, and question counts</li>
+        <li>📈 Track your progress with visual statistics and attempt history</li>
+        <li>🤝 Share quizzes with friends or collaborate in groups</li>
+    </ul>
+
+    <a href="/create_quiz" class="bn5" style="margin-top: 2rem;">Get Started</a>
+</div>
+
 <div class="header-container">
     <div class="top-center-page">
         <!-- <h2>/q/<h2> -->
     </div>
 
     <div class="top-right-buttons">
-        <a href="#about">About</a>  <!-- keep About clickable if needed -->
         {% if session.get('user_email') %}
             <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
             <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
@@ -108,7 +126,11 @@
     </div>
 
     <div class="top-left-buttons">
-        <h2>/q/</h2>
+        <h2>Github</h2>
+        <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank" class="repo-link">
+        <img src="{{ url_for('static', filename='photos/github-white.svg') }}" alt="GitHub" class="github-icon">
+        <span>CITS3403 Project</span>
+    </a>
         <div class="profile-images">
             <div class="profile-image">
                 <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
@@ -139,7 +161,6 @@
                 </a>
             </div>
         </div>
-        <!-- <a>About Us</a> -->
     </div>
 </div>
 
