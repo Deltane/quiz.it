@@ -95,7 +95,7 @@
             <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
             <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #000000; font-weight: bold;">
-                👤 {{ session.get('user_name', session['user_email']) }}
+                {{ session.get('user_name', session['user_email']) }}
             </span>
                 <img src="{{ session['user_pic'] }}" alt="Profile"
                      style="height: 30px; width: 30px; border-radius: 50%; object-fit: cover;">
