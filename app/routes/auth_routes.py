@@ -65,4 +65,4 @@ def authorize():
 def logout():
     session.clear()
     current_app.logger.info("User logged out and session cleared.")
-    return redirect(url_for('quiz_routes.index'))
+    return redirect(url_for('quiz_routes.home'))
