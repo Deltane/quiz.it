@@ -29,6 +29,7 @@ def generate_quiz():
     text_input = request.form.get('ai-prompt', '')
     question_count = int(request.form.get('question-count', 5))
     uploaded_file = request.files.get('upload-file')
+    quiz_type = request.form.get('quiz-type')
 
     text = text_input
 
@@ -90,16 +91,37 @@ def generate_quiz():
     print(f"Processing text with OpenAI (length: {len(text)})")
     
     # Use OpenAI to generate quiz
-        # Use OpenAI to generate quiz
     try:
-        system_prompt = (
-            f"You are a quiz maker AI. Generate a multiple-choice quiz based on the following content. "
-            f"Return exactly {question_count} questions in JSON format. "
-            "Each question should have 4 options, and one correct answer. "
-            "Do not provide any explanations or preambles. "
-            "Only return a JSON array in the following format: "
-            "[{\"question\": \"...\", \"options\": [\"...\", \"...\", \"...\", \"...\"], \"answer\": \"...\"}, ...]"
-        )
+        if quiz_type == "Fill in the Blank":
+            system_prompt = (
+                f"You are a quiz maker AI. Generate a fill-in-the-blank quiz based on the following content. "
+                f"Return exactly {question_count} questions in JSON format. "
+                "For each question, create a sentence with '_____' where the blank should be, "
+                "and provide the correct answer. "
+                "Do not provide explanations. "
+                "Return only a JSON array in this format: "
+                "[{\"question\": \"The process of _____ is used to convert analog signals to digital.\", "
+                "\"answer\": \"digitization\"}, ...]"
+            )
+        elif quiz_type == "Short Answer":
+            system_prompt = (
+                f"You are a quiz maker AI. Generate short answer questions based on the following content. "
+                f"Return exactly {question_count} questions in JSON format. "
+                "Each question should require a brief, specific answer. "
+                "Do not provide explanations. "
+                "Return only a JSON array in this format: "
+                "[{\"question\": \"What protocol is used for secure web browsing?\", "
+                "\"answer\": \"HTTPS\"}, ...]"
+            )
+        else:
+            system_prompt = (
+                f"You are a quiz maker AI. Generate a multiple-choice quiz based on the following content. "
+                f"Return exactly {question_count} questions in JSON format. "
+                "Each question should have 4 options, and one correct answer. "
+                "Do not provide any explanations or preambles. "
+                "Only return a JSON array in the following format: "
+                "[{\"question\": \"...\", \"options\": [\"...\", \"...\", \"...\", \"...\"], \"answer\": \"...\"}, ...]"
+            )
 
         print("Sending request to OpenAI API...")
         response = client.chat.completions.create(
