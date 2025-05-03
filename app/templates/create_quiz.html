@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Quiz</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -59,8 +60,8 @@
         </form>
     
         <hr>
-        <h3>Generated Quiz:</h3>
-        <pre id="quiz-result" style="background-color: #f0f0f0; padding: 10px; border-radius: 8px;"></pre>
+        <!-- <h3>Generated Quiz:</h3> -->
+        <pre id="quiz-result" style="background-color: #f0f0f000; padding: 10px; border-radius: 8px;"></pre>
     </div>
     <script>
         $(document).ready(function () {
@@ -87,7 +88,7 @@
                 e.preventDefault();
     
                 const formData = new FormData(this);
-                $('#quiz-result').text('Generating quiz...');
+                $('#quiz-result').html('<p class="message">Generating quiz...</p>'); 
     
                 fetch('/generate_quiz', {
                     method: 'POST',
@@ -95,31 +96,47 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                    if (data.quiz) {
-                        // Store the quiz data in the session or backend
-                        fetch('/store_quiz', {
-                            method: 'POST',
-                            headers: {
-                                'Content-Type': 'application/json'
-                            },
-                            body: JSON.stringify({ quiz: data.quiz })
-                        })
-                        .then(() => {
-                            // Redirect to the quiz page
-                            window.location.href = '/take_quiz';
-                        })
-                        .catch(err => {
-                            $('#quiz-result').text('Error storing quiz: ' + err.message);
+                if (data.quiz) {
+                    // Store the quiz data in the session or backend
+                    fetch('/store_quiz', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ quiz: data.quiz })
+                    })
+                    .then(() => {
+                        // Show the "Start Quiz" button
+                        $('#quiz-result').html(`
+                            <p class="message">Quiz generated successfully!</p>
+                            <button id="start-quiz" type="button" class="btn btn-secondary">Start Quiz</button>
+                        `);
+
+                        // Trigger confetti animation
+                        confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 }
                         });
-                    } else {
-                        $('#quiz-result').text(data.error || 'Something went wrong.');
-                    }
-                })
-                .catch(err => {
-                    $('#quiz-result').text('Error generating quiz: ' + err.message);
-                });
+
+                        // Add click event to the "Start Quiz" button
+                        $('#start-quiz').on('click', function () {
+                            console.log('Start Quiz button clicked'); // Debugging log
+                            window.location.href = '/take_quiz'; // Redirect to the quiz-taking page
+                        });
+                    })
+                    .catch(err => {
+                        $('#quiz-result').text('Error storing quiz: ' + err.message);
+                    });
+                } else {
+                    $('#quiz-result').text(data.error || 'Something went wrong.');
+                }
+            })
+            .catch(err => {
+                $('#quiz-result').text('Error generating quiz: ' + err.message);
             });
         });
+    });
     </script>
  </body>
 </html>
