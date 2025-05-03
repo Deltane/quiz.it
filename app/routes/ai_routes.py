@@ -59,7 +59,7 @@ def generate_quiz():
                 with fitz.open(filepath) as doc:
                     pdf_text = "\n".join(page.get_text() for page in doc)
                     if pdf_text.strip():
-                        text = pdf_text
+                        text = pdf_text              
                     else:
                         # Fallback to OCR for image-based PDFs
                         text = ""
@@ -70,6 +70,9 @@ def generate_quiz():
                         
                         if not text.strip():
                             return jsonify({"error": "The PDF does not contain extractable text, even with OCR."})
+                       
+            except Exception as e:
+                return jsonify({"error": f"Failed to process PDF: {str(e)}"})
             finally:
                 # Clean up the uploaded file
                 try:
@@ -84,7 +87,8 @@ def generate_quiz():
     if not text or not text.strip():
         return jsonify({"error": "No valid text provided. Please enter text or upload a valid PDF."})
 
-
+    print(f"Processing text with OpenAI (length: {len(text)})")
+    
     # Use OpenAI to generate quiz
     try:
         system_prompt = (
@@ -106,16 +110,22 @@ def generate_quiz():
             max_tokens=1000
         )
 
-        # Parse the response content
-        quiz_data = json.loads(response.choices[0].message.content)  # Use json.loads for safety
-        if isinstance(quiz_data, list):  # Ensure the response is a list
-            return jsonify({"quiz": quiz_data})
-        else:
-            return jsonify({"error": "Unexpected response format from OpenAI."})
+
+        try:
+            # Parse the response content
+            quiz_data = json.loads(response.choices[0].message.content)
+            
+            if isinstance(quiz_data, list):
+                return jsonify({"quiz": quiz_data})
+            else:
+                return jsonify({"error": "Unexpected response format from OpenAI."})
+
+        except json.JSONDecodeError as je:
+            return jsonify({"error": f"Failed to parse OpenAI response: {str(je)}"})
 
     except Exception as e:
-        return jsonify({"error": str(e)})
-
+        return jsonify({"error": f"OpenAI API error: {str(e)}"})
+    
 # Route to handle quiz submission
 @ai_routes.route('/submit_quiz', methods=['POST'])
 def submit_quiz():
