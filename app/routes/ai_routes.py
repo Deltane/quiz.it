@@ -30,6 +30,8 @@ def generate_quiz():
     question_count = int(request.form.get('question-count', 5))
     uploaded_file = request.files.get('upload-file')
 
+    text = text_input
+
     # Extract text from the uploaded PDF or use the provided text input
     if uploaded_file and uploaded_file.filename.endswith('.pdf'):
         filename = secure_filename(uploaded_file.filename)
