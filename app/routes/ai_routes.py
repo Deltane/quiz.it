@@ -3,8 +3,10 @@ from flask import Blueprint, render_template, request, jsonify
 from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF
 import json
+import pytesseract
 from openai import OpenAI
 from dotenv import load_dotenv
+from PIL import Image
 
 # Define the blueprint
 ai_routes = Blueprint('ai_routes', __name__)
@@ -39,13 +41,17 @@ def generate_quiz():
         try:
             with fitz.open(filepath) as doc:
                 text = "\n".join(page.get_text() for page in doc)
+                if not text.strip():
+                    # Fallback to OCR for image-based PDFs
+                    text = ""
+                    for page_num in range(len(doc)):
+                        pix = doc[page_num].get_pixmap()
+                        img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
+                        text += pytesseract.image_to_string(img)
+                    if not text.strip():
+                        return jsonify({"error": "The PDF does not contain extractable text, even with OCR."})
         except Exception as e:
             return jsonify({"error": f"Failed to extract text from PDF: {str(e)}"})
-    elif text_input.strip():
-        text = text_input.strip()
-    else:
-        return jsonify({"error": "Please upload a file or provide a prompt."})
-
     # Use OpenAI to generate quiz
     try:
         system_prompt = (
