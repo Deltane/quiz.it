@@ -20,3 +20,4 @@ openai
 python-dotenv
 PyMuPDF
 requests
+pytesseract
