@@ -31,6 +31,8 @@ def generate_quiz():
     uploaded_file = request.files.get('upload-file')
     quiz_type = request.form.get('quiz-type')
 
+    print(f"Received quiz_type: {quiz_type}")  # Debugging log
+
     text = text_input
 
     # Handle PDF upload
