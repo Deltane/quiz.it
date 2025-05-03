@@ -90,6 +90,7 @@ def generate_quiz():
     print(f"Processing text with OpenAI (length: {len(text)})")
     
     # Use OpenAI to generate quiz
+        # Use OpenAI to generate quiz
     try:
         system_prompt = (
             f"You are a quiz maker AI. Generate a multiple-choice quiz based on the following content. "
@@ -100,6 +101,7 @@ def generate_quiz():
             "[{\"question\": \"...\", \"options\": [\"...\", \"...\", \"...\", \"...\"], \"answer\": \"...\"}, ...]"
         )
 
+        print("Sending request to OpenAI API...")
         response = client.chat.completions.create(
             model="gpt-3.5-turbo",
             messages=[
@@ -110,10 +112,13 @@ def generate_quiz():
             max_tokens=1000
         )
 
-
         try:
-            # Parse the response content
-            quiz_data = json.loads(response.choices[0].message.content)
+            # Clean up the response content
+            content = response.choices[0].message.content
+            cleaned_content = content.replace('```json', '').replace('```', '').strip()
+            
+            # Parse the cleaned content
+            quiz_data = json.loads(cleaned_content)  # Use cleaned_content instead of original
             
             if isinstance(quiz_data, list):
                 return jsonify({"quiz": quiz_data})
@@ -135,17 +140,10 @@ def submit_quiz():
         user_answers = {answer['name']: answer['value'] for answer in data['answers']}
         quiz = data['quiz']
 
-        # Clear any existing session or cached quiz data here if applicable
-        # (Since no session or cache is shown, this is a placeholder comment)
-
-        print("User Answers:", user_answers)
-        print("Quiz Data:", quiz)
-
         score = 0
         for index, question in enumerate(quiz):
             correct_answer = question['answer']
             user_answer = user_answers.get(f'q{index}')
-            print(f"Q{index} - Correct: {correct_answer}, User: {user_answer}")
             if user_answer == correct_answer:
                 score += 1
 
