@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="{{ url_for('static', filename='js/take_quiz.js') }}"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -65,7 +66,7 @@
             function stopTimer() {
                 clearInterval(timerInterval);
             }
-    
+
             // Load the current question
             function loadQuestion() {
                 if (currentQuestionIndex === 0) resetQuiz();
@@ -75,24 +76,35 @@
                         if (data.question) {
                             const questionContainer = $('#question-container');
                             questionContainer.empty(); // Clear previous question
-    
-                            // Display the question
+
+                            // Display the question number and text
                             questionContainer.append(`<p><strong>Q${currentQuestionIndex + 1}:</strong> ${data.question}</p>`);
-    
-                            // Display the options
-                            data.options.forEach((option, index) => {
-                                const optionId = `option${index}`;
+
+                            // Create answer input based on question type
+                            if (data.type === 'Multiple Choice' && data.options) {
+                                // Display multiple choice options
+                                data.options.forEach((option, index) => {
+                                    const optionId = `option${index}`;
+                                    questionContainer.append(`
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="radio" name="answer" id="${optionId}" value="${option}">
+                                            <label class="form-check-label" for="${optionId}">${option}</label>
+                                        </div>
+                                    `);
+                                });
+                            } else {
+                                // Display text input for Fill in the Blank or Short Answer
                                 questionContainer.append(`
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="radio" name="answer" id="${optionId}" value="${option}">
-                                        <label class="form-check-label" for="${optionId}">${option}</label>
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="answer" 
+                                            placeholder="Type your answer here" required>
                                     </div>
                                 `);
-                            });
-    
+                            }
+
                             // Show the "Next Question" button
                             $('#next-question').show();
-    
+
                             // Start the timer for the question
                             startTimer();
                         } else {
@@ -106,7 +118,65 @@
                         $('#question-container').html('<p>Error loading question: ' + err.message + '</p>');
                     });
             }
-    
+
+            // Update the next-question click handler to work with all question types
+            $('#next-question').on('click', function () {
+                let answer;
+                if ($('input[type="radio"]').length > 0) {
+                    // Multiple choice question
+                    answer = $('input[name="answer"]:checked').val();
+                    if (!answer) {
+                        alert('Please select an answer before proceeding.');
+                        return;
+                    }
+                } else {
+                    // Text input question (Fill in the Blank or Short Answer)
+                    answer = $('input[name="answer"]').val().trim();
+                    if (!answer) {
+                        alert('Please enter your answer before proceeding.');
+                        return;
+                    }
+                }
+                submitAnswer(answer);
+            });
+
+            function displayQuestion(questionData) {
+                const questionText = document.getElementById('question-text');
+                const answerContainer = document.getElementById('answer-container');
+                
+                questionText.textContent = questionData.question;
+                answerContainer.innerHTML = '';
+
+                if (questionData.type === 'Fill in the Blank') {
+                    answerContainer.innerHTML = `
+                        <input type="text" 
+                            class="form-control answer-input" 
+                            placeholder="Type your answer here">
+                    `;
+                } else if (questionData.type === 'Short Answer') {
+                    answerContainer.innerHTML = `
+                        <textarea class="form-control answer-input" 
+                                rows="3" 
+                                placeholder="Type your answer here"></textarea>
+                    `;
+                } else {
+                    // Multiple Choice
+                    questionData.options.forEach((option, index) => {
+                        answerContainer.innerHTML += `
+                            <div class="form-check">
+                                <input class="form-check-input" 
+                                    type="radio" 
+                                    name="answer" 
+                                    value="${option}">
+                                <label class="form-check-label">
+                                    ${option}
+                                </label>
+                            </div>
+                        `;
+                    });
+                }
+            }
+        
             // Submit the current question and load the next one
             function submitAnswer(selectedAnswer) {
                 stopTimer(); // Stop the timer when submitting the answer
@@ -135,15 +205,6 @@
                     alert('Error submitting answer: ' + err.message);
                 });
             }
-    
-            $('#next-question').on('click', function () {
-                const selectedAnswer = $('input[name="answer"]:checked').val();
-                if (!selectedAnswer) {
-                    alert('Please select an answer before proceeding.');
-                    return;
-                }
-                submitAnswer(selectedAnswer);
-            });
     
             // Load the first question on page load
             loadQuestion();
