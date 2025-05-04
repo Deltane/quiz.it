@@ -1,7 +1,7 @@
 from app.models import QuizResult
 from app import db
 from datetime import datetime
-from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
+from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for, flash
 
 quiz_routes = Blueprint('quiz_routes', __name__)
 

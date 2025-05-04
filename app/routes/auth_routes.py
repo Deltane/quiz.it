@@ -64,6 +64,7 @@ def authorize():
         session['user_email'] = user_info['email']
         session['user_name'] = user_info.get('name', user_info['email'])
         session['user_pic'] = user_info.get('picture', '')
+        session['user_id'] = user.id  # ✅ This is the missing line!
 
         # Check if user exists in the database
         user = User.query.filter_by(email=user_info['email']).first()
