@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz.it</title>
+    <title>quiz.it</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap"
@@ -18,9 +18,9 @@
 <div class="container">
     <!-- Title Section -->
     <div class="title-container">
-        <h1 class="title">[Quiz.it]</h1>
-        <h2 id="text">Quiz, with a twist of AI<h2 class="cursor">_</h2></h2>
-        <a href="/" class="bn5" id="learn-more-button" style="color:rgb(255, 255, 255)">Learn More</a>
+        <h1 class="title">[quiz.it]</h1>
+        <h2 id="text">Quiz, with a twist of AI</h2><h2 class="cursor">_</h2>
+        <a href="/" class="bn5" id="learn-more-button" style="color:#290900">Learn More</a>
         <p style="color:#ffff">Assess your knowledge across a range of topics, including:</p>
     </div>
 
@@ -107,7 +107,6 @@
     <div class="top-center-page">
         <!-- <h2>/q/<h2> -->
     </div>
-
     <div class="top-right-buttons">
         {% if session.get('user_email') %}
             <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
@@ -121,48 +120,32 @@
             </div>
         {% else %}
             <a href="{{ url_for('auth.login') }}" rel="nofollow" class="bn5">Sign In with Google</a>
-
         {% endif %}
     </div>
-
-    <div class="top-left-buttons">
-        <h2>Github</h2>
-        <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank" class="repo-link">
-        <img src="{{ url_for('static', filename='photos/github-white.svg') }}" alt="GitHub" class="github-icon">
-        <span>CITS3403 Project</span>
-    </a>
-        <div class="profile-images">
-            <div class="profile-image">
-                <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
-                    <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
-                        <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"></path>
-                    </svg>
-                </a>
-            </div>
-            <div class="profile-image">
-                <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
-                    <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
-                        <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"></path>
-                    </svg>
-                </a>
-            </div>
-            <div class="profile-image">
-                <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
-                    <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
-                        <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"></path>
-                    </svg>
-                </a>
-            </div>
-            <div class="profile-image">
-                <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank">
-                    <svg width="16" height="16" fill="white" viewBox="0 0 24 24" style="display: block; margin: auto;">
-                        <path d="M12,2C6.48,2,2,6.48,2,12c0,5.52,4.48,10,10,10s10-4.48,10-10C22,6.48,17.52,2,12,2z M12,6c1.93,0,3.5,1.57,3.5,3.5 S13.93,13,12,13s-3.5-1.57-3.5-3.5S10.07,6,12,6z M12,20c-2.03,0-3.8-0.76-5.23-2C8,16.85,9.94,16,12,16 c2.07,0,4,0.85,5.23,2C15.8,19.24,14.03,20,12,20z"></path>
-                    </svg>
-                </a>
-            </div>
-        </div>
-    </div>
 </div>
+
+<div class="top-left-buttons">
+  <div class="repo-section">
+    <a href="https://github.com/Deltane/CITS3403-Group-Project" target="_blank" class="repo-link" title="Our Project on GitHub">
+      <img src="https://github.githubassets.com/images/modules/logos_page/GitHub-Mark.png" alt="GitHub" class="github-icon">
+    </a>
+    <div class="profile-images">
+      <a href="https://github.com/Deltane" target="_blank" class="profile-image" title="Serena">
+        <img src="https://github.com/Deltane.png" alt="Serena's GitHub Avatar">
+      </a>
+      <a href="https://github.com/rayhannm" target="_blank" class="profile-image" title="Rayhan">
+        <img src="https://github.com/rayhannm.png" alt="Rayhan's GitHub Avatar">
+      </a>
+      <a href="https://github.com/gabrielajt10" target="_blank" class="profile-image" title="Gaby">
+        <img src="https://github.com/gabrielajt10.png" alt="Gaby's GitHub Avatar">
+      </a>
+      <a href="https://github.com/mandasgn" target="_blank" class="profile-image" title="Amanda">
+        <img src="https://github.com/mandasgn.png" alt="Amanda's GitHub Avatar">
+      </a>
+    </div>
+  </div>
+</div>
+
 
 <script src="{{ url_for('static', filename='js/main.js') }}"></script>
 </body>
