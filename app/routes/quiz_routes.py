@@ -18,14 +18,16 @@ def store_quiz():
     session['answers'] = {}
 
     # Save to DB
-    from app.models import Quiz, db, User
+    from app.models import Quiz, db, User, Folder
     import json
     user_email = session.get("user_email")
     user = User.query.filter_by(email=user_email).first()
     if user:
         topic = request.json.get('quiz_title') or request.json.get('title') or 'Untitled'
         questions = request.json['quiz']
-        quiz = Quiz(title=topic, questions_json=json.dumps(questions), author=user)
+        folder_id = session.pop("folder_id", None)
+        folder = Folder.query.get(folder_id) if folder_id else None
+        quiz = Quiz(title=topic, questions_json=json.dumps(questions), author=user, folder=folder)
         db.session.add(quiz)
         db.session.commit()
         
@@ -50,6 +52,22 @@ def delete_quiz(quiz_id):
     db.session.delete(quiz)
     db.session.commit()
     return redirect(url_for('dashboard.dashboard_view'))
+
+@quiz_routes.route('/create_quiz_for_folder/<int:folder_id>', methods=['GET'])
+def create_quiz_for_folder(folder_id):
+    from app.models import Folder, User
+    user_email = session.get("user_email")
+    user = User.query.filter_by(email=user_email).first()
+    if not user:
+        return redirect(url_for('quiz_routes.home'))
+
+    folder = Folder.query.get(folder_id)
+    if not folder or folder.user_id != user.id:
+        return "Unauthorized access or folder not found", 403
+
+    # Store folder ID in session and redirect to create_quiz page
+    session['folder_id'] = folder.id
+    return redirect(url_for('ai_routes.generate_quiz'))  # Ensure this route exists
 
 @quiz_routes.route('/get_question/<int:question_index>', methods=['GET'])
 def get_question(question_index):

@@ -70,22 +70,47 @@
                 {% endfor %}
             </div>
             <div class="folders">
-                <p>Folder 1</p>
-                <p>Folder 2</p>
-                
-                <p>Folder 3</p>
+                <h3>Your Folders</h3>
+                {% for folder in folders %}
+                  <div class="folder">
+                    <strong>{{ folder.name }}</strong>
+                    <a href="{{ url_for('quiz_routes.create_quiz_for_folder', folder_id=folder.id) }}" class="quiz-button" style="margin-left: 10px;">Create Quiz</a>
+                    <form action="{{ url_for('dashboard.delete_folder', folder_id=folder.id) }}" method="post" style="display:inline; margin-left: 5px;">
+                      <button type="submit" class="quiz-button" onclick="return confirm('Are you sure you want to delete this folder and all its quizzes?')">Delete Folder</button>
+                    </form>
+                    {% if folder.quizzes %}
+                      {% for quiz in folder.quizzes %}
+                        <div class="quiz-entry">
+                          <span class="quiz-title clickable">{{ quiz.title }}</span>
+                          <form action="{{ url_for('quiz_routes.redo_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
+                              <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                              <button type="submit" class="quiz-button">Redo</button>
+                          </form>
+                          <form action="{{ url_for('quiz_routes.delete_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline; margin-left: 5px;">
+                              <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                              <button type="submit" class="quiz-button" onclick="return confirm('Are you sure you want to delete this quiz?')">Delete</button>
+                          </form>
+                        </div>
+                      {% endfor %}
+                    {% else %}
+                      <p>No quizzes yet.</p>
+                    {% endif %}
+                  </div>
+                {% endfor %}
             </div>
         </section>
         <aside class="create-folder">
             <h3>Create a new folder</h3>
-            <label for="folder-name">Folder name:</label>
-            <input type="text" id="folder-name">
-            <div class="quiz-checkboxes">
-                {% for quiz in all_quizzes %}
-                <label><input type="checkbox" name="quiz" value="{{ quiz.id }}"> {{ quiz.title }}</label>
-                {% endfor %}
-            </div>
-            <button class="create-folder-button">New quiz</button>
+            <form action="{{ url_for('dashboard.create_folder') }}" method="post">
+                <label for="folder-name">Folder name:</label>
+                <input type="text" id="folder-name" name="folder_name" required>
+                <div class="quiz-checkboxes">
+                    {% for quiz in all_quizzes %}
+                    <label><input type="checkbox" name="quiz_ids[]" value="{{ quiz.id }}"> {{ quiz.title }}</label>
+                    {% endfor %}
+                </div>
+                <button type="submit" class="quiz-button">Create Folder</button>
+            </form>
         </aside>
     </main>
 </body>
