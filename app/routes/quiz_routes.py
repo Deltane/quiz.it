@@ -43,6 +43,14 @@ def redo_quiz(quiz_id):
     session['answers'] = {}
     return redirect(url_for('quiz_routes.take_quiz'))
 
+@quiz_routes.route('/delete_quiz/<int:quiz_id>', methods=['POST'])
+def delete_quiz(quiz_id):
+    from app.models import Quiz, db
+    quiz = Quiz.query.get_or_404(quiz_id)
+    db.session.delete(quiz)
+    db.session.commit()
+    return redirect(url_for('dashboard.dashboard_view'))
+
 @quiz_routes.route('/get_question/<int:question_index>', methods=['GET'])
 def get_question(question_index):
     quiz = session.get('quiz', [])

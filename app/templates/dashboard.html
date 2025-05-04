@@ -44,7 +44,11 @@
                     <span class="quiz-title clickable">{{ quiz.title }}</span>
                     <form action="{{ url_for('quiz_routes.redo_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
                         <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                        <button type="submit" class="redo-button">Redo</button>
+                        <button type="submit" class="quiz-button">Redo</button>
+                    </form>
+                    <form action="{{ url_for('quiz_routes.delete_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline; margin-left: 5px;">
+                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                        <button type="submit" class="quiz-button" onclick="return confirm('Are you sure you want to delete this quiz?')">Delete</button>
                     </form>
                 </div>
                 {% endfor %}
@@ -56,7 +60,11 @@
                     <span class="quiz-title clickable">{{ quiz.title }}</span>
                     <form action="{{ url_for('quiz_routes.redo_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
                         <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                        <button type="submit" class="redo-button">Redo</button>
+                        <button type="submit" class="quiz-button">Redo</button>
+                    </form>
+                    <form action="{{ url_for('quiz_routes.delete_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline; margin-left: 5px;">
+                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                        <button type="submit" class="quiz-button" onclick="return confirm('Are you sure you want to delete this quiz?')">Delete</button>
                     </form>
                 </div>
                 {% endfor %}
@@ -64,6 +72,7 @@
             <div class="folders">
                 <p>Folder 1</p>
                 <p>Folder 2</p>
+                
                 <p>Folder 3</p>
             </div>
         </section>
