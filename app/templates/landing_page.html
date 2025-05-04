@@ -40,8 +40,7 @@
                         <div class="shortcut-icon">
                             <img src="{{ url_for('static', filename='photos/movie.png') }}" alt="Movie Icon">
                         </div>
-                        <div class="shortcut-name">Movies</div>
-                    </div>
+                        <div class="shortcut-name">Movies</                    </div>
                     <div class="shortcut">
                         <div class="shortcut-icon">
                             <img src="{{ url_for('static', filename='photos/flag.png') }}" alt="Flag Icon">
@@ -110,6 +109,7 @@
     <div class="top-right-buttons">
         {% if session.get('user_email') %}
             <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
+            <a href="/dashboard" class="bn5" style="margin-right: 10px;">Detailed Statistics</a>
             <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #000000; font-weight: bold;">
                 {{ session.get('user_name', session['user_email']) }}
