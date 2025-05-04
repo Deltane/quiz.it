@@ -101,3 +101,33 @@ def create_quiz_in_folder(folder_id):
     # Store folder_id in session to use when saving the quiz later
     session['selected_folder_id'] = folder_id
     return redirect(url_for('quiz_routes.create_quiz'))
+
+@dashboard_bp.route('/assign_quiz_to_folder/<int:folder_id>', methods=['POST'])
+def assign_quiz_to_folder(folder_id):
+    if 'user_email' not in session:
+        return redirect(url_for('auth.login'))
+
+    user = User.query.filter_by(email=session['user_email']).first()
+    if not user:
+        return redirect(url_for('auth.login'))
+
+    folder = Folder.query.get_or_404(folder_id)
+    if folder.user_id != user.id:
+        flash("You are not authorized to modify this folder.", "error")
+        return redirect(url_for('dashboard.dashboard_view'))
+
+    quiz_id = request.form.get('quiz_id')
+    if not quiz_id:
+        flash("No quiz selected.", "error")
+        return redirect(url_for('dashboard.dashboard_view'))
+
+    quiz = Quiz.query.get(int(quiz_id))
+    if quiz and quiz.user_id == user.id:
+        quiz.folder_id = folder.id
+        db.session.add(quiz)
+        db.session.commit()
+        flash(f"Quiz '{quiz.title}' added to folder '{folder.name}'.", "success")
+    else:
+        flash("Invalid quiz selected.", "error")
+
+    return redirect(url_for('dashboard.dashboard_view'))
