@@ -3,6 +3,9 @@ from app import oauth  # Import the oauth object
 import os
 import logging
 import uuid
+from flask_login import login_user, logout_user, current_user
+from app.models import User
+from app import db
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -55,6 +58,17 @@ def authorize():
         session['user_name'] = user_info.get('name', user_info['email'])
         session['user_pic'] = user_info.get('picture', '')
 
+        # Check if user exists in the database
+        user = User.query.filter_by(email=user_info['email']).first()
+        if not user:
+            # Create a new user if not exists
+            user = User(username=user_info.get('name', user_info['email']), email=user_info['email'])
+            db.session.add(user)
+            db.session.commit()
+
+        # Log the user in
+        login_user(user)
+
         current_app.logger.info(f"User {session['user_email']} logged in successfully.")
         return redirect(url_for('quiz_routes.home'))
     except Exception as e:
@@ -63,6 +77,7 @@ def authorize():
 
 @auth_bp.route('/logout')
 def logout():
+    logout_user()
     session.clear()
     current_app.logger.info("User logged out and session cleared.")
     return redirect(url_for('quiz_routes.home'))
