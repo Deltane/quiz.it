@@ -1,3 +1,4 @@
+from app import models
 from dotenv import load_dotenv
 import os
 # import shutil
@@ -35,6 +36,11 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     oauth.init_app(app)
+
+    # Create all tables after initializing db and migrate
+    with app.app_context():
+        db.create_all()
+        app.logger.info("Database tables created.")
 
     # Log app initialization
     app.logger.info("Flask app initialized with configuration:")

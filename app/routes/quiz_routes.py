@@ -17,6 +17,19 @@ def store_quiz():
     session['score'] = 0
     session['current_question'] = 0
     session['answers'] = {}
+
+    # Save to DB
+    from app.models import Quiz, db, User
+    import json
+    user_email = session.get("user_email")
+    user = User.query.filter_by(email=user_email).first()
+    if user:
+        topic = request.json.get('topic', 'Untitled')
+        questions = request.json['quiz']
+        quiz = Quiz(title=topic, questions_json=json.dumps(questions), author=user)
+        db.session.add(quiz)
+        db.session.commit()
+        
     return '', 204
 
 @quiz_routes.route('/get_question/<int:question_index>', methods=['GET'])
