@@ -1,7 +1,7 @@
 from app.models import QuizResult
 from app import db
 from datetime import datetime
-from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for, flash
+from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
 
 quiz_routes = Blueprint('quiz_routes', __name__)
 
@@ -15,6 +15,9 @@ def take_quiz():
 
 @quiz_routes.route('/store_quiz', methods=['POST'])
 def store_quiz():
+    # Check if the user session is valid
+    if not session.get('user_id'):
+        return jsonify({'error': 'Session expired. Please log in again.'}), 401
 
     session['quiz'] = request.json['quiz']
     session['quiz_duration'] = request.json.get('quiz_duration', 5)
@@ -32,9 +35,12 @@ def store_quiz():
         questions = request.json['quiz']
         folder_id = session.pop("folder_id", None)
         folder = Folder.query.get(folder_id) if folder_id else None
-        quiz = Quiz(title=topic, questions_json=json.dumps(questions), author=user, folder=folder)
+        quiz = Quiz(title=topic, questions_json=json.dumps(questions), user_id=user.id, folder=folder)
         db.session.add(quiz)
         db.session.commit()
+        # ✅ Add these lines
+        session['quiz_id'] = quiz.id
+        session['quiz_type'] = topic  # Or whatever type you use
 
     return '', 204
 
@@ -97,6 +103,9 @@ def submit_answer():
     data = request.json
     question_index = data['questionIndex']
     user_answer = data['answer']
+    print("submit_answer session user_id:", session.get("user_id"))
+    print("submit_answer session quiz_id:", session.get("quiz_id"))
+    print("submit_answer session quiz_type:", session.get("quiz_type"))
 
     # Store the user's answer
     if 'answers' not in session:
@@ -122,6 +131,8 @@ def submit_answer():
         quiz_type = session.get('quiz_type')
         total_questions = len(quiz)
         timestamp = datetime.utcnow()
+
+        print("Session contents before saving QuizResult:", dict(session))
 
         quiz_result = QuizResult(
             user_id=user_id,

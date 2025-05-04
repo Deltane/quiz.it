@@ -24,3 +24,14 @@ document.getElementById("learn-more-button").addEventListener("click", function(
   event.preventDefault(); // Prevent the default link behavior
   document.getElementById("learn-more-section").scrollIntoView({ behavior: "smooth" }); // Smooth scroll to the learn more section
 });
+
+document.addEventListener('DOMContentLoaded', function () {
+    fetch('/check_login')
+      .then(response => response.json())
+      .then(data => {
+        if (!data.logged_in) {
+          alert("Your session has expired. Please sign in again.");
+          window.location.href = "/auth/login";
+        }
+      });
+  });

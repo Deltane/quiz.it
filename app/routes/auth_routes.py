@@ -1,4 +1,4 @@
-from flask import Blueprint, redirect, url_for, session, current_app, request
+from flask import Blueprint, redirect, url_for, session, current_app, request, jsonify
 from app import oauth  # Import the oauth object
 import os
 import logging
@@ -79,6 +79,7 @@ def authorize():
 
         # Log the user in
         login_user(user)
+        session['user_id'] = user.id  # ✅ Must come after login_user()
 
         current_app.logger.info(f"User {session['user_email']} logged in successfully.")
         return redirect(url_for('dashboard.dashboard_view'))
@@ -92,3 +93,8 @@ def logout():
     session.clear()
     current_app.logger.info("User logged out and session cleared.")
     return redirect(url_for('quiz_routes.home'))
+
+@auth_bp.route('/check_login')
+def check_login():
+    from flask_login import current_user
+    return jsonify({'logged_in': current_user.is_authenticated})
