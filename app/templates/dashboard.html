@@ -13,14 +13,14 @@
 
 <body>
     <header>
-        <nav>
+        <nav class="fixed-nav">
             <div class="nav-left">
-                <a href="#">Quiz Dashboard</a>
+                <span class="dashboard-title">Quiz Dashboard</span>
             </div>
             <div class="nav-right">
             {% if session.get('user_email') %}
-                <a href="/" class="bn5" style="margin-right: 10px;">Home</a>
-                <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
+                <a href="/" class="bn5 no-underline" style="margin-right: 10px;">Home</a>
+                <a href="/create_quiz" class="bn5 no-underline" style="margin-right: 10px;">Create Quiz</a>
                 <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
                 <span style="color: #000000; font-weight: bold;">
                     {{ session.get('user_name', session['user_email']) }}

@@ -1,9 +1,9 @@
+@import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
+
 @font-face {
     font-family: 'MyFont';
     src: url('../font/Hornbill-Personal Use Regular.otf') format('truetype');
   }
-  
-  @import url('https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&display=swap');
 
 body {
     font-family: 'Syne', serif;
@@ -256,4 +256,54 @@ main {
     display: flex;
     flex-direction: column;
     gap: 15px;
+}
+
+/* === NAVIGATION BAR FIXES === */
+
+.fixed-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  background-color: #9a503b;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 2rem;
+  font-family: 'Syne', serif;
+}
+
+.fixed-nav a {
+  text-decoration: none !important;  /* ✨ Removes underlines */
+}
+
+/* Make sure page content doesn't go under the navbar */
+main {
+  display: flex;
+  padding: 120px 20px 20px; /* top padding added */
+  gap: 30px;
+  box-sizing: border-box;
+}
+
+/* === DASHBOARD TITLE STYLE (smaller) === */
+
+.dashboard-title {
+  font-size: 2rem; /* Reduced from 3rem */
+  font-weight: 700;
+  color: white;
+  text-decoration: none;
+  font-family: 'Syne', serif;
+}
+
+/* Optional: soft hover on nav buttons */
+.nav-right a:hover {
+  text-decoration: none;
+  opacity: 0.9;
+}
+
+/* Remove duplicate margin (your header nav already has margin/padding) */
+body {
+  margin: 0;
+  padding: 0;
 }

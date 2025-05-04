@@ -1,3 +1,5 @@
+import json
+
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
 from app.models import User, Quiz, Folder, db
 
