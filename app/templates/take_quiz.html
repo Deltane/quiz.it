@@ -12,19 +12,32 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@400..800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/create_quiz.css') }}">
     <link rel="stylesheet" href="../static/css/take_quiz.css">
+    <style>
+        .timer-text {
+            text-align: center;
+            margin-top: 8px;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
         <h2 id="quiz-title">Quiz</h2>
-        <div id="timer-container"> 
+        <div id="timer-container">
             <div id="timer-progress"></div>
         </div>
+        <div id="countdown-timer" class="timer-text">Loading...</div>
         <div id="question-container" style="margin-top: 20px;"></div>
-        <button id="next-question" class="btn btn-primary" style="display: none;">Next Question</button>
+        <div style="display: flex; justify-content: space-between; margin-top: 20px;">
+            <button id="prev-question" class="btn btn-secondary" style="display: none; flex: 1; margin-right: 10px;">Previous Question</button>
+            <button id="next-question" class="btn btn-primary" style="display: none; flex: 1;">Next Question</button>
+        </div>
     </div>
 
     <script>
         const homeUrl = "{{ url_for('quiz_routes.home') }}";
+        let totalTimeMinutes = Number({{ session.get('quiz_duration', 5) }});
+        let totalTime = totalTimeMinutes * 60;
+        let timeLeft = totalTime;
     </script>
         
     <script>
@@ -32,39 +45,57 @@
             let currentQuestionIndex = 0;
             let score = 0;
             let timerInterval;
-            const questionTimeLimit = 30; // 30 seconds per question (too short?)
+            let timerStarted = false;
+            let answers = [];
+            // const questionTimeLimit = 30; // 30 seconds per question (too short?)
     
             function resetQuiz() {
                 currentQuestionIndex = 0;
                 score = 0;
                 $('#next-question').hide();
+                $('#prev-question').hide();
                 $('#timer-container').show();
                 $('#question-container').empty();
             }
     
             // Start the timer
             function startTimer() {
+                if (timerStarted) return;
+                timerStarted = true;
+
                 const timerProgress = $('#timer-progress');
-                let timeLeft = questionTimeLimit * 1000;
-                const interval = 100; 
-                const decrement = 100 / (timeLeft / interval);
-    
-                // Reset the progress bar to full width
-                timerProgress.css('width', '100%');
-    
-                // Calculate the decrement per second
-    
+                const countdownText = $('#countdown-timer');
+
                 timerInterval = setInterval(() => {
-                    timeLeft-= interval;
-                    const percentage = (timeLeft / (questionTimeLimit * 1000)) * 100;
-                    timerProgress.css('width', `${percentage}%`); // Update the width of the progress bar
+                    timeLeft--;
+                    const percentage = (timeLeft / totalTime) * 100;
+                    timerProgress.css('width', `${percentage}%`);
+    
+                    // Color change
+                    if (timeLeft <= 10) {
+                        timerProgress.css('background-color', '#ff0000');
+                    } else if (timeLeft <= 30) {
+                        timerProgress.css('background-color', '#ff6600');
+                    } else if (timeLeft <= 60) {
+                        timerProgress.css('background-color', '#ffcc00');
+                    } else {
+                        timerProgress.css('background-color', '#4caf50');
+                    }
+    
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = timeLeft % 60;
+                    countdownText.text(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+    
+                    if (timeLeft === 60) alert("1 minute remaining!");
+                    if (timeLeft === 30) alert("30 seconds remaining!");
+                    if (timeLeft === 10) alert("10 seconds remaining!");
     
                     if (timeLeft <= 0) {
                         clearInterval(timerInterval);
-                        alert('Time is up for this question! Moving to the next question.');
-                        submitAnswer(null); // Submit no answer if time runs out
+                        alert("Time's up! Submitting your answer.");
+                        submitAnswer(null);
                     }
-                }, interval);
+                }, 1000);
             }
     
             // Stop the timer
@@ -73,8 +104,8 @@
             }
 
             // Load the current question
-            function loadQuestion() {
-                if (currentQuestionIndex === 0) resetQuiz();
+            function loadQuestion(isBackwards = false) {
+                if (currentQuestionIndex === 0 && !isBackwards) resetQuiz();
                 fetch(`/get_question/${currentQuestionIndex}`)
                     .then(response => response.json())
                     .then(data => {
@@ -116,12 +147,28 @@
                             // Show the "Next Question" button
                             $('#next-question').show();
 
-                            // Start the timer for the question
+                            if (currentQuestionIndex > 0) {
+                                $('#prev-question').show();
+                            } else {
+                                $('#prev-question').hide();
+                            }
+
+                            if (answers[currentQuestionIndex]) {
+                                const prevAnswer = answers[currentQuestionIndex];
+                                if ($('input[type="radio"]').length > 0) {
+                                    $(`input[name="answer"][value="${prevAnswer}"]`).prop('checked', true);
+                                } else {
+                                    $('input[name="answer"], textarea[name="answer"]').val(prevAnswer);
+                                }
+                            }
+
+                            // Start the timer once
                             startTimer();
                         } else {
                             // Quiz completed
                             $('#question-container').html(`<p>Quiz completed! Your score is: ${score}</p>`);
                             $('#next-question').hide();
+                            $('#prev-question').hide();
                             $('#timer-container').hide();
                         }
                     })
@@ -149,6 +196,13 @@
                     }
                 }
                 submitAnswer(answer);
+            });
+
+            $('#prev-question').on('click', function () {
+                if (currentQuestionIndex > 0) {
+                    currentQuestionIndex--;
+                    loadQuestion(true);
+                }
             });
 
             function displayQuestion(questionData) {
@@ -190,7 +244,8 @@
         
             // Submit the current question and load the next one
             function submitAnswer(selectedAnswer) {
-                stopTimer(); // Stop the timer when submitting the answer
+                answers[currentQuestionIndex] = selectedAnswer;
+                // stopTimer(); // Commented out to keep timer running globally
     
                 fetch('/submit_answer', {
                     method: 'POST',
@@ -202,7 +257,10 @@
                 .then(response => response.json())
                 .then(data => {
                     if (data.completed) {
+                        clearInterval(timerInterval); // Stop the timer
+                        sessionStorage.clear(); // End the session if used for any temporary storage
                         // Quiz completed, show the final score
+                        $('#countdown-timer').hide();
                         $('#question-container').html(`
                             <div class="result">
                                 <p>Quiz completed! Your score is: ${data.score}</p>
@@ -214,10 +272,12 @@
                             </div>
                         `);
                         $('#next-question').hide();
+                        $('#prev-question').hide();
                         $('#timer-container').hide();
                     } else {
                         // Increment the question index and load the next question
                         currentQuestionIndex++;
+                        $('#prev-question').toggle(currentQuestionIndex > 0);
                         loadQuestion();
                     }
                 })

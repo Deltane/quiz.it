@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
 from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF
 import json
@@ -28,6 +28,8 @@ def create_quiz():
 def generate_quiz():
     text_input = request.form.get('ai-prompt', '')
     question_count = int(request.form.get('question-count', 5))
+    timer_minutes = int(request.form.get('timer', 5))
+    session['quiz_duration'] = timer_minutes
     uploaded_file = request.files.get('upload-file')
     quiz_type = request.form.get('quiz-type')
 

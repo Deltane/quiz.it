@@ -207,3 +207,23 @@ body {
     box-shadow: 0 6px 10px rgba(0, 0, 0, 0.15);
   }
   
+/* Countdown timer text below the bar */
+#timer-countdown {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #fff;
+    margin-top: 0.5rem;
+}
+
+/* Dynamic red gradient bar based on time remaining */
+#timer-progress.warning-1min {
+    background-color: #cc3333;
+}
+
+#timer-progress.warning-30s {
+    background-color: #cc0000;
+}
+
+#timer-progress.warning-10s {
+    background-color: #990000;
+}
