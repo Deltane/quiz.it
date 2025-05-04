@@ -1,4 +1,4 @@
-from flask import Blueprint, jsonify, session, request
+from flask import Blueprint, jsonify, session, request, render_template
 from app.models import QuizResult
 from app import db
 from flask_login import login_required, current_user

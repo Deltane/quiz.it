@@ -52,7 +52,8 @@ cd CITS3403-Group-Project
 python3 -m venv venv  
 source venv/bin/activate  
 pip install --upgrade pip  
-pip install -r requirements.txt  
+pip install -r requirements.txt
+pip freeze > requirements.txt
 ```
 
 #### Windows
@@ -61,7 +62,8 @@ pip install -r requirements.txt
 python3 -m venv venv  
 venv\Scripts\activate  
 pip install --upgrade pip  
-pip install -r requirements.txt  
+pip install -r requirements.txt
+pip freeze > requirements.txt
 ```
 
 ### 3. Set Up Environment Variables
