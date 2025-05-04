@@ -24,3 +24,24 @@ document.getElementById("learn-more-button").addEventListener("click", function(
   event.preventDefault(); // Prevent the default link behavior
   document.getElementById("learn-more-section").scrollIntoView({ behavior: "smooth" }); // Smooth scroll to the learn more section
 });
+
+
+document.addEventListener("DOMContentLoaded", () => {
+    const userImage = document.querySelector(".user-info img");
+    const userName = document.querySelector(".user-info span");
+
+    if (userImage && userName) {
+        const img = new Image();
+        img.crossOrigin = "Anonymous"; // Ensure cross-origin requests are allowed
+        img.src = userImage.src;
+
+        img.onload = () => {
+            const colorThief = new ColorThief();
+            const dominantColor = colorThief.getColor(img);
+            const rgbColor = `rgb(${dominantColor[0]}, ${dominantColor[1]}, ${dominantColor[2]})`;
+
+            // Apply the dominant color to the user's name
+            userName.style.color = rgbColor;
+        };
+    }
+});
