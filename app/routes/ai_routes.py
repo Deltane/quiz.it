@@ -115,7 +115,7 @@ def generate_quiz():
                 "[{\"question\": \"What protocol is used for secure web browsing?\", "
                 "\"answer\": \"HTTPS\"}, ...]"
             )
-        else:
+        elif quiz_type == "Multiple Choice":
             system_prompt = (
                 f"You are a quiz maker AI. Generate a multiple-choice quiz based on the following content. "
                 f"Return exactly {question_count} questions in JSON format. "
