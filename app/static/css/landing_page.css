@@ -464,15 +464,11 @@ span {
 /* Learn More Container */
 .learn-more-container {
   background: linear-gradient(135deg, #fffdfc, #f8f4f1);
-  padding-top: 2rem;
-  padding-bottom: 5rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 2rem 2rem rgba(0, 0, 0, 0.2);
-  max-width: 5000px;
-  margin-top: 5rem;
-  margin-bottom: 7rem;
+  max-width: 60rem; /* Reduced from 5000px */
+  margin: 5rem auto 7rem; /* Centered the container */
 }
 
 .learn-more-container h2 {
