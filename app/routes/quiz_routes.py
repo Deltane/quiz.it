@@ -15,6 +15,7 @@ def take_quiz():
 
 @quiz_routes.route('/store_quiz', methods=['POST'])
 def store_quiz():
+
     session['quiz'] = request.json['quiz']
     session['quiz_duration'] = request.json.get('quiz_duration', 5)
     session['score'] = 0

@@ -87,7 +87,7 @@
 <div id="learn-more-section" class="learn-more-container">
     <h2>Why quiz.it?</h2>
     <p>
-        quiz.it is your smarter study companion. Powered by AI, our platform helps you create, customise, and share interactive quizzes
+        Quiz.it is your smarter study companion. Powered by AI, our platform helps you create, customise, and share interactive quizzes
         from any topic or document — all in seconds. Whether you're brushing up on science, music, or language,
         our intelligent quiz engine adapts to your learning style.
     </p>
@@ -117,7 +117,6 @@
         {% endif %}
         {% if session.get('user_email') %}
             <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
-            <a href="/dashboard" class="bn5" style="margin-right: 10px;">Dashboard</a>
             <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #000000; font-weight: bold;">
                 {{ session.get('user_name', session['user_email']) }}
