@@ -3,6 +3,9 @@ from app import oauth  # Import the oauth object
 import os
 import logging
 import uuid
+from flask_login import login_user, logout_user, current_user
+from app.models import User
+from app import db
 
 auth_bp = Blueprint('auth', __name__)
 
@@ -41,6 +44,7 @@ def login():
 @auth_bp.route('/authorize')
 def authorize():
     try:
+        current_app.logger.info("Starting authorization process.")  # Log statement for debugging
         token = oauth.google.authorize_access_token()
         nonce = session.pop('oauth_nonce', None)  # Retrieve and remove the nonce from the session
         state = session.pop('oauth_state', None)  # Retrieve and remove the state from the session
@@ -55,6 +59,20 @@ def authorize():
         session['user_name'] = user_info.get('name', user_info['email'])
         session['user_pic'] = user_info.get('picture', '')
 
+        # Check if user exists in the database
+        user = User.query.filter_by(email=user_info['email']).first()
+        if not user:
+            # Create a new user if not exists
+            current_app.logger.info(f"Creating new user with email: {user_info['email']}")  # Log statement for debugging
+            if user_info.get('password_hash') is None:
+                user_info['password_hash'] = 'default_hash'  # Set a default password hash
+            user = User(username=user_info.get('name', user_info['email']), email=user_info['email'], password_hash=user_info['password_hash'])
+            db.session.add(user)
+            db.session.commit()
+
+        # Log the user in
+        login_user(user)
+
         current_app.logger.info(f"User {session['user_email']} logged in successfully.")
         return redirect(url_for('quiz_routes.home'))
     except Exception as e:
@@ -63,6 +81,7 @@ def authorize():
 
 @auth_bp.route('/logout')
 def logout():
+    logout_user()
     session.clear()
     current_app.logger.info("User logged out and session cleared.")
     return redirect(url_for('quiz_routes.home'))

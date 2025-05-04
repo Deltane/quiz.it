@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>User Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>{{ user.username }}'s Profile</h1>
+        <div class="stats-section">
+            <h2>Total Quizzes Completed</h2>
+            <p id="quizzes-completed">{{ stats.quizzes_completed }}</p>
+        </div>
+        <div class="stats-section">
+            <h2>Quizzes with Scores Above 80%</h2>
+            <p id="quizzes-above-80">{{ stats.quizzes_above_80 }}</p>
+        </div>
+        <div class="stats-section">
+            <h2>Recent Topics</h2>
+            <ul id="recent-topics">
+                {% for topic in stats.recent_topics %}
+                    <li>{{ topic }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="stats-section">
+            <h2>Most Frequent Quiz Type</h2>
+            <p id="most-frequent-quiz-type">{{ stats.most_frequent_quiz_type }}</p>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const stats = {{ stats|tojson }};
+            document.getElementById('quizzes-completed').textContent = stats.quizzes_completed;
+            document.getElementById('quizzes-above-80').textContent = stats.quizzes_above_80;
+            const recentTopicsList = document.getElementById('recent-topics');
+            recentTopicsList.innerHTML = '';
+            stats.recent_topics.forEach(topic => {
+                const li = document.createElement('li');
+                li.textContent = topic;
+                recentTopicsList.appendChild(li);
+            });
+            document.getElementById('most-frequent-quiz-type').textContent = stats.most_frequent_quiz_type;
+        });
+    </script>
+</body>
+</html>
