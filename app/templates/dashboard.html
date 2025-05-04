@@ -2,9 +2,96 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Dashboard</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@400..800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
 </head>
-<body>
 
+<body>
+    <header>
+        <nav>
+            <div class="nav-left">
+                <a href="#">Quiz Dashboard</a>
+            </div>
+            <div class="nav-right">
+            {% if session.get('user_email') %}
+                <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
+                <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
+                <span style="color: #000000; font-weight: bold;">
+                    {{ session.get('user_name', session['user_email']) }}
+                </span>
+                <img src="{{ session['user_pic'] }}" alt="Profile"
+                     style="height: 30px; width: 30px; border-radius: 50%; object-fit: cover;">
+                <a href="{{ url_for('auth.logout') }}" class="bn5">Sign Out</a>
+            </div>
+        {% else %}
+            <a href="{{ url_for('auth.login') }}" rel="nofollow" class="bn5">Sign In with Google</a>
+        {% endif %}
+            </div>
+        </nav>
+    </header>
+    
+    <main>
+        <section class="quiz-lists">
+            <div class="recent-quizzes">
+                <h3>Recent Quiz</h3>
+                <div class="quiz-entry">
+                    <span class="quiz-title clickable">Title 1</span>
+                    <button class="redo-button">Redo</button>
+                </div>
+                <div class="quiz-entry">
+                    <span class="quiz-title clickable">Title 2</span>
+                    <button class="redo-button">Redo</button>
+                </div>
+                <div class="quiz-entry">
+                    <span class="quiz-title clickable">Title 3</span>
+                    <button class="redo-button">Redo</button>
+                </div>
+            </div>
+            <div class="past-quizzes">
+                <h3>Past Quizzes</h3>
+                <div class="quiz-entry">
+                    <span class="quiz-title clickable">Title 1</span>
+                    <button class="redo-button">Redo</button>
+                </div>
+                <div class="quiz-entry">
+                    <span class="quiz-title clickable">Title 2</span>
+                    <button class="redo-button">Redo</button>
+                </div>
+                <div class="quiz-entry">
+                    <span class="quiz-title clickable">Title 3</span>
+                    <button class="redo-button">Redo</button>
+                </div>
+                <div class="quiz-entry">
+                    <span class="quiz-title clickable">Title 4</span>
+                    <button class="redo-button">Redo</button>
+                </div>
+                <div class="quiz-entry">
+                    <span class="quiz-title clickable">Title 5</span>
+                    <button class="redo-button">Redo</button>
+                </div>
+            </div>
+            <div class="folders">
+                <p>Folder 1</p>
+                <p>Folder 2</p>
+                <p>Folder 3</p>
+            </div>
+        </section>
+        <aside class="create-folder">
+            <h3>Create a new folder</h3>
+            <label for="folder-name">Folder name:</label>
+            <input type="text" id="folder-name">
+            <div class="quiz-checkboxes">
+                <label><input type="checkbox" name="quiz" value="q1"> q1</label>
+                <label><input type="checkbox" name="quiz" value="q2"> q2</label>
+                <label><input type="checkbox" name="quiz" value="q3"> q3</label>
+                <label><input type="checkbox" name="quiz" value="q4"> q4</label>
+            </div>
+            <button class="create-folder-button">New quiz</button>
+        </aside>
+    </main>
 </body>
 </html>
