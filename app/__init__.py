@@ -10,12 +10,14 @@ from flask_migrate import Migrate
 from flask_session import Session
 from authlib.integrations.flask_client import OAuth
 import requests
+from flask_login import LoginManager
 
 # Initialize extensions globally
 db = SQLAlchemy()
 migrate = Migrate()
 session_manager = Session()
 oauth = OAuth()
+login_manager = LoginManager()
 
 def create_app():
     app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -35,6 +37,7 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     oauth.init_app(app)
+    login_manager.init_app(app)
 
     # Log app initialization
     app.logger.info("Flask app initialized with configuration:")
@@ -51,6 +54,9 @@ def create_app():
     # Configure OAuth
     from app.routes.auth_routes import init_oauth
     init_oauth(oauth)
+
+    # Configure login manager
+    login_manager.login_view = 'auth.login'
 
     # Register blueprints
     from app.routes.quiz_routes import quiz_routes
