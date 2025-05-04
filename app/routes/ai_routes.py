@@ -150,6 +150,7 @@ def generate_quiz():
             quiz_data = json.loads(cleaned_content)  # Use cleaned_content instead of original
             
             if isinstance(quiz_data, list):
+                session['quiz'] = quiz_data
                 return jsonify({"quiz": quiz_data})
             else:
                 return jsonify({"error": "Unexpected response format from OpenAI."})
