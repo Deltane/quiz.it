@@ -63,14 +63,18 @@ def create_app():
     from app.routes.auth_routes import auth_bp
     from app.routes.ai_routes import ai_routes
     from app.routes.stats_routes import stats_bp
+    from app.routes.dashboard_routes import dashboard_bp
+
     app.register_blueprint(quiz_routes)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(ai_routes)
     app.register_blueprint(stats_bp)
+    app.register_blueprint(dashboard_bp)
 
     # Create database tables
     with app.app_context():
         db.create_all()
         app.logger.info("Database tables created successfully.")
 
+    from app import models
     return app

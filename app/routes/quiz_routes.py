@@ -1,7 +1,7 @@
-from flask import Blueprint, session, request, jsonify, render_template
 from app.models import QuizResult
 from app import db
 from datetime import datetime
+from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
 
 quiz_routes = Blueprint('quiz_routes', __name__)
 
@@ -11,18 +11,67 @@ def home():
 
 @quiz_routes.route('/take_quiz')
 def take_quiz():
-    return render_template('take_quiz.html')
+    return render_template('take_quiz.html', quiz_duration=session.get("quiz_duration", 5))
 
 @quiz_routes.route('/store_quiz', methods=['POST'])
 def store_quiz():
-    data = request.json
-    session['quiz'] = data['quiz']
-    session['quiz_type'] = data.get('quizType', 'multiple-choice')
-    print(f"Stored {session['quiz_type']} quiz with {len(session['quiz'])} questions.")
+    session['quiz'] = request.json['quiz']
+    session['quiz_duration'] = request.json.get('quiz_duration', 5)
     session['score'] = 0
     session['current_question'] = 0
     session['answers'] = {}
+
+    # Save to DB
+    from app.models import Quiz, db, User, Folder
+    import json
+    user_email = session.get("user_email")
+    user = User.query.filter_by(email=user_email).first()
+    if user:
+        topic = request.json.get('quiz_title') or request.json.get('title') or 'Untitled'
+        questions = request.json['quiz']
+        folder_id = session.pop("folder_id", None)
+        folder = Folder.query.get(folder_id) if folder_id else None
+        quiz = Quiz(title=topic, questions_json=json.dumps(questions), author=user, folder=folder)
+        db.session.add(quiz)
+        db.session.commit()
+
     return '', 204
+
+# Redo quiz route
+@quiz_routes.route('/redo_quiz/<int:quiz_id>', methods=['POST'])
+def redo_quiz(quiz_id):
+    from app.models import Quiz
+    import json
+    quiz = Quiz.query.get_or_404(quiz_id)
+    session['quiz'] = json.loads(quiz.questions_json)
+    session['score'] = 0
+    session['current_question'] = 0
+    session['answers'] = {}
+    return redirect(url_for('quiz_routes.take_quiz'))
+
+@quiz_routes.route('/delete_quiz/<int:quiz_id>', methods=['POST'])
+def delete_quiz(quiz_id):
+    from app.models import Quiz, db
+    quiz = Quiz.query.get_or_404(quiz_id)
+    db.session.delete(quiz)
+    db.session.commit()
+    return redirect(url_for('dashboard.dashboard_view'))
+
+@quiz_routes.route('/create_quiz_for_folder/<int:folder_id>', methods=['GET'])
+def create_quiz_for_folder(folder_id):
+    from app.models import Folder, User
+    user_email = session.get("user_email")
+    user = User.query.filter_by(email=user_email).first()
+    if not user:
+        return redirect(url_for('quiz_routes.home'))
+
+    folder = Folder.query.get(folder_id)
+    if not folder or folder.user_id != user.id:
+        return "Unauthorized access or folder not found", 403
+
+    # Store folder ID in session and redirect to create_quiz page
+    session['folder_id'] = folder.id
+    return redirect(url_for('ai_routes.generate_quiz'))  # Ensure this route exists
 
 @quiz_routes.route('/get_question/<int:question_index>', methods=['GET'])
 def get_question(question_index):

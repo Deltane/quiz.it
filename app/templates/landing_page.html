@@ -85,9 +85,9 @@
 </div>
 
 <div id="learn-more-section" class="learn-more-container">
-    <h2>Why Quiz.it?</h2>
+    <h2>Why quiz.it?</h2>
     <p>
-        Quiz.it is your smarter study companion. Powered by AI, our platform helps you create, customise, and share interactive quizzes
+        quiz.it is your smarter study companion. Powered by AI, our platform helps you create, customise, and share interactive quizzes
         from any topic or document — all in seconds. Whether you're brushing up on science, music, or language,
         our intelligent quiz engine adapts to your learning style.
     </p>
@@ -100,7 +100,11 @@
         <li>🤝 Share quizzes with friends or collaborate in groups</li>
     </ul>
 
-    <a href="/create_quiz" class="bn5" style="margin-top: 2rem;">Get Started</a>
+    {% if session.get('user_email') %}
+        <a href="{{ url_for('ai_routes.create_quiz') }}" class="bn5" style="margin-top: 2rem;">Get Started</a>
+    {% else %}
+        <a href="{{ url_for('auth.login') }}" class="bn5" style="margin-top: 2rem;">Get Started</a>
+    {% endif %}
 </div>
 
 <div class="header-container">
@@ -108,6 +112,9 @@
         <!-- <h2>/q/<h2> -->
     </div>
     <div class="top-right-buttons">
+        {% if session.get('user_email') %}
+            <a href="/dashboard" class="bn5" style="margin-right: 10px;">Quiz Dashboard</a>
+        {% endif %}
         {% if session.get('user_email') %}
             <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
             <a href="/dashboard" class="bn5" style="margin-right: 10px;">Detailed Statistics</a>

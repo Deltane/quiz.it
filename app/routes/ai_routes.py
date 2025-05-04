@@ -1,5 +1,5 @@
 import os
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
 from werkzeug.utils import secure_filename
 import fitz  # PyMuPDF
 import json
@@ -24,10 +24,15 @@ def create_quiz():
     return render_template('create_quiz.html')
 
 # Route to handle quiz generation
-@ai_routes.route('/generate_quiz', methods=['POST'])
+@ai_routes.route('/generate_quiz', methods=['GET', 'POST'])
 def generate_quiz():
+    if request.method == 'GET':
+        return render_template('create_quiz.html')
+
     text_input = request.form.get('ai-prompt', '')
     question_count = int(request.form.get('question-count', 5))
+    timer_minutes = int(request.form.get('timer', 5))
+    session['quiz_duration'] = timer_minutes
     uploaded_file = request.files.get('upload-file')
     quiz_type = request.form.get('quiz-type')
 
@@ -145,6 +150,7 @@ def generate_quiz():
             quiz_data = json.loads(cleaned_content)  # Use cleaned_content instead of original
             
             if isinstance(quiz_data, list):
+                session['quiz'] = quiz_data
                 return jsonify({"quiz": quiz_data})
             else:
                 return jsonify({"error": "Unexpected response format from OpenAI."})
