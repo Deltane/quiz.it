@@ -52,63 +52,64 @@ a {
   margin: 0; /* Remove any extra margins */
 }
 
-
-/* Top-left buttons container */
-.top-left-buttons {
+.top-left-buttons{
   position: absolute;
-  top: 4rem; /* Match the top value of .top-right-buttons */
-  left: 10rem; /* Position it on the left */
+  top: 2rem;
+  left: 2rem;
   display: flex;
-  gap: 2rem; /* Add spacing between buttons */
-  align-items: center;
-  justify-content: flex-start;
-  margin-top: 0;
-  font-family: 'Inter', serif;
+  flex-direction: column;
+  gap: 1rem;
+  font-family: 'Syne', serif;
 }
 
-.top-left-buttons a {
-  font-size: 1rem;
-  font-weight: normal;
+.repo-section {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.repo-link {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
   color: #000;
 }
 
-.top-left-buttons {
-  left: 10rem; /* Position it on the left */
-}
-
-.top-right-buttons {
-  right: 10rem; /* Position it on the right */
-}
 .profile-images {
   display: flex;
-  margin-right: 8px;
+  gap: 0.5rem;
+}
+
+.profile-image img {
+  width: 40px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #ccc;
 }
 
 .profile-image {
-width: 32px;
-height: 32px;
-border-radius: 50%;
-background-color: #333;
-border: 2px solid white;
-margin-right: -10px;
-overflow: hidden;
-display: flex;
-justify-content: center;
-align-items: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background-color: #333;
+  border: 2px solid white;
+  overflow: hidden;
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
-.count {
-font-size: 14px;
-font-weight: 600;
-color: #333;
-}
-
-.followers {
-font-size: 14px;
-color: #0066cc;
-font-weight: 600;
-margin-left: 4px;
-}
+.github-icon {
+        width: 3rem;
+        height: 3rem;
+        border-radius: 50%;
+        background-color: #ffffff; /* Add a background color */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.2); /* Add a subtle shadow */
+    }
 
 /* Top-right buttons container */
 .top-right-buttons {
@@ -133,7 +134,6 @@ margin-left: 4px;
 .top-right-buttons a:hover {
   background-color: rgba(255, 255, 255, 0.2);
 }
-
 
 .bn5 {
   padding: 0.4375rem 1.25rem;
@@ -464,15 +464,11 @@ span {
 /* Learn More Container */
 .learn-more-container {
   background: linear-gradient(135deg, #fffdfc, #f8f4f1);
-  padding-top: 2rem;
-  padding-bottom: 5rem;
-  padding-left: 2rem;
-  padding-right: 2rem;
+  padding: 2rem;
   border-radius: 0.5rem;
   box-shadow: 0 2rem 2rem rgba(0, 0, 0, 0.2);
-  max-width: 5000px;
-  margin-top: 5rem;
-  margin-bottom: 7rem;
+  max-width: 60rem; /* Reduced from 5000px */
+  margin: 5rem auto 7rem; /* Centered the container */
 }
 
 .learn-more-container h2 {
