@@ -102,7 +102,7 @@
                             headers: {
                                 'Content-Type': 'application/json'
                             },
-                            body: JSON.stringify({ quiz: data.quiz })
+                            body: JSON.stringify({ quiz: data.quiz, quiz_title: $('#quiz-name').val() })
                         })
                         .then(() => {
                             // Redirect to the quiz page

@@ -1,4 +1,4 @@
-from flask import Blueprint, session, request, jsonify, render_template
+from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
 
 quiz_routes = Blueprint('quiz_routes', __name__)
 
@@ -13,7 +13,6 @@ def take_quiz():
 @quiz_routes.route('/store_quiz', methods=['POST'])
 def store_quiz():
     session['quiz'] = request.json['quiz']
-    print(f"Stored quiz with {len(session['quiz'])} questions.")
     session['score'] = 0
     session['current_question'] = 0
     session['answers'] = {}
@@ -24,7 +23,7 @@ def store_quiz():
     user_email = session.get("user_email")
     user = User.query.filter_by(email=user_email).first()
     if user:
-        topic = request.json.get('topic', 'Untitled')
+        topic = request.json.get('quiz_title') or request.json.get('title') or 'Untitled'
         questions = request.json['quiz']
         quiz = Quiz(title=topic, questions_json=json.dumps(questions), author=user)
         db.session.add(quiz)
@@ -32,10 +31,21 @@ def store_quiz():
         
     return '', 204
 
+# Redo quiz route
+@quiz_routes.route('/redo_quiz/<int:quiz_id>', methods=['POST'])
+def redo_quiz(quiz_id):
+    from app.models import Quiz
+    import json
+    quiz = Quiz.query.get_or_404(quiz_id)
+    session['quiz'] = json.loads(quiz.questions_json)
+    session['score'] = 0
+    session['current_question'] = 0
+    session['answers'] = {}
+    return redirect(url_for('quiz_routes.take_quiz'))
+
 @quiz_routes.route('/get_question/<int:question_index>', methods=['GET'])
 def get_question(question_index):
     quiz = session.get('quiz', [])
-    print(f"Fetching question {question_index}, quiz length = {len(quiz)}")
     if question_index < len(quiz):
         question = quiz[question_index]
         return jsonify({

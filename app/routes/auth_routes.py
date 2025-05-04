@@ -51,12 +51,18 @@ def authorize():
         user_info = oauth.google.parse_id_token(token, nonce=nonce) or {}
         userinfo_response = oauth.google.get('https://openidconnect.googleapis.com/v1/userinfo')
         user_info.update(userinfo_response.json() or {})
+        from app.models import User, db  # Import inside to avoid circular import
+        user = User.query.filter_by(email=user_info["email"]).first()
+        if not user:
+            user = User(email=user_info["email"], username=user_info.get("name", user_info["email"]))
+            db.session.add(user)
+            db.session.commit()
         session['user_email'] = user_info['email']
         session['user_name'] = user_info.get('name', user_info['email'])
         session['user_pic'] = user_info.get('picture', '')
 
         current_app.logger.info(f"User {session['user_email']} logged in successfully.")
-        return redirect(url_for('quiz_routes.home'))
+        return redirect(url_for('dashboard.dashboard_view'))
     except Exception as e:
         current_app.logger.error(f"Error in /auth/authorize: {e}")
         return "An error occurred during authorization. Check server logs for details.", 500

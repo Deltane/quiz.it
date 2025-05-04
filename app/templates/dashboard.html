@@ -37,42 +37,28 @@
     <main>
         <section class="quiz-lists">
             <div class="recent-quizzes">
-                <h3>Recent Quiz</h3>
+                <h3>Recent Quizzes</h3>
+                {% for quiz in recent_quizzes %}
                 <div class="quiz-entry">
-                    <span class="quiz-title clickable">Title 1</span>
-                    <button class="redo-button">Redo</button>
+                    <span class="quiz-title clickable">{{ quiz.title }}</span>
+                    <form action="{{ url_for('quiz_routes.redo_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
+                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                        <button type="submit" class="redo-button">Redo</button>
+                    </form>
                 </div>
-                <div class="quiz-entry">
-                    <span class="quiz-title clickable">Title 2</span>
-                    <button class="redo-button">Redo</button>
-                </div>
-                <div class="quiz-entry">
-                    <span class="quiz-title clickable">Title 3</span>
-                    <button class="redo-button">Redo</button>
-                </div>
+                {% endfor %}
             </div>
             <div class="past-quizzes">
                 <h3>Past Quizzes</h3>
+                {% for quiz in past_quizzes %}
                 <div class="quiz-entry">
-                    <span class="quiz-title clickable">Title 1</span>
-                    <button class="redo-button">Redo</button>
+                    <span class="quiz-title clickable">{{ quiz.title }}</span>
+                    <form action="{{ url_for('quiz_routes.redo_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
+                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                        <button type="submit" class="redo-button">Redo</button>
+                    </form>
                 </div>
-                <div class="quiz-entry">
-                    <span class="quiz-title clickable">Title 2</span>
-                    <button class="redo-button">Redo</button>
-                </div>
-                <div class="quiz-entry">
-                    <span class="quiz-title clickable">Title 3</span>
-                    <button class="redo-button">Redo</button>
-                </div>
-                <div class="quiz-entry">
-                    <span class="quiz-title clickable">Title 4</span>
-                    <button class="redo-button">Redo</button>
-                </div>
-                <div class="quiz-entry">
-                    <span class="quiz-title clickable">Title 5</span>
-                    <button class="redo-button">Redo</button>
-                </div>
+                {% endfor %}
             </div>
             <div class="folders">
                 <p>Folder 1</p>
@@ -85,10 +71,9 @@
             <label for="folder-name">Folder name:</label>
             <input type="text" id="folder-name">
             <div class="quiz-checkboxes">
-                <label><input type="checkbox" name="quiz" value="q1"> q1</label>
-                <label><input type="checkbox" name="quiz" value="q2"> q2</label>
-                <label><input type="checkbox" name="quiz" value="q3"> q3</label>
-                <label><input type="checkbox" name="quiz" value="q4"> q4</label>
+                {% for quiz in all_quizzes %}
+                <label><input type="checkbox" name="quiz" value="{{ quiz.id }}"> {{ quiz.title }}</label>
+                {% endfor %}
             </div>
             <button class="create-folder-button">New quiz</button>
         </aside>

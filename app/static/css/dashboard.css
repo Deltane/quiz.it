@@ -144,10 +144,7 @@ main {
     border-radius: 5px;
     cursor: pointer;
     font-size: 0.9rem;
-}
-
-.redo-button:hover {
-    background-color: #9a503b
+    font-family: 'Syne', serif;
 }
 
 .folders p {
