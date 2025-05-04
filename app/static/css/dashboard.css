@@ -206,3 +206,39 @@ main {
   .user-greeting img {
       border: 2px solid #ffffff;
   }
+
+/* P9f0e */
+.folder {
+    background-color: #f9f9f9;
+    padding: 10px;
+    margin-bottom: 10px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.folder strong {
+    font-size: 1.1rem;
+    color: #333;
+}
+
+.folder .quiz-entry {
+    margin-left: 20px;
+}
+
+/* P08e4 */
+.quiz-entry:hover {
+    background-color: #f0f0f0;
+}
+
+.quiz-button:hover {
+    background-color: #7f3f2d;
+}
+
+/* P90ff */
+.quiz-checkboxes {
+    max-height: 150px;
+    overflow-y: auto;
+    border: 1px solid #ddd;
+    padding: 10px;
+    border-radius: 4px;
+}
