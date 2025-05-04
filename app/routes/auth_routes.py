@@ -63,7 +63,10 @@ def authorize():
         user = User.query.filter_by(email=user_info['email']).first()
         if not user:
             # Create a new user if not exists
-            user = User(username=user_info.get('name', user_info['email']), email=user_info['email'])
+            current_app.logger.info(f"Creating new user with email: {user_info['email']}")  # Log statement for debugging
+            if user_info.get('password_hash') is None:
+                raise ValueError("Password hash is None. Cannot create user.")
+            user = User(username=user_info.get('name', user_info['email']), email=user_info['email'], password_hash=user_info['password_hash'])
             db.session.add(user)
             db.session.commit()
 
