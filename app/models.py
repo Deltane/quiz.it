@@ -1,5 +1,5 @@
 from app import db
-from flask_login import UserMixin
+from flask_login import UserMixin, login_manager
 
 class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -16,3 +16,7 @@ class QuizResult(db.Model):
     total_questions = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     quiz_type = db.Column(db.String(50), nullable=False)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
