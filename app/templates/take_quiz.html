@@ -86,7 +86,7 @@
                             questionContainer.append(`<p><strong>Q${currentQuestionIndex + 1}:</strong> ${data.question}</p>`);
 
                             // Create answer input based on question type
-                            if (data.type === 'Multiple Choice' && data.options) {
+                            if (Array.isArray(data.options) && data.options.length > 0) {
                                 // Display multiple choice options
                                 data.options.forEach((option, index) => {
                                     const optionId = `option${index}`;
@@ -97,12 +97,18 @@
                                         </div>
                                     `);
                                 });
-                            } else {
-                                // Display text input for Fill in the Blank or Short Answer
+                            } else if (data.type === 'Short Answer') {
+                                // Short Answer
                                 questionContainer.append(`
                                     <div class="form-group">
-                                        <input type="text" class="form-control" name="answer" 
-                                            placeholder="Type your answer here" required>
+                                        <textarea class="form-control" name="answer" rows="3" placeholder="Type your answer here"></textarea>
+                                    </div>
+                                `);
+                            } else {
+                                // Fill in the Blank (default)
+                                questionContainer.append(`
+                                    <div class="form-group">
+                                        <input type="text" class="form-control" name="answer" placeholder="Type your answer here">
                                     </div>
                                 `);
                             }
