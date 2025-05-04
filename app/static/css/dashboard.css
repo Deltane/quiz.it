@@ -242,3 +242,18 @@ main {
     padding: 10px;
     border-radius: 4px;
 }
+
+/* P17db */
+#create-folder input[type="text"] {
+    width: 100%;
+    padding: 5px;
+    margin-bottom: 10px;
+    display: block;
+}
+
+/* P292e */
+.create-folder form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
