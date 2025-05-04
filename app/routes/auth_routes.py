@@ -44,6 +44,7 @@ def login():
 @auth_bp.route('/authorize')
 def authorize():
     try:
+        current_app.logger.info("Starting authorization process.")  # Log statement for debugging
         token = oauth.google.authorize_access_token()
         nonce = session.pop('oauth_nonce', None)  # Retrieve and remove the nonce from the session
         state = session.pop('oauth_state', None)  # Retrieve and remove the state from the session

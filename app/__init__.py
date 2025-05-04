@@ -68,4 +68,9 @@ def create_app():
     app.register_blueprint(ai_routes)
     app.register_blueprint(stats_bp)
 
+    # Create database tables
+    with app.app_context():
+        db.create_all()
+        app.logger.info("Database tables created successfully.")
+
     return app
