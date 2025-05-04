@@ -104,27 +104,21 @@
                 })
                 .then(response => response.json())
                 .then(data => {
-                if (data.quiz) {
-                    // Store the quiz data in the session or backend
-                    fetch('/store_quiz', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json'
-                        },
-                        body: JSON.stringify({ quiz: data.quiz })
-                    })
-                    .then(() => {
-                        // Show the "Start Quiz" button
-                        $('#quiz-result').html(`
-                            <p class="message">Quiz generated successfully!</p>
-                            <button id="start-quiz" type="button" class="btn btn-secondary">Start Quiz</button>
-                        `);
-
-                        // Trigger confetti animation
-                        confetti({
-                                particleCount: 100,
-                                spread: 70,
-                                origin: { y: 0.6 }
+                    if (data.quiz) {
+                        // Store the quiz data in the session or backend
+                        fetch('/store_quiz', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json'
+                            },
+                            body: JSON.stringify({ quiz: data.quiz, quiz_title: $('#quiz-name').val() })
+                        })
+                        .then(() => {
+                            // Redirect to the quiz page
+                            window.location.href = '/take_quiz';
+                        })
+                        .catch(err => {
+                            $('#quiz-result').text('Error storing quiz: ' + err.message);
                         });
 
                         // Add click event to the "Start Quiz" button

@@ -5,17 +5,9 @@ import os
 load_dotenv()  # Load environment variables from .env
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
-from flask_migrate import Migrate
-from flask_session import Session
-from authlib.integrations.flask_client import OAuth
+from app.extensions import db, migrate, session_manager, oauth
 import requests
 
-# Initialize extensions globally
-db = SQLAlchemy()
-migrate = Migrate()
-session_manager = Session()
-oauth = OAuth()
 
 def create_app():
     app = Flask(__name__, template_folder='templates', static_folder='static')
@@ -35,6 +27,11 @@ def create_app():
     db.init_app(app)
     migrate.init_app(app, db)
     oauth.init_app(app)
+
+    # Create all tables after initializing db and migrate
+    with app.app_context():
+        db.create_all()
+        app.logger.info("Database tables created.")
 
     # Log app initialization
     app.logger.info("Flask app initialized with configuration:")
@@ -56,9 +53,13 @@ def create_app():
     from app.routes.quiz_routes import quiz_routes
     from app.routes.auth_routes import auth_bp
     from app.routes.ai_routes import ai_routes
+    from app.routes.dashboard_routes import dashboard_bp
     app.register_blueprint(quiz_routes)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(ai_routes)
+    app.register_blueprint(dashboard_bp)
+
     # app.register_blueprint(stats_bp)
 
+    from app import models
     return app

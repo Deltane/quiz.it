@@ -113,6 +113,9 @@
     </div>
     <div class="top-right-buttons">
         {% if session.get('user_email') %}
+            <a href="/dashboard" class="bn5" style="margin-right: 10px;">Quiz Dashboard</a>
+        {% endif %}
+        {% if session.get('user_email') %}
             <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
             <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
             <span style="color: #000000; font-weight: bold;">
