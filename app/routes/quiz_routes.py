@@ -8,7 +8,7 @@ def home():
 
 @quiz_routes.route('/take_quiz')
 def take_quiz():
-    return render_template('take_quiz.html')
+    return render_template('take_quiz.html', quiz_duration=session.get("quiz_duration", 5))
 
 @quiz_routes.route('/store_quiz', methods=['POST'])
 def store_quiz():
