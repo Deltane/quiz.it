@@ -7,7 +7,7 @@ class User(UserMixin, db.Model):
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=False)
+    password_hash = db.Column(db.String(128), nullable=False, default='google-oauth')
     quiz_results = db.relationship('QuizResult', backref='user', lazy=True)
 
 @login_manager.user_loader
@@ -31,10 +31,20 @@ class QuizResult(db.Model):
     timestamp = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     quiz_type = db.Column(db.String(50), nullable=False)
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'quiz_id': self.quiz_id,
+            'score': self.score,
+            'total_questions': self.total_questions,
+            'timestamp': self.timestamp.isoformat(),
+            'quiz_type': self.quiz_type
+        }
+
 class Folder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-
     user = db.relationship('User', backref=db.backref('folders', lazy=True))
     quizzes = db.relationship('Quiz', backref='folder', lazy=True)
