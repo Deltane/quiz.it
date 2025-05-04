@@ -2,9 +2,112 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <title>Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
+    <div class="container">
+        <h1>Quiz Dashboard</h1>
+        <div class="stats-section">
+            <h2>Total Quizzes Completed</h2>
+            <p id="quizzes-completed">{{ stats.quizzes_completed }}</p>
+        </div>
+        <div class="stats-section">
+            <h2>Quizzes with Scores Above 80%</h2>
+            <p id="quizzes-above-80">{{ stats.quizzes_above_80 }}</p>
+        </div>
+        <div class="stats-section">
+            <h2>Recent Topics</h2>
+            <ul id="recent-topics">
+                {% for topic in stats.recent_topics %}
+                    <li>{{ topic }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div class="stats-section">
+            <h2>Most Frequent Quiz Type</h2>
+            <p id="most-frequent-quiz-type">{{ stats.most_frequent_quiz_type }}</p>
+        </div>
+        <div class="chart-section">
+            <h2>Quiz Performance</h2>
+            <canvas id="quiz-performance-chart"></canvas>
+        </div>
+        <div class="filter-section">
+            <h2>Filter and Sort Options</h2>
+            <form id="filter-form">
+                <label for="filter-type">Filter by:</label>
+                <select id="filter-type" name="filter_type">
+                    <option value="all">All</option>
+                    <option value="quizzes_above_80">Quizzes Above 80%</option>
+                    <option value="recent_topics">Recent Topics</option>
+                    <option value="most_frequent_quiz_type">Most Frequent Quiz Type</option>
+                </select>
+                <label for="sort-order">Sort by:</label>
+                <select id="sort-order" name="sort_order">
+                    <option value="desc">Descending</option>
+                    <option value="asc">Ascending</option>
+                </select>
+                <button type="submit">Apply</button>
+            </form>
+        </div>
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const ctx = document.getElementById('quiz-performance-chart').getContext('2d');
+            const quizPerformanceChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: ['Total Quizzes', 'Quizzes Above 80%'],
+                    datasets: [{
+                        label: 'Quiz Performance',
+                        data: [{{ stats.quizzes_completed }}, {{ stats.quizzes_above_80 }}],
+                        backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+                        borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    scales: {
+                        y: {
+                            beginAtZero: true
+                        }
+                    }
+                }
+            });
 
+            document.getElementById('filter-form').addEventListener('submit', function(event) {
+                event.preventDefault();
+                const filterType = document.getElementById('filter-type').value;
+                const sortOrder = document.getElementById('sort-order').value;
+
+                fetch('/filter_stats', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ filter_type: filterType, sort_order: sortOrder })
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the dashboard with filtered and sorted data
+                    document.getElementById('quizzes-completed').textContent = data.quizzes_completed;
+                    document.getElementById('quizzes-above-80').textContent = data.quizzes_above_80;
+                    const recentTopicsList = document.getElementById('recent-topics');
+                    recentTopicsList.innerHTML = '';
+                    data.recent_topics.forEach(topic => {
+                        const li = document.createElement('li');
+                        li.textContent = topic;
+                        recentTopicsList.appendChild(li);
+                    });
+                    document.getElementById('most-frequent-quiz-type').textContent = data.most_frequent_quiz_type;
+
+                    // Update the chart
+                    quizPerformanceChart.data.datasets[0].data = [data.quizzes_completed, data.quizzes_above_80];
+                    quizPerformanceChart.update();
+                });
+            });
+        });
+    </script>
 </body>
 </html>
