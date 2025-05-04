@@ -25,13 +25,19 @@ document.getElementById("learn-more-button").addEventListener("click", function(
   document.getElementById("learn-more-section").scrollIntoView({ behavior: "smooth" }); // Smooth scroll to the learn more section
 });
 
-document.addEventListener('DOMContentLoaded', function () {
+ function checkSessionStatus() {
     fetch('/check_login')
-      .then(response => response.json())
+      .then(res => res.json())
       .then(data => {
         if (!data.logged_in) {
           alert("Your session has expired. Please sign in again.");
           window.location.href = "/auth/login";
         }
       });
+  }
+
+  // Check once on load and every 2 minutes
+  document.addEventListener('DOMContentLoaded', () => {
+    checkSessionStatus();
+    setInterval(checkSessionStatus, 2 * 60 * 1000);  // every 2 minutes
   });

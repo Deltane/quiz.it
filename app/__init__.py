@@ -76,5 +76,16 @@ def create_app():
         db.create_all()
         app.logger.info("Database tables created successfully.")
 
+    from datetime import timedelta
+    from flask import session
+
+    # Set session lifetime
+    app.permanent_session_lifetime = timedelta(minutes=30)
+
+    @app.before_request
+    def refresh_session_if_logged_in():
+        if session.get('user_email'):  # or use Flask-Login's current_user.is_authenticated
+            session.permanent = True
+
     from app import models
     return app
