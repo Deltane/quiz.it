@@ -5,7 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="{{ url_for('static', filename='js/take_quiz.js') }}"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -249,20 +248,27 @@
                 // stopTimer(); // Commented out to keep timer running globally
     
                 fetch('/submit_answer', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ questionIndex: currentQuestionIndex, answer: selectedAnswer })
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.completed) {
-                        clearInterval(timerInterval); // Stop the timer
-                        sessionStorage.clear(); // End the session if used for any temporary storage
-                        // Quiz completed, show the final score
-                        $('#countdown-timer').hide();
-                        $('#question-container').html(`
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({ questionIndex: currentQuestionIndex, answer: selectedAnswer })
+                    })
+                    .then(response => {
+                        if (response.status === 401) {
+                            alert("Your session has expired. Please log in again.");
+                            window.location.href = "/auth/login";
+                        } else {
+                            return response.json();
+                        }
+                    })
+                    .then(data => {
+                        if (data.completed) {
+                            clearInterval(timerInterval); // Stop the timer
+                            sessionStorage.clear(); // End the session if used for any temporary storage
+                            // Quiz completed, show the final score
+                            $('#countdown-timer').hide();
+                            $('#question-container').html(`
                             <div class="result">
                                 <p>Quiz completed! Your score is: ${data.score}</p>
                                 <div class="button-group" style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">

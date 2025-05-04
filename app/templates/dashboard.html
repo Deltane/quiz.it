@@ -1,128 +1,146 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <title>Dashboard</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@400..800&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <meta charset="UTF-8">
+  <title>Quiz Dashboard</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-
 <body>
-    <header>
-        <nav>
-            <div class="nav-left">
-                <a href="#">Quiz Dashboard</a>
-            </div>
-            <div class="nav-right">
-            {% if session.get('user_email') %}
-                <a href="/" class="bn5" style="margin-right: 10px;">Home</a>
-                <a href="/create_quiz" class="bn5" style="margin-right: 10px;">Create Quiz</a>
-                <div class="user-greeting" style="display: flex; align-items: center; gap: 10px;">
-                <span style="color: #000000; font-weight: bold;">
-                    {{ session.get('user_name', session['user_email']) }}
-                </span>
-                <img src="{{ session['user_pic'] }}" alt="Profile"
-                     style="height: 30px; width: 30px; border-radius: 50%; object-fit: cover;">
-                <a href="{{ url_for('auth.logout') }}" class="bn5">Sign Out</a>
-            </div>
+  <!-- Header Navigation -->
+  <header>
+    <nav class="fixed-nav">
+      <div class="nav-left">
+        <span class="dashboard-title">Quiz Dashboard</span>
+      </div>
+      <div class="nav-right">
+        {% if session.get('user_email') %}
+          <a href="/" class="nav-button">Home</a>
+          <a href="/create_quiz" class="nav-button">Create Quiz</a>
+          <div class="user-info">
+            <span>{{ session.get('user_name', session['user_email']) }}</span>
+            <img src="{{ session['user_pic'] }}" alt="Profile" style="height: 30px; width: 30px; border-radius: 50%; object-fit: cover;">
+            <a href="{{ url_for('auth.logout') }}" class="nav-button">Sign Out</a>
+          </div>
         {% else %}
-            <a href="{{ url_for('auth.login') }}" rel="nofollow" class="bn5">Sign In with Google</a>
+          <a href="{{ url_for('auth.login') }}" class="nav-button">Sign In with Google</a>
         {% endif %}
-            </div>
-        </nav>
-    </header>
-    
-    <main>
-        <section class="quiz-lists">
-            <div class="recent-quizzes">
-                <h3>Recent Quizzes</h3>
-                {% for quiz in recent_quizzes %}
-                <div class="quiz-entry">
-                    <span class="quiz-title clickable">{{ quiz.title }}</span>
-                    <form action="{{ url_for('quiz_routes.redo_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
-                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                        <button type="submit" class="quiz-button">Redo</button>
-                    </form>
-                    <form action="{{ url_for('quiz_routes.delete_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline; margin-left: 5px;">
-                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                        <button type="submit" class="quiz-button" onclick="return confirm('Are you sure you want to delete this quiz?')">Delete</button>
-                    </form>
-                </div>
-                {% endfor %}
-            </div>
-            <div class="past-quizzes">
-                <h3>Past Quizzes</h3>
-                {% for quiz in past_quizzes %}
-                <div class="quiz-entry">
-                    <span class="quiz-title clickable">{{ quiz.title }}</span>
-                    <form action="{{ url_for('quiz_routes.redo_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
-                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                        <button type="submit" class="quiz-button">Redo</button>
-                    </form>
-                    <form action="{{ url_for('quiz_routes.delete_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline; margin-left: 5px;">
-                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                        <button type="submit" class="quiz-button" onclick="return confirm('Are you sure you want to delete this quiz?')">Delete</button>
-                    </form>
-                </div>
-                {% endfor %}
-            </div>
-            <div class="folders">
-                <h3>Your Folders</h3>
-                {% for folder in folders %}
-                  <div class="folder">
-                    <strong>{{ folder.name }}</strong>
-                    <a href="{{ url_for('quiz_routes.create_quiz_for_folder', folder_id=folder.id) }}" class="quiz-button" style="margin-left: 10px;">Create Quiz</a>
-                    <form action="{{ url_for('dashboard.delete_folder', folder_id=folder.id) }}" method="post" style="display:inline; margin-left: 5px;">
-                      <button type="submit" class="quiz-button" onclick="return confirm('Are you sure you want to delete this folder and all its quizzes?')">Delete Folder</button>
-                    </form>
-                    <form action="{{ url_for('dashboard.assign_quiz_to_folder', folder_id=folder.id) }}" method="post" style="margin-top: 10px;">
-                        <label for="quiz_id_{{ folder.id }}">Add Quiz:</label>
-                        <select name="quiz_id" id="quiz_id_{{ folder.id }}">
-                            {% for quiz in all_quizzes %}
-                                {% if quiz not in folder.quizzes %}
-                                    <option value="{{ quiz.id }}">{{ quiz.title }}</option>
-                                {% endif %}
-                            {% endfor %}
-                        </select>
-                        <button type="submit" class="quiz-button" style="margin-left: 5px;">Add Quiz</button>
-                    </form>
-                    {% if folder.quizzes %}
-                      {% for quiz in folder.quizzes %}
-                        <div class="quiz-entry">
-                          <span class="quiz-title clickable">{{ quiz.title }}</span>
-                          <form action="{{ url_for('quiz_routes.redo_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline;">
-                              <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                              <button type="submit" class="quiz-button">Redo</button>
-                          </form>
-                          <form action="{{ url_for('quiz_routes.delete_quiz', quiz_id=quiz.id) }}" method="post" style="display:inline; margin-left: 5px;">
-                              <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                              <button type="submit" class="quiz-button" onclick="return confirm('Are you sure you want to delete this quiz?')">Delete</button>
-                          </form>
-                        </div>
-                      {% endfor %}
-                    {% else %}
-                      <p>No quizzes yet.</p>
-                    {% endif %}
-                  </div>
-                {% endfor %}
-            </div>
-        </section>
-        <aside class="create-folder">
-            <h3>Create a new folder</h3>
-            <form action="{{ url_for('dashboard.create_folder') }}" method="post">
-                <label for="folder-name">Folder name:</label>
-                <input type="text" id="folder-name" name="folder_name" required>
-                <div class="quiz-checkboxes">
-                    {% for quiz in all_quizzes %}
-                    <label><input type="checkbox" name="quiz_ids[]" value="{{ quiz.id }}"> {{ quiz.title }}</label>
-                    {% endfor %}
-                </div>
-                <button type="submit" class="quiz-button">Create Folder</button>
-            </form>
-        </aside>
-    </main>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Main Dashboard Content -->
+  <main class="dashboard-container">
+    <section class="stat-card">
+      <h2>Total Quizzes Completed</h2>
+      <p id="quizzes-completed">{{ stats.quizzes_completed }}</p>
+    </section>
+
+    <section class="stat-card">
+      <h2>Quizzes with Scores Above 80%</h2>
+      <p id="quizzes-above-80">{{ stats.quizzes_above_80 }}</p>
+    </section>
+
+    <section class="stat-card">
+      <h2>Recent Topics</h2>
+      <ul id="recent-topics">
+        {% for topic in stats.recent_topics %}
+          <li>{{ topic }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+
+    <section class="stat-card">
+      <h2>Most Frequent Quiz Type</h2>
+      <p id="most-frequent-quiz-type">{{ stats.most_frequent_quiz_type }}</p>
+    </section>
+
+    <section class="chart-section">
+      <h2>Quiz Performance</h2>
+      <canvas id="quiz-performance-chart"></canvas>
+    </section>
+
+    <section class="stat-card">
+      <h2>Filter and Sort</h2>
+      <form id="filter-form">
+        <label for="filter-type">Filter by:</label>
+        <select id="filter-type" name="filter_type">
+          <option value="all">All</option>
+          <option value="quizzes_above_80">Above 80%</option>
+          <option value="recent_topics">Recent Topics</option>
+          <option value="most_frequent_quiz_type">Frequent Type</option>
+        </select>
+
+        <label for="sort-order">Sort:</label>
+        <select id="sort-order" name="sort_order">
+          <option value="desc">Descending</option>
+          <option value="asc">Ascending</option>
+        </select>
+
+        <button type="submit">Apply</button>
+      </form>
+    </section>
+  </main>
+
+  <!-- Chart & Filter Script -->
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const ctx = document.getElementById('quiz-performance-chart').getContext('2d');
+      const quizPerformanceChart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+          labels: ['Total Quizzes', 'Above 80%'],
+          datasets: [{
+            label: 'Quiz Performance',
+            data: [{{ stats.quizzes_completed }}, {{ stats.quizzes_above_80 }}],
+            backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+            borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+            borderWidth: 1
+          }]
+        },
+        options: {
+          responsive: true,
+          animation: {
+            duration: 1000,
+            easing: 'easeInOutBounce'
+          },
+          scales: {
+            y: {
+              beginAtZero: true
+            }
+          }
+        }
+      });
+
+      document.getElementById('filter-form').addEventListener('submit', function (event) {
+        event.preventDefault();
+        const filterType = document.getElementById('filter-type').value;
+        const sortOrder = document.getElementById('sort-order').value;
+
+        fetch('/filter_stats', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ filter_type: filterType, sort_order: sortOrder })
+        })
+        .then(response => response.json())
+        .then(data => {
+          document.getElementById('quizzes-completed').textContent = data.quizzes_completed;
+          document.getElementById('quizzes-above-80').textContent = data.quizzes_above_80;
+          const recentTopicsList = document.getElementById('recent-topics');
+          recentTopicsList.innerHTML = '';
+          data.recent_topics.forEach(topic => {
+            const li = document.createElement('li');
+            li.textContent = topic;
+            recentTopicsList.appendChild(li);
+          });
+          document.getElementById('most-frequent-quiz-type').textContent = data.most_frequent_quiz_type;
+          quizPerformanceChart.data.datasets[0].data = [data.quizzes_completed, data.quizzes_above_80];
+          quizPerformanceChart.update();
+        });
+      });
+    });
+  </script>
 </body>
 </html>

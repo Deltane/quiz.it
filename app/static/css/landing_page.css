@@ -454,7 +454,7 @@ span {
 .user-greeting span {
     font-family: "Syne", serif;
     font-size: 1rem;
-    color: #ffffff;
+    color: #333;
 }
 
 .user-greeting img {

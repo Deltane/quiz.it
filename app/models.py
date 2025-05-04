@@ -1,13 +1,18 @@
-from app import db
+from app import db, login_manager
 from flask_login import UserMixin
 from datetime import datetime
 
 class User(UserMixin, db.Model):
+    __tablename__ = 'user'
     id = db.Column(db.Integer, primary_key=True)
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
-    password_hash = db.Column(db.String(128), nullable=True)
-    quizzes = db.relationship('Quiz', backref='author', lazy=True)
+    password_hash = db.Column(db.String(128), nullable=False)
+    quiz_results = db.relationship('QuizResult', backref='user', lazy=True)
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
 
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -16,6 +21,15 @@ class Quiz(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     folder_id = db.Column(db.Integer, db.ForeignKey('folder.id'), nullable=True)
+
+class QuizResult(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    quiz_id = db.Column(db.Integer, nullable=False)
+    score = db.Column(db.Integer, nullable=False)
+    total_questions = db.Column(db.Integer, nullable=False)
+    timestamp = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    quiz_type = db.Column(db.String(50), nullable=False)
 
 class Folder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
