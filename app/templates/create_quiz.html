@@ -110,7 +110,11 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        body: JSON.stringify({ quiz: data.quiz, quiz_title: $('#quiz-name').val() })
+                        body: JSON.stringify({
+                            quiz: data.quiz,
+                            quiz_title: $('#quiz-name').val(),
+                            quiz_duration: parseInt($('#timer').val()) || 5
+                        })
                     })
                     .then(() => {
                         // Show the "Start Quiz" button
