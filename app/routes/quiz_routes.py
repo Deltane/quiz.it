@@ -2,6 +2,7 @@ from app.models import QuizResult
 from app import db
 from datetime import datetime
 from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
+from flask import render_template, session, request
 
 quiz_routes = Blueprint('quiz_routes', __name__)
 
@@ -88,7 +89,8 @@ def get_question(question_index):
         question = quiz[question_index]
         response = {
             'question': question['question'],
-            'type': 'multiple-choice' if 'options' in question else 'fill-in-blank'
+            'type': 'multiple-choice' if 'options' in question else 'fill-in-blank',
+            'time_limit': session.get('quiz_duration', 5)
         }
         
         # Only include options for multiple choice questions
