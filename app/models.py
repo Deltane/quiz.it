@@ -25,11 +25,12 @@ class Quiz(db.Model):
 class QuizResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    quiz_id = db.Column(db.Integer, nullable=False)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     total_questions = db.Column(db.Integer, nullable=False)
     timestamp = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     quiz_type = db.Column(db.String(50), nullable=False)
+    quiz = db.relationship('Quiz', backref='results')
 
 class Folder(db.Model):
     id = db.Column(db.Integer, primary_key=True)

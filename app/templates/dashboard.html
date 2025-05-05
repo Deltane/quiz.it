@@ -42,12 +42,20 @@
     </section>
 
     <section class="stat-card">
-      <h2>Recent Topics</h2>
-      <ul id="recent-topics">
-        {% for topic in stats.recent_topics %}
-          <li>{{ topic }}</li>
+      <h2>Recent Quizzes</h2>
+      <div id="recent-quizzes-list">
+        {% for quiz in recent_quizzes %}
+          <div class="quiz-entry">
+            <span class="quiz-title">{{ quiz.title }}</span>
+            <form action="/redo_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+              <button class="nav-button" type="submit">Redo</button>
+            </form>
+            <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+              <button class="nav-button" type="submit">Delete</button>
+            </form>
+          </div>
         {% endfor %}
-      </ul>
+      </div>
     </section>
 
     <section class="stat-card">
@@ -67,7 +75,7 @@
         <select id="filter-type" name="filter_type">
           <option value="all">All</option>
           <option value="quizzes_above_80">Above 80%</option>
-          <option value="recent_topics">Recent Topics</option>
+          <option value="recent_quizzes">Recent Quizzes</option>
           <option value="most_frequent_quiz_type">Frequent Type</option>
         </select>
 
@@ -128,16 +136,50 @@
         .then(data => {
           document.getElementById('quizzes-completed').textContent = data.quizzes_completed;
           document.getElementById('quizzes-above-80').textContent = data.quizzes_above_80;
-          const recentTopicsList = document.getElementById('recent-topics');
-          recentTopicsList.innerHTML = '';
-          data.recent_topics.forEach(topic => {
-            const li = document.createElement('li');
-            li.textContent = topic;
-            recentTopicsList.appendChild(li);
-          });
+          const recentQuizzesList = document.getElementById('recent-quizzes-list');
+          recentQuizzesList.innerHTML = '';
+          if (data.recent_quizzes && Array.isArray(data.recent_quizzes)) {
+            data.recent_quizzes.forEach(quiz => {
+              const entry = document.createElement('div');
+              entry.classList.add('quiz-entry');
+              entry.innerHTML = `
+                <span class="quiz-title">${quiz.title}</span>
+                <form action="/redo_quiz/${quiz.id}" method="POST" style="display:inline;">
+                  <button class="nav-button" type="submit">Redo</button>
+                </form>
+                <form action="/delete_quiz/${quiz.id}" method="POST" style="display:inline;">
+                  <button class="nav-button" type="submit">Delete</button>
+                </form>
+              `;
+              recentQuizzesList.appendChild(entry);
+            });
+            // Attach confirmation to all new delete forms
+            document.querySelectorAll('#recent-quizzes-list form[action^="/delete_quiz"]').forEach(form => {
+              form.addEventListener('submit', function (e) {
+                const confirmDelete = confirm('Are you sure you want to delete this quiz? This action cannot be undone.');
+                if (!confirmDelete) e.preventDefault();
+              });
+            });
+          }
           document.getElementById('most-frequent-quiz-type').textContent = data.most_frequent_quiz_type;
           quizPerformanceChart.data.datasets[0].data = [data.quizzes_completed, data.quizzes_above_80];
           quizPerformanceChart.update();
+
+          // Attach confirmation to all existing delete forms (including initial HTML)
+          document.querySelectorAll('form[action^="/delete_quiz"]').forEach(form => {
+            form.addEventListener('submit', function (e) {
+              const confirmDelete = confirm('Are you sure you want to delete this quiz? This action cannot be undone.');
+              if (!confirmDelete) e.preventDefault();
+            });
+          });
+        });
+      });
+
+      // Attach confirmation to all existing delete forms (including initial HTML)
+      document.querySelectorAll('form[action^="/delete_quiz"]').forEach(form => {
+        form.addEventListener('submit', function (e) {
+          const confirmDelete = confirm('Are you sure you want to delete this quiz? This action cannot be undone.');
+          if (!confirmDelete) e.preventDefault();
         });
       });
     });

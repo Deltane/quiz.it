@@ -50,19 +50,34 @@ def redo_quiz(quiz_id):
     from app.models import Quiz
     import json
     quiz = Quiz.query.get_or_404(quiz_id)
+
+    # Authorization check
+    if quiz.user_id != session.get("user_id"):
+        return "Unauthorized", 403
+
     session['quiz'] = json.loads(quiz.questions_json)
     session['score'] = 0
     session['current_question'] = 0
     session['answers'] = {}
+    session['quiz_id'] = quiz.id
+    session['quiz_type'] = quiz.title
+
     return redirect(url_for('quiz_routes.take_quiz'))
 
 @quiz_routes.route('/delete_quiz/<int:quiz_id>', methods=['POST'])
 def delete_quiz(quiz_id):
-    from app.models import Quiz, db
+    from app.models import Quiz, QuizResult, db
     quiz = Quiz.query.get_or_404(quiz_id)
+
+    # Authorization check
+    if quiz.user_id != session.get("user_id"):
+        return "Unauthorized", 403
+
+    # Delete related results
+    QuizResult.query.filter_by(quiz_id=quiz.id).delete()
     db.session.delete(quiz)
     db.session.commit()
-    return redirect(url_for('dashboard.dashboard_view'))
+    return redirect(url_for('stats_bp.dashboard'))
 
 @quiz_routes.route('/create_quiz_for_folder/<int:folder_id>', methods=['GET'])
 def create_quiz_for_folder(folder_id):
