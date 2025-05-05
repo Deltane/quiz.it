@@ -15,52 +15,55 @@
 <body>
     <div class="container">
         <h2>Create a New Quiz</h2>
-        <form id="quiz-setup-form">
+        <form id="quiz-setup-form" method="POST">
+            {{ form.csrf_token }}
+            
             <div class="form-group">
-                <label for="quiz-name">Quiz Name</label>
-                <input type="text" class="form-control" id="quiz-name" name="quiz-name" required>
+                {{ form.quiz_name.label }}
+                {{ form.quiz_name(class="form-control", id="quiz-name") }}
             </div>
+            
             <div class="form-group">
-                <label for="upload-file">Upload File</label>
-                <input type="file" class="form-control" id="upload-file" name="upload-file" accept=".pdf,.doc,.docx,.txt">
+                {{ form.upload_file.label }}
+                {{ form.upload_file(class="form-control", id="upload-file", accept=".pdf,.doc,.docx,.txt") }}
             </div>
+            
             <div class="form-group">
-                <label for="ai-prompt">Or ask AI</label>
-                <textarea class="form-control" id="ai-prompt" name="ai-prompt" rows="3"></textarea>
+                {{ form.ai_prompt.label }}
+                {{ form.ai_prompt(class="form-control", id="ai-prompt", rows="3") }}
             </div>
+            
             <div class="form-group">
-                <label for="timer">Timer (minutes)</label>
-                <input type="number" class="form-control" id="timer" name="timer" value="0" min="0">
+                {{ form.timer.label }}
+                {{ form.timer(class="form-control", id="timer", min="0") }}
             </div>
+            
             <div class="form-group">
-                <label for="quiz-type">Quiz Type</label>
-                <select class="form-control" id="quiz-type" name="quiz-type" required>
-                    <option value="" disabled selected>Select quiz type</option>
-                    <option value="Multiple Choice">Multiple Choice</option>
-                    <option value="Short Answer">Short Answer</option>
-                    <option value="Fill in the Blank">Fill in the Blank</option>
-                </select>
+                {{ form.quiz_type.label }}
+                {{ form.quiz_type(class="form-control", id="quiz-type") }}
             </div>
+            
             <div class="form-group">
-                <label for="question-count">Question Count</label>
-                <input type="number" class="form-control" id="question-count" name="question-count" min="1" max="50" required>
+                {{ form.question_count.label }}
+                {{ form.question_count(class="form-control", id="question-count", min="1", max="50") }}
             </div>
+            
             <div class="form-group">
                 <label>Privacy</label>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="privacy" id="public" value="public" checked>
+                    {{ form.privacy(class="form-check-input", id="public", value="public") }}
                     <label class="form-check-label" for="public">Public</label>
                 </div>
                 <div class="form-check">
-                    <input class="form-check-input" type="radio" name="privacy" id="private" value="private">
+                    {{ form.privacy(class="form-check-input", id="private", value="private") }}
                     <label class="form-check-label" for="private">Private</label>
                 </div>
             </div>
-            <button type="submit" class="btn btn-primary">Generate Quiz</button>
+            
+            {{ form.submit(class="btn btn-primary") }}
         </form>
-    
+        
         <hr>
-        <!-- <h3>Generated Quiz:</h3> -->
         <pre id="quiz-result" style="background-color: #f0f0f000; padding: 10px; border-radius: 8px;"></pre>
     </div>
     <script>
