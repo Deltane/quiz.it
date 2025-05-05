@@ -7,6 +7,8 @@ import pytesseract
 from openai import OpenAI
 from dotenv import load_dotenv
 from PIL import Image
+from flask import render_template, session, request
+from app.forms import QuizSetupForm
 
 # Define the blueprint
 ai_routes = Blueprint('ai_routes', __name__)
@@ -21,22 +23,28 @@ client = OpenAI(api_key=openai_api_key)
 # Route to render the create_quiz.html page
 @ai_routes.route('/create_quiz')
 def create_quiz():
-    return render_template('create_quiz.html')
+    form = QuizSetupForm()
+    return render_template('create_quiz.html', form=form)
 
 # Route to handle quiz generation
 @ai_routes.route('/generate_quiz', methods=['GET', 'POST'])
 def generate_quiz():
+    form = QuizSetupForm()
     if request.method == 'GET':
-        return render_template('create_quiz.html')
+        return render_template('create_quiz.html', form=form)
+    
 
-    text_input = request.form.get('ai-prompt', '')
-    question_count = int(request.form.get('question-count', 5))
-    timer_minutes = int(request.form.get('timer', 5))
-    session['quiz_duration'] = timer_minutes
-    uploaded_file = request.files.get('upload-file')
-    quiz_type = request.form.get('quiz-type')
-
-    print(f"Received quiz_type: {quiz_type}")  # Debugging log
+     # Use WTForms validation
+    if form.validate_on_submit():
+        text_input = form.ai_prompt.data or ''
+        question_count = form.question_count.data
+        timer_minutes = form.timer.data
+        session['quiz_duration'] = timer_minutes
+        quiz_type = form.quiz_type.data
+        uploaded_file = form.upload_file.data
+        
+    else:
+        return render_template('create_quiz.html', form=form)
 
     text = text_input
 
