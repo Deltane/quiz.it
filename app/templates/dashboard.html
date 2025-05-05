@@ -113,7 +113,7 @@
                 <input type="hidden" name="folder_id" value="{{ folder.id }}">
                 <select name="quiz_id" required>
                   <option value="">Select a Quiz</option>
-                  {% for quiz in recent_quizzes if not quiz.folder_id %}
+                  {% for quiz in recent_quizzes if folder not in quiz.folders %}
                     <option value="{{ quiz.id }}">{{ quiz.title }}</option>
                   {% endfor %}
                 </select>

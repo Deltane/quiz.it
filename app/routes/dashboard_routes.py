@@ -54,7 +54,8 @@ def create_folder():
     for quiz_id in selected_quiz_ids:
         quiz = Quiz.query.get(int(quiz_id))
         if quiz and quiz.user_id == user.id:
-            quiz.folder_id = new_folder.id
+            if new_folder not in quiz.folders:
+                quiz.folders.append(new_folder)
             db.session.add(quiz)
 
     db.session.commit()
@@ -79,7 +80,8 @@ def delete_folder(folder_id):
 
     # Unassign the folder from its quizzes before deleting
     for quiz in folder.quizzes:
-        quiz.folder_id = None
+        if folder in quiz.folders:
+            quiz.folders.remove(folder)
         db.session.add(quiz)
 
     db.session.delete(folder)
@@ -127,7 +129,8 @@ def assign_quiz_to_folder():
 
     quiz = Quiz.query.get(int(quiz_id))
     if quiz and quiz.user_id == user.id:
-        quiz.folder_id = folder.id
+        if folder not in quiz.folders:
+            quiz.folders.append(folder)
         db.session.add(quiz)
         db.session.commit()
 

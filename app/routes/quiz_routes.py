@@ -35,7 +35,9 @@ def store_quiz():
         questions = request.json['quiz']
         folder_id = session.pop("folder_id", None)
         folder = Folder.query.get(folder_id) if folder_id else None
-        quiz = Quiz(title=topic, questions_json=json.dumps(questions), user_id=user.id, folder=folder)
+        quiz = Quiz(title=topic, questions_json=json.dumps(questions), user_id=user.id)
+        if folder:
+            quiz.folders.append(folder)
         db.session.add(quiz)
         db.session.commit()
         # ✅ Add these lines
