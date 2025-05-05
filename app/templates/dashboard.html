@@ -47,12 +47,21 @@
         {% for quiz in recent_quizzes %}
           <div class="quiz-entry">
             <span class="quiz-title">{{ quiz.title }}</span>
-            <form action="/redo_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
-              <button class="action-button" type="submit">Redo</button>
-            </form>
-            <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
-              <button class="action-button" type="submit">Delete</button>
-            </form>
+            <div class="action-button-wrapper">
+              <button class="action-button" onclick="toggleRenameForm('quiz', {{ quiz.id }})">Rename</button>
+              <div id="quiz-rename-form-{{ quiz.id }}" class="rename-form" style="display: none;">
+                <form action="/rename_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+                  <input type="text" name="new_title" placeholder="New Title" required>
+                  <button class="action-button" type="submit">Save</button>
+                </form>
+              </div>
+              <form action="/redo_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+                <button class="action-button" type="submit">Redo</button>
+              </form>
+              <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+                <button class="action-button" type="submit">Delete</button>
+              </form>
+            </div>
           </div>
         {% endfor %}
       </div>
@@ -102,6 +111,13 @@
         {% for folder in folders %}
           <div class="folder-entry">
             <strong>{{ folder.name }}</strong>
+            <button class="action-button" onclick="toggleRenameForm('folder', {{ folder.id }})">Rename</button>
+            <div id="folder-rename-form-{{ folder.id }}" class="rename-form" style="display: none;">
+              <form action="/rename_folder/{{ folder.id }}" method="POST" style="display:inline;">
+                <input type="text" name="new_name" placeholder="New Folder Name" required>
+                <button class="action-button" type="submit">Save</button>
+              </form>
+            </div>
             <form action="/delete_folder/{{ folder.id }}" method="POST" style="display:inline;">
               <button class="action-button" type="submit">Delete</button>
             </form>
@@ -125,12 +141,21 @@
               {% for quiz in folder.quizzes %}
                 <li>
                   {{ quiz.title }}
-                  <form action="/redo_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
-                    <button class="action-button" type="submit">Redo</button>
-                  </form>
-                  <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
-                    <button class="action-button" type="submit">Delete</button>
-                  </form>
+                  <div class="action-button-wrapper">
+                    <button class="action-button" onclick="toggleRenameForm('quiz', {{ quiz.id }})">Rename</button>
+                    <div id="quiz-rename-form-{{ quiz.id }}" class="rename-form" style="display: none;">
+                      <form action="/rename_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+                        <input type="text" name="new_title" placeholder="New Title" required>
+                        <button class="action-button" type="submit">Save</button>
+                      </form>
+                    </div>
+                    <form action="/redo_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+                      <button class="action-button" type="submit">Redo</button>
+                    </form>
+                    <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+                      <button class="action-button" type="submit">Delete</button>
+                    </form>
+                  </div>
                 </li>
               {% endfor %}
             </ul>
@@ -194,12 +219,18 @@
               entry.classList.add('quiz-entry');
               entry.innerHTML = `
                 <span class="quiz-title">${quiz.title}</span>
-                <form action="/redo_quiz/${quiz.id}" method="POST" style="display:inline;">
-                  <button class="action-button" type="submit">Redo</button>
-                </form>
-                <form action="/delete_quiz/${quiz.id}" method="POST" style="display:inline;">
-                  <button class="action-button" type="submit">Delete</button>
-                </form>
+                <div class="action-button-wrapper">
+                  <form action="/rename_quiz/${quiz.id}" method="POST" style="display:inline;">
+                    <input type="text" name="new_title" placeholder="New Title" required>
+                    <button class="action-button" type="submit">Rename</button>
+                  </form>
+                  <form action="/redo_quiz/${quiz.id}" method="POST" style="display:inline;">
+                    <button class="action-button" type="submit">Redo</button>
+                  </form>
+                  <form action="/delete_quiz/${quiz.id}" method="POST" style="display:inline;">
+                    <button class="action-button" type="submit">Delete</button>
+                  </form>
+                </div>
               `;
               recentQuizzesList.appendChild(entry);
             });
@@ -288,6 +319,13 @@
     function toggleAssignForm(folderId) {
       const form = document.getElementById(`assign-form-${folderId}`);
       form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    }
+
+    function toggleRenameForm(type, id) {
+      const form = document.getElementById(`${type}-rename-form-${id}`);
+      if (form) {
+        form.style.display = form.style.display === 'none' ? 'inline' : 'none';
+      }
     }
   </script>
 </body>

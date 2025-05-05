@@ -88,6 +88,31 @@ def delete_folder(folder_id):
     db.session.commit()
     flash("Folder deleted successfully.", "success")
     return redirect(url_for('dashboard.dashboard_view'))
+
+@dashboard_bp.route('/rename_folder/<int:folder_id>', methods=['POST'])
+def rename_folder(folder_id):
+    if 'user_email' not in session:
+        return redirect(url_for('auth.login'))
+
+    user = User.query.filter_by(email=session['user_email']).first()
+    if not user:
+        return redirect(url_for('auth.login'))
+
+    folder = Folder.query.get_or_404(folder_id)
+    if folder.user_id != user.id:
+        flash("You are not authorized to rename this folder.", "error")
+        return redirect(url_for('dashboard.dashboard_view'))
+
+    new_name = request.form.get('new_name')
+    if new_name:
+        folder.name = new_name
+        db.session.commit()
+        flash("Folder renamed successfully.", "success")
+    else:
+        flash("New folder name cannot be empty.", "error")
+
+    return redirect(url_for('dashboard.dashboard_view'))
+
 @dashboard_bp.route('/create_quiz_in_folder/<int:folder_id>', methods=['GET'])
 def create_quiz_in_folder(folder_id):
     if 'user_email' not in session:

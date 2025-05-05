@@ -81,6 +81,22 @@ def delete_quiz(quiz_id):
     db.session.commit()
     return redirect(url_for('stats_bp.dashboard'))
 
+@quiz_routes.route('/rename_quiz/<int:quiz_id>', methods=['POST'])
+def rename_quiz(quiz_id):
+    from app.models import Quiz
+    new_title = request.form.get('new_title')
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    # Authorization check
+    if quiz.user_id != session.get("user_id"):
+        return "Unauthorized", 403
+
+    if new_title:
+        quiz.title = new_title
+        db.session.commit()
+
+    return redirect(url_for('stats_bp.dashboard'))
+
 @quiz_routes.route('/get_question/<int:question_index>', methods=['GET'])
 def get_question(question_index):
     quiz = session.get('quiz', [])

@@ -138,9 +138,9 @@ body {
     margin-top: 6rem;
     padding: 2rem;
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
     gap: 2rem;
-    max-width: 1200px;
+    max-width: 1600px;
     margin-left: auto;
     margin-right: auto;
 }
@@ -292,17 +292,14 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
-}
-
-.folder-entry-header strong {
-    font-size: 1rem;
-    color: #9a503b;
+    width: 100%;
 }
 
 /* Actions next to folder name */
 .folder-actions {
     display: flex;
     gap: 0.5rem;
+    margin-left: auto;
 }
 
 /* Quiz assignment dropdown in folder entry */
@@ -333,17 +330,13 @@ body {
 .action-button {
     padding: 0.5rem;
     border-radius: 0.5rem;
-    border: 1px solid #ccc;
+    border: none;
     font-family: 'Syne', sans-serif;
-    font-size: 0.85rem;
-    font-weight: normal;
+    font-size: 0.9rem;
     background-color: #9a503b;
     color: white;
     cursor: pointer;
     transition: background-color 0.3s ease;
-    text-transform: none;
-    letter-spacing: normal;
-    line-height: 1.2;
 }
 
 .action-button:hover {
