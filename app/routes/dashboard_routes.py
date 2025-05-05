@@ -104,8 +104,10 @@ def create_quiz_in_folder(folder_id):
     session['selected_folder_id'] = folder_id
     return redirect(url_for('quiz_routes.create_quiz'))
 
-@dashboard_bp.route('/assign_quiz_to_folder/<int:folder_id>', methods=['POST'])
-def assign_quiz_to_folder(folder_id):
+from flask import jsonify
+
+@dashboard_bp.route('/assign_quiz_to_folder', methods=['POST'])
+def assign_quiz_to_folder():
     if 'user_email' not in session:
         return redirect(url_for('auth.login'))
 
@@ -113,23 +115,23 @@ def assign_quiz_to_folder(folder_id):
     if not user:
         return redirect(url_for('auth.login'))
 
+    folder_id = request.form.get('folder_id')
+    quiz_id = request.form.get('quiz_id')
+
+    if not folder_id or not quiz_id:
+        return jsonify({'error': 'Missing folder or quiz ID.'}), 400
+
     folder = Folder.query.get_or_404(folder_id)
     if folder.user_id != user.id:
-        flash("You are not authorized to modify this folder.", "error")
-        return redirect(url_for('dashboard.dashboard_view'))
-
-    quiz_id = request.form.get('quiz_id')
-    if not quiz_id:
-        flash("No quiz selected.", "error")
-        return redirect(url_for('dashboard.dashboard_view'))
+        return jsonify({'error': 'Unauthorized'}), 403
 
     quiz = Quiz.query.get(int(quiz_id))
     if quiz and quiz.user_id == user.id:
         quiz.folder_id = folder.id
         db.session.add(quiz)
         db.session.commit()
-        flash(f"Quiz '{quiz.title}' added to folder '{folder.name}'.", "success")
-    else:
-        flash("Invalid quiz selected.", "error")
 
-    return redirect(url_for('dashboard.dashboard_view'))
+        quiz_html = render_template("components/_quiz_item.html", quiz=quiz)
+        return jsonify({"quiz_html": quiz_html, "folder_id": folder.id})
+    else:
+        return jsonify({"error": "Invalid quiz selected."}), 400

@@ -243,13 +243,109 @@ body {
     display: inline;
 }
 
-.quiz-entry .nav-button {
-    padding: 0.4rem 0.75rem;
-    font-size: 0.85rem;
-}
-
 .quiz-title {
     font-weight: bold;
     flex: 1;
     margin-right: 1rem;
+}
+
+
+/* Folder Panel */
+.folder-panel {
+    background: white;
+    border-radius: 0.75rem;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    grid-column: span 2;
+}
+
+.folder-form {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.folder-form input[type="text"] {
+    flex: 1;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    font-family: 'Syne', sans-serif;
+}
+
+.folder-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+/* Folder entry styling */
+.folder-entry {
+    border: 1px solid #ddd;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    background-color: #fff;
+}
+
+/* Header for folder entry: name and actions aligned horizontally */
+.folder-entry-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.folder-entry-header strong {
+    font-size: 1rem;
+    color: #9a503b;
+}
+
+/* Actions next to folder name */
+.folder-actions {
+    display: flex;
+    gap: 0.5rem;
+}
+
+/* Quiz assignment dropdown in folder entry */
+.folder-entry select {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ccc;
+    font-family: 'Syne', sans-serif;
+    margin-top: 0.5rem;
+    margin-right: 0.5rem;
+}
+
+.folder-entry ul {
+    list-style: none;
+    padding-left: 1rem;
+    margin: 0.5rem 0 0;
+}
+
+.folder-entry li {
+    margin-bottom: 0.5rem;
+}
+
+.folder-entry form {
+    display: inline;
+    margin-left: 0.5rem;
+}
+
+.action-button {
+    padding: 0.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #ccc;
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: normal;
+    background-color: #9a503b;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    text-transform: none;
+    letter-spacing: normal;
+    line-height: 1.2;
+}
+
+.action-button:hover {
+    background-color: #7f3f2d;
 }

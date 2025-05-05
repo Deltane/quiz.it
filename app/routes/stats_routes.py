@@ -35,6 +35,9 @@ def dashboard():
     recent_quizzes = [result.quiz for result in recent_quiz_results if result.quiz is not None]
     most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
 
+    from app.models import Folder
+    folders = Folder.query.filter_by(user_id=user_id).all()
+
     stats = {
         'quizzes_completed': quizzes_completed,
         'quizzes_above_80': quizzes_above_80,
@@ -42,7 +45,7 @@ def dashboard():
         'most_frequent_quiz_type': most_frequent_quiz_type[0] if most_frequent_quiz_type else None
     }
 
-    return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes)
+    return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders)
 
 @stats_bp.route('/filter_stats', methods=['POST'])
 @login_required

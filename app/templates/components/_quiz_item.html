@@ -1,0 +1,9 @@
+<li id="quiz-{{ quiz.id }}">
+    <span class="quiz-title">{{ quiz.title }}</span>
+    <form action="/redo_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+      <button class="nav-button" type="submit">Redo</button>
+    </form>
+    <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+      <button class="nav-button" type="submit">Delete</button>
+    </form>
+  </li>

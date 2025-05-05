@@ -79,22 +79,6 @@ def delete_quiz(quiz_id):
     db.session.commit()
     return redirect(url_for('stats_bp.dashboard'))
 
-@quiz_routes.route('/create_quiz_for_folder/<int:folder_id>', methods=['GET'])
-def create_quiz_for_folder(folder_id):
-    from app.models import Folder, User
-    user_email = session.get("user_email")
-    user = User.query.filter_by(email=user_email).first()
-    if not user:
-        return redirect(url_for('quiz_routes.home'))
-
-    folder = Folder.query.get(folder_id)
-    if not folder or folder.user_id != user.id:
-        return "Unauthorized access or folder not found", 403
-
-    # Store folder ID in session and redirect to create_quiz page
-    session['folder_id'] = folder.id
-    return redirect(url_for('ai_routes.generate_quiz'))  # Ensure this route exists
-
 @quiz_routes.route('/get_question/<int:question_index>', methods=['GET'])
 def get_question(question_index):
     quiz = session.get('quiz', [])
