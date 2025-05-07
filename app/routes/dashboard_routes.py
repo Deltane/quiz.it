@@ -159,7 +159,7 @@ def assign_quiz_to_folder():
         db.session.add(quiz)
         db.session.commit()
 
-        quiz_html = render_template("components/_quiz_item.html", quiz=quiz)
+        quiz_html = render_template("components/_quiz_item.html", quiz=quiz, folder=folder)
         return jsonify({"quiz_html": quiz_html, "folder_id": folder.id})
     else:
         return jsonify({"error": "Invalid quiz selected."}), 400

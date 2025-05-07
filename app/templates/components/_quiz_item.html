@@ -1,9 +1,30 @@
-<li id="quiz-{{ quiz.id }}">
-    <span class="quiz-title">{{ quiz.title }}</span>
+<li class="quiz-entry" id="quiz-{{ quiz.id }}">
+  <span class="quiz-title">{{ quiz.title }}</span>
+
+  <div class="action-button-wrapper">
     <form action="/redo_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
       <button class="action-button" type="submit">Redo</button>
     </form>
+
     <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
       <button class="action-button" type="submit">Delete</button>
     </form>
-  </li>
+
+    <button class="action-button" onclick="toggleRenameForm('quiz', {{ quiz.id }})">Rename</button>
+
+    {% if folder %}
+    <form action="/unassign_quiz_from_folder" method="POST" style="display:inline;">
+      <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+      <input type="hidden" name="folder_id" value="{{ folder.id }}">
+      <button class="action-button" type="submit">Unassign</button>
+    </form>
+    {% endif %}
+  </div>
+
+  <div class="rename-form" id="rename-quiz-{{ quiz.id }}" style="display:none;">
+    <form action="/rename_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+      <input type="text" name="new_title" placeholder="New Title" required>
+      <button class="action-button" type="submit">Save</button>
+    </form>
+  </div>
+</li>
