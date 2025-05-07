@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Quiz</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -11,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@400..800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/create_quiz.css') }}">
     <link rel="stylesheet" href="../static/css/take_quiz.css">
+    <script src="{{ url_for('static', filename='js/quiz_logic.js') }}"></script>
+
     <style>
         .timer-text {
             text-align: center;
@@ -268,9 +271,15 @@
                             sessionStorage.clear(); // End the session if used for any temporary storage
                             // Quiz completed, show the final score
                             $('#countdown-timer').hide();
+                            const correctness = data.results;
+                            const correctCount = correctness.filter(c => c).length;
+                            const incorrectCount = correctness.length - correctCount;
+
                             $('#question-container').html(`
                             <div class="result">
                                 <p>Quiz completed! Your score is: ${data.score}</p>
+                                <h3 style="text-align: center; margin-top: 20px;">Answers Summary</h3>
+                                <canvas id="resultChart" width="400" height="200" style="margin-top: 20px;"></canvas>
                                 <div class="button-group" style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                                     <a href="/create_quiz" class="btn">Redo</a>
                                     <a href="${homeUrl}" class="btn">Home</a>
@@ -278,6 +287,37 @@
                                 </div>
                             </div>
                         `);
+                    setTimeout(() => { 
+                        const chartCtx = document.getElementById('resultChart').getContext('2d');
+                        if (!chartCtx) return;
+                        
+                          
+                        new Chart(chartCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: ['Correct', 'Incorrect'],
+                                datasets: [{
+                                    label: 'Answers Summary',
+                                    data: [correctCount, incorrectCount],
+                                    backgroundColor: ['#82b74b', '#bc5a45']
+                                }]
+                            },
+                            options: {
+                                plugins: {
+                                    legend: {
+                                        display: false // Disable the legend
+                                    }
+                                },
+                                indexAxis: 'y',
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        precision: 0
+                                    }
+                                }
+                            }
+                        });
+                    }, 100);
                         $('#next-question').hide();
                         $('#prev-question').hide();
                         $('#timer-container').hide();
