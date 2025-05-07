@@ -163,3 +163,35 @@ def assign_quiz_to_folder():
         return jsonify({"quiz_html": quiz_html, "folder_id": folder.id})
     else:
         return jsonify({"error": "Invalid quiz selected."}), 400
+
+@dashboard_bp.route('/unassign_quiz_from_folder', methods=['POST'])
+def unassign_quiz_from_folder():
+    if 'user_email' not in session:
+        return redirect(url_for('auth.login'))
+
+    user = User.query.filter_by(email=session['user_email']).first()
+    if not user:
+        return redirect(url_for('auth.login'))
+
+    folder_id = request.form.get('folder_id')
+    quiz_id = request.form.get('quiz_id')
+
+    if not folder_id or not quiz_id:
+        flash("Missing folder or quiz ID.", "error")
+        return redirect(url_for('dashboard.dashboard_view'))
+
+    folder = Folder.query.get_or_404(folder_id)
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    if folder.user_id != user.id or quiz.user_id != user.id:
+        flash("You are not authorized to unassign this quiz.", "error")
+        return redirect(url_for('dashboard.dashboard_view'))
+
+    if folder in quiz.folders:
+        quiz.folders.remove(folder)
+        db.session.commit()
+        flash("Quiz unassigned from folder.", "success")
+    else:
+        flash("Quiz was not assigned to this folder.", "error")
+
+    return redirect(url_for('dashboard.dashboard_view'))

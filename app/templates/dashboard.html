@@ -160,6 +160,11 @@
                       <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
                         <button class="action-button" type="submit">Delete</button>
                       </form>
+                      <form action="/unassign_quiz_from_folder" method="POST" style="display:inline;" class="unassign-form" onsubmit="return confirm('Are you sure you want to unassign this quiz from the folder?');">
+                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                        <input type="hidden" name="folder_id" value="{{ folder.id }}">
+                        <button class="action-button" type="submit">Unassign</button>
+                      </form>
                     </div>
                   </div>
                 </li>
@@ -269,13 +274,6 @@
           if (!confirmDelete) e.preventDefault();
         });
       });
-      // Also attach confirmation to folder quiz deletions
-      document.querySelectorAll('.folder-entry form[action^="/delete_quiz"]').forEach(form => {
-        form.addEventListener('submit', function (e) {
-          const confirmDelete = confirm('Are you sure you want to delete this quiz? This action cannot be undone.');
-          if (!confirmDelete) e.preventDefault();
-        });
-      });
 
       // Attach confirmation to all folder delete forms
       document.querySelectorAll('form[action^="/delete_folder"]').forEach(form => {
@@ -304,8 +302,19 @@
                 form.reset();
                 wrapper.style.display = 'none';
 
-                // Re-attach confirmation to new delete button in the inserted quiz
+                // Reattach all relevant event listeners to the newly inserted quiz block
                 const newQuizEntry = targetList.lastElementChild;
+
+                // Reattach rename toggle
+                const renameBtn = newQuizEntry.querySelector(`button[onclick^="toggleRenameForm"]`);
+                if (renameBtn) {
+                  renameBtn.addEventListener('click', () => {
+                    const id = renameBtn.getAttribute('onclick').match(/\d+/)[0];
+                    toggleRenameForm('quiz', id);
+                  });
+                }
+
+                // Reattach delete confirmation
                 const deleteForm = newQuizEntry.querySelector('form[action^="/delete_quiz"]');
                 if (deleteForm) {
                   deleteForm.addEventListener('submit', function (e) {
@@ -313,6 +322,7 @@
                     if (!confirmDelete) e.preventDefault();
                   });
                 }
+
               } else {
                 alert("Failed to assign quiz to folder.");
               }
