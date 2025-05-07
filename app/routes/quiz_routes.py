@@ -40,9 +40,9 @@ def store_quiz():
             quiz.folders.append(folder)
         db.session.add(quiz)
         db.session.commit()
-        # ✅ Add these lines
+        
         session['quiz_id'] = quiz.id
-        session['quiz_type'] = topic  # Or whatever type you use
+        session['topic'] = topic  # Or whatever type you use
 
     return '', 204
 

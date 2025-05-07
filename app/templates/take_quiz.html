@@ -21,7 +21,7 @@
 
 <body>
     <div class="container">
-        <h2 id="quiz-title">Quiz</h2>
+        <h2 id="quiz-title">{{ session.get('topic', 'Quiz') }}</h2>
         <div id="timer-container">
             <div id="timer-progress"></div>
         </div>
