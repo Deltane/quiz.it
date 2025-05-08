@@ -40,9 +40,9 @@ def store_quiz():
             quiz.folders.append(folder)
         db.session.add(quiz)
         db.session.commit()
-        # ✅ Add these lines
+        
         session['quiz_id'] = quiz.id
-        session['quiz_type'] = topic  # Or whatever type you use
+        session['topic'] = topic  # Or whatever type you use
 
     return '', 204
 
@@ -122,9 +122,6 @@ def submit_answer():
     data = request.json
     question_index = data['questionIndex']
     user_answer = data['answer']
-    print("submit_answer session user_id:", session.get("user_id"))
-    print("submit_answer session quiz_id:", session.get("quiz_id"))
-    print("submit_answer session quiz_type:", session.get("quiz_type"))
 
     # Store the user's answer
     if 'answers' not in session:
@@ -147,11 +144,13 @@ def submit_answer():
         # Store quiz result in the database
         user_id = session.get('user_id')
         quiz_id = session.get('quiz_id')
-        quiz_type = session.get('quiz_type')
+        quiz_title = session.get('topic') or 'Untitled'
         total_questions = len(quiz)
         timestamp = datetime.utcnow()
 
         print("Session contents before saving QuizResult:", dict(session))
+
+        QuizResult.query.filter_by(user_id=user_id, quiz_id=quiz_id, completed=False).delete()
 
         quiz_result = QuizResult(
             user_id=user_id,
@@ -159,8 +158,24 @@ def submit_answer():
             score=score,
             total_questions=total_questions,
             timestamp=timestamp,
-            quiz_type=quiz_type
+            quiz_type=quiz_title,
+            title=quiz_title,
+            completed=True
         )
+
+        db.session.add(quiz_result)
+        db.session.commit()
+
+        # Calculate and store quiz statistics
+        quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
+        quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
+        recent_topics = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
+        most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
+
+        session['quizzes_completed'] = quizzes_completed
+        session['quizzes_above_80'] = quizzes_above_80
+        session['recent_topics'] = [result.title for result in recent_topics]
+        session['most_frequent_quiz_type'] = most_frequent_quiz_type[0] if most_frequent_quiz_type else None
 
         # Clean up session
         session.pop('quiz', None)
@@ -175,4 +190,87 @@ def submit_answer():
 
     return jsonify({'completed': False})
 
-    return '', 204
+# Route to handle quiz exit and save incomplete quiz result
+@quiz_routes.route('/exit_quiz', methods=['POST'])
+def exit_quiz():
+    from app.models import QuizResult
+    import json
+
+    user_id = session.get("user_id")
+    quiz_id = session.get("quiz_id")
+    topic = session.get("topic", "Untitled")
+    answers = session.get("answers", {})
+    time_remaining = request.form.get("time_left") or (request.json.get("time_left", 0) if request.json else 0)
+
+    if not user_id or not quiz_id:
+        return jsonify(success=False, message="Missing session info"), 400
+
+    quiz_result = QuizResult(
+        user_id=user_id,
+        quiz_id=quiz_id,
+        score=0,  # Will be calculated on resume
+        total_questions=len(session.get("quiz", [])),
+        timestamp=datetime.utcnow(),
+        quiz_type=topic,
+        completed=False,
+        answers=json.dumps(answers),
+        title=topic,
+        time_remaining=int(time_remaining)
+    )
+
+    db.session.add(quiz_result)
+    db.session.commit()
+
+    # Clear session state
+    session.pop("quiz", None)
+    session.pop("answers", None)
+    session.pop("current_question", None)
+    session.pop("quiz_id", None)
+    session.pop("quiz_duration", None)
+    session.pop("topic", None)
+
+    return jsonify(success=True)
+
+
+# Route to resume an unfinished quiz attempt
+@quiz_routes.route('/resume_quiz/<int:attempt_id>', methods=['GET'])
+def resume_quiz(attempt_id):
+    attempt = QuizResult.query.get_or_404(attempt_id)
+    if attempt.user_id != session.get('user_id'):
+        return "Unauthorized", 403
+
+    from app.models import Quiz
+    import json
+
+    quiz = Quiz.query.get(attempt.quiz_id)
+    if not quiz:
+        return "Quiz not found", 404
+
+    questions = json.loads(quiz.questions_json)
+    answers = json.loads(attempt.answers or '{}')
+    first_unanswered = 0
+    for i in range(len(questions)):
+        if str(i) not in answers:
+            first_unanswered = i
+            break
+
+    session['quiz'] = questions
+    session['answers'] = answers
+    session['score'] = 0
+    session['current_question'] = first_unanswered
+    session['quiz_id'] = quiz.id
+    session['topic'] = attempt.title
+    session['quiz_duration'] = (attempt.time_remaining or 300) // 60 + 1
+    session['time_remaining'] = attempt.time_remaining
+
+    return redirect(url_for('quiz_routes.take_quiz'))
+
+@quiz_routes.route('/delete_quiz_attempt/<int:attempt_id>', methods=['POST'])
+def delete_quiz_attempt(attempt_id):
+    attempt = QuizResult.query.get_or_404(attempt_id)
+    if attempt.user_id != session.get('user_id'):
+        return "Unauthorized", 403
+
+    db.session.delete(attempt)
+    db.session.commit()
+    return redirect(url_for('stats_bp.dashboard'))

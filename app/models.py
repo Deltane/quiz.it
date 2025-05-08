@@ -37,16 +37,10 @@ class QuizResult(db.Model):
     quiz_type = db.Column(db.String(50), nullable=False)
     quiz = db.relationship('Quiz', backref='results')
 
-    def to_dict(self):
-        return {
-            'id': self.id,
-            'user_id': self.user_id,
-            'quiz_id': self.quiz_id,
-            'score': self.score,
-            'total_questions': self.total_questions,
-            'timestamp': self.timestamp.isoformat(),
-            'quiz_type': self.quiz_type
-        }
+    completed = db.Column(db.Boolean, default=False)
+    answers = db.Column(db.JSON, nullable=True)
+    title = db.Column(db.String(255), nullable=True)
+    time_remaining = db.Column(db.Integer, nullable=True)
 
 class Folder(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -76,8 +76,28 @@
     </section>
 
     <section class="stat-card">
-        <h2>Most Frequent Quiz Type</h2>
-        <p id="most-frequent-quiz-type">{{ stats.most_frequent_quiz_type }}</p>
+
+      <h2>Unfinished Quizzes</h2>
+      <div id="unfinished-quizzes-list">
+        {% for attempt in unfinished_attempts %}
+          <div class="quiz-entry">
+            <span class="quiz-title">{{ attempt.title or 'Untitled Quiz' }}</span>
+            <div class="action-button-wrapper">
+              <form action="/resume_quiz/{{ attempt.id }}" method="GET" style="display:inline;">
+                <button class="action-button" type="submit">Resume</button>
+              </form>
+              <form action="/delete_quiz_attempt/{{ attempt.id }}" method="POST" style="display:inline;">
+                <button class="action-button" type="submit">Delete</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="stat-card">
+      <h2>Most Frequent Quiz Type</h2>
+      <p id="most-frequent-quiz-type">{{ stats.most_frequent_quiz_type }}</p>
     </section>
 
     <section class="chart-section">
@@ -320,14 +340,21 @@
                   });
                 }
 
-                // Reattach delete confirmation
-                const deleteForm = newQuizEntry.querySelector('form[action^="/delete_quiz"]');
-                if (deleteForm) {
+                // Reattach delete confirmation (for any delete_quiz forms)
+                newQuizEntry.querySelectorAll('form[action^="/delete_quiz"]').forEach(deleteForm => {
                   deleteForm.addEventListener('submit', function (e) {
                     const confirmDelete = confirm('Are you sure you want to delete this quiz? This action cannot be undone.');
                     if (!confirmDelete) e.preventDefault();
                   });
-                }
+                });
+
+                // Reattach unassign confirmation
+                newQuizEntry.querySelectorAll('form[action^="/unassign_quiz_from_folder"]').forEach(unassignForm => {
+                  unassignForm.addEventListener('submit', function (e) {
+                    const confirmUnassign = confirm('Are you sure you want to unassign this quiz from the folder?');
+                    if (!confirmUnassign) e.preventDefault();
+                  });
+                });
 
               } else {
                 alert("Failed to assign quiz to folder.");

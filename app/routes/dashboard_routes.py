@@ -14,7 +14,7 @@ def dashboard_view():
     if not user:
         return redirect(url_for('auth.login'))
 
-    user_quizzes = Quiz.query.filter_by(user_id=user.id).order_by(Quiz.created_at.desc()).all()
+    user_quizzes = Quiz.query.filter_by(user_id=user.id, completed=True).order_by(Quiz.created_at.desc()).all()
     recent_quizzes = user_quizzes[:3]
     past_quizzes = user_quizzes[3:]
     user_folders = Folder.query.filter_by(user_id=user.id).all()
@@ -159,7 +159,7 @@ def assign_quiz_to_folder():
         db.session.add(quiz)
         db.session.commit()
 
-        quiz_html = render_template("components/_quiz_item.html", quiz=quiz)
+        quiz_html = render_template("components/_quiz_item.html", quiz=quiz, folder=folder)
         return jsonify({"quiz_html": quiz_html, "folder_id": folder.id})
     else:
         return jsonify({"error": "Invalid quiz selected."}), 400
