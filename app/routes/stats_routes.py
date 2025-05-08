@@ -1,5 +1,5 @@
-from flask import Blueprint, jsonify, request, render_template
-from app.models import QuizResult
+from flask import Blueprint, jsonify, session, request, render_template
+from app.models import QuizResult, Quiz
 from app import db
 from flask_login import login_required, current_user
 from app.utils.stats_helpers import get_user_stats
@@ -14,7 +14,25 @@ def get_stats():
 @stats_bp.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    return render_template('dashboard.html', stats=get_user_stats(current_user.id))
+    user_id = current_user.id
+
+    quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
+    quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
+    recent_quiz_results = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
+    recent_quizzes = [result.quiz for result in recent_quiz_results if result.quiz is not None]
+    most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
+
+    from app.models import Folder
+    folders = Folder.query.filter_by(user_id=user_id).all()
+
+    stats = {
+        'quizzes_completed': quizzes_completed,
+        'quizzes_above_80': quizzes_above_80,
+        'recent_quizzes': [{'id': quiz.id, 'title': quiz.title} for quiz in recent_quizzes],
+        'most_frequent_quiz_type': most_frequent_quiz_type[0] if most_frequent_quiz_type else None
+    }
+
+    return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders)
 
 @stats_bp.route('/filter_stats', methods=['POST'])
 @login_required

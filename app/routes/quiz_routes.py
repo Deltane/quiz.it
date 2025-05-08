@@ -35,7 +35,9 @@ def store_quiz():
         questions = request.json['quiz']
         folder_id = session.pop("folder_id", None)
         folder = Folder.query.get(folder_id) if folder_id else None
-        quiz = Quiz(title=topic, questions_json=json.dumps(questions), user_id=user.id, folder=folder)
+        quiz = Quiz(title=topic, questions_json=json.dumps(questions), user_id=user.id)
+        if folder:
+            quiz.folders.append(folder)
         db.session.add(quiz)
         db.session.commit()
         # ✅ Add these lines
@@ -50,35 +52,50 @@ def redo_quiz(quiz_id):
     from app.models import Quiz
     import json
     quiz = Quiz.query.get_or_404(quiz_id)
+
+    # Authorization check
+    if quiz.user_id != session.get("user_id"):
+        return "Unauthorized", 403
+
     session['quiz'] = json.loads(quiz.questions_json)
     session['score'] = 0
     session['current_question'] = 0
     session['answers'] = {}
+    session['quiz_id'] = quiz.id
+    session['quiz_type'] = quiz.title
+
     return redirect(url_for('quiz_routes.take_quiz'))
 
 @quiz_routes.route('/delete_quiz/<int:quiz_id>', methods=['POST'])
 def delete_quiz(quiz_id):
-    from app.models import Quiz, db
+    from app.models import Quiz, QuizResult, db
     quiz = Quiz.query.get_or_404(quiz_id)
+
+    # Authorization check
+    if quiz.user_id != session.get("user_id"):
+        return "Unauthorized", 403
+
+    # Delete related results
+    QuizResult.query.filter_by(quiz_id=quiz.id).delete()
     db.session.delete(quiz)
     db.session.commit()
-    return redirect(url_for('dashboard.dashboard_view'))
+    return redirect(url_for('stats_bp.dashboard'))
 
-@quiz_routes.route('/create_quiz_for_folder/<int:folder_id>', methods=['GET'])
-def create_quiz_for_folder(folder_id):
-    from app.models import Folder, User
-    user_email = session.get("user_email")
-    user = User.query.filter_by(email=user_email).first()
-    if not user:
-        return redirect(url_for('quiz_routes.home'))
+@quiz_routes.route('/rename_quiz/<int:quiz_id>', methods=['POST'])
+def rename_quiz(quiz_id):
+    from app.models import Quiz
+    new_title = request.form.get('new_title')
+    quiz = Quiz.query.get_or_404(quiz_id)
 
-    folder = Folder.query.get(folder_id)
-    if not folder or folder.user_id != user.id:
-        return "Unauthorized access or folder not found", 403
+    # Authorization check
+    if quiz.user_id != session.get("user_id"):
+        return "Unauthorized", 403
 
-    # Store folder ID in session and redirect to create_quiz page
-    session['folder_id'] = folder.id
-    return redirect(url_for('ai_routes.generate_quiz'))  # Ensure this route exists
+    if new_title:
+        quiz.title = new_title
+        db.session.commit()
+
+    return redirect(url_for('stats_bp.dashboard'))
 
 @quiz_routes.route('/get_question/<int:question_index>', methods=['GET'])
 def get_question(question_index):
