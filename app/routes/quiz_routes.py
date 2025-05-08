@@ -117,6 +117,8 @@ def get_question(question_index):
 
 @quiz_routes.route('/submit_answer', methods=['POST'])
 def submit_answer():
+    if not session.get('user_id'):
+        return jsonify({'error': 'Session expired. Please log in again.'}), 401
     data = request.json
     question_index = data['questionIndex']
     user_answer = data['answer']
@@ -160,6 +162,7 @@ def submit_answer():
             title=quiz_title,
             completed=True
         )
+
         db.session.add(quiz_result)
         db.session.commit()
 

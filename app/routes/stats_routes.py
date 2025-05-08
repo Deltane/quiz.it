@@ -2,12 +2,14 @@ from flask import Blueprint, jsonify, session, request, render_template
 from app.models import QuizResult, Quiz
 from app import db
 from flask_login import login_required, current_user
+from app.utils.stats_helpers import get_user_stats
 
 stats_bp = Blueprint('stats_bp', __name__)
 
 @stats_bp.route('/stats', methods=['GET'])
 @login_required
 def get_stats():
+
     user_id = current_user.id
 
     quizzes_completed = QuizResult.query.filter_by(user_id=user_id, completed=True).count()
@@ -62,13 +64,19 @@ def filter_stats():
     elif filter_type == 'recent_topics':
         query = query.order_by(QuizResult.timestamp.desc())
     elif filter_type == 'most_frequent_quiz_type':
-        query = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc())
+        query = db.session.query(
+            QuizResult.quiz_type,
+            db.func.count(QuizResult.quiz_type)
+        ).filter_by(user_id=user_id).group_by(
+            QuizResult.quiz_type
+        ).order_by(
+            db.func.count(QuizResult.quiz_type).desc()
+        )
+        # Skip ordering again
+        return jsonify([
+            {'quiz_type': row[0], 'count': row[1]}
+            for row in query.all()
+        ])
 
-    if sort_order == 'asc':
-        query = query.order_by(QuizResult.timestamp.asc())
-    else:
-        query = query.order_by(QuizResult.timestamp.desc())
-
-    filtered_stats = query.all()
-
-    return jsonify([result.to_dict() for result in filtered_stats])
+    query = query.order_by(QuizResult.timestamp.asc() if sort_order == 'asc' else QuizResult.timestamp.desc())
+    return jsonify([result.to_dict() for result in query.all()])

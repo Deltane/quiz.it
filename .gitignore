@@ -4,6 +4,7 @@ config/client_secret.json.env
 flask_session/
 venv/
 .venv/
+myvenv/
 
 # Python bytecode
 *.pyc
@@ -14,16 +15,27 @@ __pycache__/
 # IDE-specific files
 .idea/
 .vscode/
+.mypy_cache/
+.pytest_cache/
 
 # Logs and temporary files
 *.log
 *.tmp
 *.swp
+*.bak
+*.orig
 
 # OS-specific files
 .DS_Store
+Thumbs.db
 
 # Build artifacts
 build/
 dist/
 *.egg-info/
+
+# Coverage reports
+*.coverage
+
+# Jupyter Notebook checkpoints
+instance/db
