@@ -100,6 +100,7 @@
                 const formData = new FormData(this);
                 $('#quiz-result').html('<p class="message">Generating quiz...</p>'); 
     
+                const token = document.querySelector('input[name="csrf_token"]').value;
                 fetch('/generate_quiz', {
                     method: 'POST',
                     body: formData
@@ -111,9 +112,13 @@
                     fetch('/store_quiz', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': token
                         },
-                        body: JSON.stringify({ quiz: data.quiz, quiz_title: $('#quiz-name').val() })
+                        body: JSON.stringify({
+                            quiz: data.quiz,
+                            quiz_title: $('#quiz-name').val(),
+                            csrf_token: token})
                     })
                     .then(() => {
                         // Show the "Start Quiz" button
