@@ -227,3 +227,9 @@ body {
 #timer-progress.warning-10s {
     background-color: #990000;
 }
+
+#resultChart {
+    display: block;
+    width: 100%;
+    height: auto;
+}

@@ -162,6 +162,16 @@ def submit_answer():
             title=quiz_title,
             completed=True
         )
+        score = 0
+        correctness_list = []
+
+        for i, question in enumerate(quiz):
+            user_ans = str(session['answers'].get(i, '')).lower().strip()
+            correct_ans = str(question['answer']).lower().strip()
+            is_correct = user_ans == correct_ans
+            correctness_list.append(is_correct)
+            if is_correct:
+                score += 1
 
         db.session.add(quiz_result)
         db.session.commit()
@@ -185,7 +195,8 @@ def submit_answer():
         return jsonify({
             'completed': True,
             'score': score,
-            'total': len(quiz)
+            'total': len(quiz),
+            'results': correctness_list
         })
 
     return jsonify({'completed': False})

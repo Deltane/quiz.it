@@ -113,6 +113,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 document.getElementById('question-container').innerHTML = `
                     <div class="result">
                         <p>Quiz completed! Your score is: ${data.score}</p>
+                        <canvas id="resultChart" width="400" height="200" style="margin-top: 20px;"></canvas>
                         <div class="button-group" style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                             <a href="/create_quiz" class="btn">Redo</a>
                             <a href="/" class="btn">Home</a>
