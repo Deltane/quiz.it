@@ -9,6 +9,20 @@ from dotenv import load_dotenv
 from PIL import Image
 from flask import render_template, session, request
 from app.forms import QuizSetupForm
+from flask_wtf.csrf import validate_csrf, CSRFError
+
+# Define the blueprint
+ai_routes = Blueprint('ai_routes', __name__)
+
+@ai_routes.route('/store_quiz', methods=['POST'])
+def store_quiz():
+    data = request.get_json()
+    csrf_token = data.get('csrf_token') or request.headers.get('X-CSRFToken')
+    try:
+        validate_csrf(csrf_token)
+    except CSRFError:
+        return jsonify({'error': 'Invalid CSRF token'}), 400
+    # ...rest of your logic...
 
 # Define the blueprint
 ai_routes = Blueprint('ai_routes', __name__)
