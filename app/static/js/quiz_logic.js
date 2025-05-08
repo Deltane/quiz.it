@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function () {
     let currentQuestionIndex = 0;
     let score = 0;
     let timerInterval;
-    const questionTimeLimit = 30; // 30 seconds per question
 
     function resetQuiz() {
         currentQuestionIndex = 0;
@@ -14,23 +13,29 @@ document.addEventListener('DOMContentLoaded', function () {
 
     function startTimer() {
         const timerProgress = document.getElementById('timer-progress');
-        let timeLeft = questionTimeLimit * 1000;
-        const interval = 100;
-        const decrement = 100 / (timeLeft / interval);
+        const timerDisplay = document.getElementById('timer-display');
+        let totalDuration = parseInt(timerProgress.getAttribute('data-total-time')) || 60;
+        let elapsed = 0;
 
-        timerProgress.style.width = '100%';
+        timerProgress.style.transition = `width ${totalDuration}s linear`;
+        timerProgress.style.width = '0%';
+        timerDisplay.textContent = formatTime(totalDuration);
 
         timerInterval = setInterval(() => {
-            timeLeft -= interval;
-            const percentage = (timeLeft / (questionTimeLimit * 1000)) * 100;
-            timerProgress.style.width = `${percentage}%`;
+            elapsed++;
+            timerDisplay.textContent = formatTime(totalDuration - elapsed);
 
-            if (timeLeft <= 0) {
+            if (elapsed >= totalDuration) {
                 clearInterval(timerInterval);
-                alert('Time is up for this question! Moving to the next question.');
                 submitAnswer(null);
             }
-        }, interval);
+        }, 1000);
+    }
+
+    function formatTime(seconds) {
+        const mins = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const secs = (seconds % 60).toString().padStart(2, '0');
+        return `${mins}:${secs}`;
     }
 
     function stopTimer() {

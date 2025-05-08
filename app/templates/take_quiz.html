@@ -229,42 +229,6 @@
                 }
             });
 
-            function displayQuestion(questionData) {
-                const questionText = document.getElementById('question-text');
-                const answerContainer = document.getElementById('answer-container');
-                
-                questionText.textContent = questionData.question;
-                answerContainer.innerHTML = '';
-
-                if (questionData.type === 'Fill in the Blank') {
-                    answerContainer.innerHTML = `
-                        <input type="text" 
-                            class="form-control answer-input" 
-                            placeholder="Type your answer here">
-                    `;
-                } else if (questionData.type === 'Short Answer') {
-                    answerContainer.innerHTML = `
-                        <textarea class="form-control answer-input" 
-                                rows="3" 
-                                placeholder="Type your answer here"></textarea>
-                    `;
-                } else {
-                    // Multiple Choice
-                    questionData.options.forEach((option, index) => {
-                        answerContainer.innerHTML += `
-                            <div class="form-check">
-                                <input class="form-check-input" 
-                                    type="radio" 
-                                    name="answer" 
-                                    value="${option}">
-                                <label class="form-check-label">
-                                    ${option}
-                                </label>
-                            </div>
-                        `;
-                    });
-                }
-            }
         
             // Submit the current question and load the next one
             function submitAnswer(selectedAnswer) {
