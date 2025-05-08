@@ -37,6 +37,11 @@ class QuizResult(db.Model):
     quiz_type = db.Column(db.String(50), nullable=False)
     quiz = db.relationship('Quiz', backref='results')
 
+    completed = db.Column(db.Boolean, default=False)
+    answers = db.Column(db.JSON, nullable=True)
+    title = db.Column(db.String(255), nullable=True)
+    time_remaining = db.Column(db.Integer, nullable=True)
+
 class Folder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)

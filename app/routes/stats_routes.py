@@ -10,10 +10,10 @@ stats_bp = Blueprint('stats_bp', __name__)
 def get_stats():
     user_id = current_user.id
 
-    quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
-    quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
+    quizzes_completed = QuizResult.query.filter_by(user_id=user_id, completed=True).count()
+    quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id, completed=True).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
     recent_topics = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
-    most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
+    most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
 
     stats = {
         'quizzes_completed': quizzes_completed,
@@ -29,14 +29,15 @@ def get_stats():
 def dashboard():
     user_id = current_user.id
 
-    quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
-    quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
-    recent_quiz_results = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
+    quizzes_completed = QuizResult.query.filter_by(user_id=user_id, completed=True).count()
+    quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id, completed=True).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
+    recent_quiz_results = QuizResult.query.filter_by(user_id=user_id, completed=True).order_by(QuizResult.timestamp.desc()).limit(5).all()
     recent_quizzes = [result.quiz for result in recent_quiz_results if result.quiz is not None]
-    most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
+    most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
 
     from app.models import Folder
     folders = Folder.query.filter_by(user_id=user_id).all()
+    unfinished_attempts = QuizResult.query.filter_by(user_id=user_id, completed=False).order_by(QuizResult.timestamp.desc()).all()
 
     stats = {
         'quizzes_completed': quizzes_completed,
@@ -45,7 +46,7 @@ def dashboard():
         'most_frequent_quiz_type': most_frequent_quiz_type[0] if most_frequent_quiz_type else None
     }
 
-    return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders)
+    return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders, unfinished_attempts=unfinished_attempts)
 
 @stats_bp.route('/filter_stats', methods=['POST'])
 @login_required

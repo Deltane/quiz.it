@@ -70,6 +70,25 @@
     </section>
 
     <section class="stat-card">
+      <h2>Unfinished Quizzes</h2>
+      <div id="unfinished-quizzes-list">
+        {% for attempt in unfinished_attempts %}
+          <div class="quiz-entry">
+            <span class="quiz-title">{{ attempt.title or 'Untitled Quiz' }}</span>
+            <div class="action-button-wrapper">
+              <form action="/resume_quiz/{{ attempt.id }}" method="GET" style="display:inline;">
+                <button class="action-button" type="submit">Resume</button>
+              </form>
+              <form action="/delete_quiz_attempt/{{ attempt.id }}" method="POST" style="display:inline;">
+                <button class="action-button" type="submit">Delete</button>
+              </form>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+    </section>
+
+    <section class="stat-card">
       <h2>Most Frequent Quiz Type</h2>
       <p id="most-frequent-quiz-type">{{ stats.most_frequent_quiz_type }}</p>
     </section>

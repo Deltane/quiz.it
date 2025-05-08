@@ -31,23 +31,26 @@
             <button id="prev-question" class="btn btn-secondary" style="display: none; flex: 1; margin-right: 10px;">Previous Question</button>
             <button id="next-question" class="btn btn-primary" style="display: none; flex: 1;">Next Question</button>
         </div>
+        <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
+            <button id="pause-resume-btn" class="btn btn-primary">Pause</button>
+            <button id="exit-quiz-btn" class="btn btn-primary">Exit Quiz</button>
+        </div>
     </div>
 
     <script>
         const homeUrl = "{{ url_for('quiz_routes.home') }}";
         let totalTimeMinutes = Number({{ session.get('quiz_duration', 5) }});
         let totalTime = totalTimeMinutes * 60;
-        let timeLeft = totalTime;
+        let timeLeft = Number({{ session.get('time_remaining', session.get('quiz_duration', 5) * 60) }});
     </script>
         
     <script>
         $(document).ready(function () {
-            let currentQuestionIndex = 0;
+            let currentQuestionIndex = Number({{ session.get('current_question', 0) }});
             let score = 0;
             let timerInterval;
             let timerStarted = false;
             let answers = [];
-            // const questionTimeLimit = 30; // 30 seconds per question (too short?)
     
             function resetQuiz() {
                 currentQuestionIndex = 0;
@@ -281,6 +284,8 @@
                         $('#next-question').hide();
                         $('#prev-question').hide();
                         $('#timer-container').hide();
+                        $('#pause-resume-btn').hide();
+                        $('#exit-quiz-btn').hide();
                     } else {
                         // Increment the question index and load the next question
                         currentQuestionIndex++;
@@ -295,6 +300,34 @@
     
             // Load the first question on page load
             loadQuestion();
+
+            let isPaused = false;
+
+            function togglePauseResume() {
+                const pauseBtn = $('#pause-resume-btn');
+                if (!isPaused) {
+                    stopTimer();
+                    timerStarted = false;  // Ensure startTimer will run again
+                    isPaused = true;
+                    pauseBtn.text('Resume');
+                } else {
+                    startTimer();
+                    isPaused = false;
+                    pauseBtn.text('Pause');
+                }
+            }
+
+            function exitQuiz() {
+                $.post('/exit_quiz', { time_left: timeLeft }, function () {
+                    alert("Your progress has been saved. You will now return to the dashboard.");
+                    window.location.href = "/dashboard";
+                }).fail(function () {
+                    alert("Failed to exit quiz. Please try again.");
+                });
+            }
+
+            $('#pause-resume-btn').click(togglePauseResume);
+            $('#exit-quiz-btn').click(exitQuiz);
         });
     </script>
     
