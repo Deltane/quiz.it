@@ -64,44 +64,57 @@
                 $('#question-container').empty();
             }
     
-            // Start the timer
+            // Start the timer using requestAnimationFrame for smoother and more accurate progress updates
             function startTimer() {
                 if (timerStarted) return;
                 timerStarted = true;
 
                 const timerProgress = $('#timer-progress');
                 const countdownText = $('#countdown-timer');
+                const totalDuration = totalTime; // in seconds
 
-                timerInterval = setInterval(() => {
-                    timeLeft--;
-                    const percentage = (timeLeft / totalTime) * 100;
-                    timerProgress.css('width', `${percentage}%`);
-    
-                    // Color change
-                    if (timeLeft <= 10) {
-                        timerProgress.css('background-color', '#ff0000');
-                    } else if (timeLeft <= 30) {
-                        timerProgress.css('background-color', '#ff6600');
-                    } else if (timeLeft <= 60) {
-                        timerProgress.css('background-color', '#ffcc00');
+                let lastTime = Date.now();
+
+                function updateTimer() {
+                    if (!isPaused) {
+                        const now = Date.now();
+                        const delta = (now - lastTime) / 1000;
+                        timeLeft -= delta;
+                        lastTime = now;
+
+                        const percentage = Math.max((timeLeft / totalDuration) * 100, 0);
+                        timerProgress.css('width', `${percentage}%`);
+
+                        if (timeLeft <= 10) {
+                            timerProgress.css('background-color', '#ff0000');
+                        } else if (timeLeft <= 30) {
+                            timerProgress.css('background-color', '#ff6600');
+                        } else if (timeLeft <= 60) {
+                            timerProgress.css('background-color', '#ffcc00');
+                        } else {
+                            timerProgress.css('background-color', '#4caf50');
+                        }
+
+                        const minutes = Math.floor(timeLeft / 60);
+                        const seconds = Math.floor(timeLeft % 60);
+                        countdownText.text(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+
+                        if (Math.floor(timeLeft) === 60) alert("1 minute remaining!");
+                        if (Math.floor(timeLeft) === 30) alert("30 seconds remaining!");
+                        if (Math.floor(timeLeft) === 10) alert("10 seconds remaining!");
+
+                        if (timeLeft <= 0) {
+                            countdownText.text("0:00");
+                            submitAnswer(null);
+                            return; // stop the loop
+                        }
                     } else {
-                        timerProgress.css('background-color', '#4caf50');
+                        lastTime = Date.now(); // Reset drift on pause
                     }
-    
-                    const minutes = Math.floor(timeLeft / 60);
-                    const seconds = timeLeft % 60;
-                    countdownText.text(`${minutes}:${seconds.toString().padStart(2, '0')}`);
-    
-                    if (timeLeft === 60) alert("1 minute remaining!");
-                    if (timeLeft === 30) alert("30 seconds remaining!");
-                    if (timeLeft === 10) alert("10 seconds remaining!");
-    
-                    if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
-                        alert("Time's up! Submitting your answer.");
-                        submitAnswer(null);
-                    }
-                }, 1000);
+                    requestAnimationFrame(updateTimer);
+                }
+
+                requestAnimationFrame(updateTimer);
             }
     
             // Stop the timer
@@ -346,12 +359,9 @@
             function togglePauseResume() {
                 const pauseBtn = $('#pause-resume-btn');
                 if (!isPaused) {
-                    stopTimer();
-                    timerStarted = false;  // Ensure startTimer will run again
                     isPaused = true;
                     pauseBtn.text('Resume');
                 } else {
-                    startTimer();
                     isPaused = false;
                     pauseBtn.text('Pause');
                 }

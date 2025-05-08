@@ -52,7 +52,7 @@ body {
     height: 100%;
     background-color: #ffffff; /* Bright green for the timer */
     width: 100%; /* Start fully filled */
-    transition: width 0.1s linear; /* Smooth shrinking effect */
+    transition: width 0.25s linear; /* Smooth shrinking effect */
 }
 
 /* Answer options */
@@ -232,4 +232,8 @@ body {
     display: block;
     width: 100%;
     height: auto;
+}
+
+#timer-progress.paused {
+  transition: none;
 }
