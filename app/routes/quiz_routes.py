@@ -151,6 +151,10 @@ def submit_answer():
         print("Session contents before saving QuizResult:", dict(session))
 
         QuizResult.query.filter_by(user_id=user_id, quiz_id=quiz_id, completed=False).delete()
+        # Also remove any previously completed attempts for this quiz to prevent duplicates
+        existing_completed = QuizResult.query.filter_by(user_id=user_id, quiz_id=quiz_id, completed=True).first()
+        if existing_completed:
+            db.session.delete(existing_completed)
 
         quiz_result = QuizResult(
             user_id=user_id,
