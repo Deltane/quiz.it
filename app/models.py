@@ -47,4 +47,4 @@ class Folder(db.Model):
     name = db.Column(db.String(120), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('folders', lazy=True))
-    quizzes = db.relationship('Quiz', secondary=quiz_folder_association, back_populates='folders'
+    quizzes = db.relationship('Quiz', secondary=quiz_folder_association, back_populates='folders')
