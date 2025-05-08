@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Quiz</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
@@ -46,16 +47,6 @@
             <div class="form-group">
                 {{ form.question_count.label }}
                 {{ form.question_count(class="form-control", id="question-count", min="1", max="50") }}
-            </div>
-            
-            <div class="form-group">
-                {{ form.privacy.label }}
-                {% for subfield in form.privacy %}
-                    <div class="form-check">
-                        {{ subfield(class="form-check-input") }}
-                        {{ subfield.label(class="form-check-label") }}
-                    </div>
-                {% endfor %}
             </div>
             
             {{ form.submit(class="btn btn-primary") }}
@@ -124,6 +115,13 @@
                             <p class="message">Quiz generated successfully!</p>
                             <button id="start-quiz" type="button" class="btn btn-secondary">Start Quiz</button>
                         `);
+
+                        // Trigger confetti animation
+                        confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 }
+                        });
 
                         // Add click event to the "Start Quiz" button
                         $('#start-quiz').on('click', function () {
