@@ -37,9 +37,20 @@ class QuizResult(db.Model):
     quiz_type = db.Column(db.String(50), nullable=False)
     quiz = db.relationship('Quiz', backref='results')
 
+    def to_dict(self):
+        return {
+            'id': self.id,
+            'user_id': self.user_id,
+            'quiz_id': self.quiz_id,
+            'score': self.score,
+            'total_questions': self.total_questions,
+            'timestamp': self.timestamp.isoformat(),
+            'quiz_type': self.quiz_type
+        }
+
 class Folder(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(120), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('folders', lazy=True))
-    quizzes = db.relationship('Quiz', secondary=quiz_folder_association, back_populates='folders')
+    quizzes = db.relationship('Quiz', secondary=quiz_folder_association, back_populates='folders'

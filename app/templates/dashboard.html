@@ -2,45 +2,51 @@
 <html lang="en">
   
 <head>
-  <meta charset="UTF-8">
-  <title>Quiz Dashboard</title>
-  <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <meta charset="UTF-8">
+    <title>Quiz Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<!-- check if project specs can use this / change to own chart script written -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 
 <body>
-  <!-- Header Navigation -->
-  <header>
+<!-- Header Navigation -->
+<header>
     <nav class="fixed-nav">
-      <div class="nav-left">
-        <span class="dashboard-title">Quiz Dashboard</span>
-      </div>
-      <div class="nav-right">
-        {% if session.get('user_email') %}
-          <a href="/" class="nav-button">Home</a>
-          <a href="/create_quiz" class="nav-button">Create Quiz</a>
-          <div class="user-info">
-            <span>{{ session.get('user_name', session['user_email']) }}</span>
-            <img src="{{ session['user_pic'] }}" alt="Profile" style="height: 30px; width: 30px; border-radius: 50%; object-fit: cover;">
-            <a href="{{ url_for('auth.logout') }}" class="nav-button">Sign Out</a>
-          </div>
-        {% else %}
-          <a href="{{ url_for('auth.login') }}" class="nav-button">Sign In with Google</a>
-        {% endif %}
-      </div>
+        <div class="nav-left">
+            <span class="dashboard-title">Quiz Dashboard</span>
+        </div>
+        <div class="nav-right">
+            {% if session.get('user_email') %}
+                <a href="/" class="nav-button">Home</a>
+                <a href="/create_quiz" class="nav-button">Create Quiz</a>
+                <div class="user-info">
+                    <span>{{ session.get('user_name', session['user_email']) }}</span>
+                    <img src="{{ session['user_pic'] }}" alt="Profile"
+                         style="height: 30px; width: 30px; border-radius: 50%; object-fit: cover;">
+                    <a href="{{ url_for('auth.logout') }}" class="nav-button">Sign Out</a>
+                </div>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="nav-button">Sign In with Google</a>
+            {% endif %}
+        </div>
     </nav>
-  </header>
+</header>
 
-  <!-- Main Dashboard Content -->
-  <main class="dashboard-container">
+<!-- Main Dashboard Content -->
+<main class="dashboard-container">
     <section class="stat-card">
-      <h2>Total Quizzes Completed</h2>
-      <p id="quizzes-completed">{{ stats.quizzes_completed }}</p>
+        <h2>Total Quizzes Completed</h2>
+        <p id="quizzes-completed">{{ stats.quizzes_completed }}</p>
     </section>
 
     <section class="stat-card">
-      <h2>Quizzes with Scores Above 80%</h2>
-      <p id="quizzes-above-80">{{ stats.quizzes_above_80 }}</p>
+        <h2>Your Highest Scoring Quiz</h2>
+        {% if stats.best_score %}
+            <p>{{ stats.best_score.score }}/{{ stats.best_score.total }} in {{ stats.best_score.type }}</p>
+        {% else %}
+            <p>No completed quizzes yet.</p>
+        {% endif %}
     </section>
 
     <section class="stat-card">
@@ -70,13 +76,13 @@
     </section>
 
     <section class="stat-card">
-      <h2>Most Frequent Quiz Type</h2>
-      <p id="most-frequent-quiz-type">{{ stats.most_frequent_quiz_type }}</p>
+        <h2>Most Frequent Quiz Type</h2>
+        <p id="most-frequent-quiz-type">{{ stats.most_frequent_quiz_type }}</p>
     </section>
 
     <section class="chart-section">
-      <h2>Quiz Performance</h2>
-      <canvas id="quiz-performance-chart"></canvas>
+        <h2>Quiz Performance</h2>
+        <canvas id="quiz-performance-chart"></canvas>
     </section>
 
     <section class="stat-card">
@@ -89,16 +95,16 @@
           <option value="recent_quizzes">Recent Quizzes</option>
           <option value="most_frequent_quiz_type">Frequent Type</option>
         </select>
+            <label for="sort-order">Sort:</label>
+            <select id="sort-order" name="sort_order">
+                <option value="desc">Descending</option>
+                <option value="asc">Ascending</option>
+            </select>
 
-        <label for="sort-order">Sort:</label>
-        <select id="sort-order" name="sort_order">
-          <option value="desc">Descending</option>
-          <option value="asc">Ascending</option>
-        </select>
-
-        <button type="submit">Apply</button>
-      </form>
+            <button type="submit">Apply</button>
+        </form>
     </section>
+  
     <section class="stat-card folder-panel">
       <h2>Your Folders</h2>
 
@@ -176,40 +182,40 @@
     </section>
   </main>
 
-  <!-- Chart & Filter Script -->
-  <script>
+<!-- Chart & Filter Script -->
+<script>
     document.addEventListener('DOMContentLoaded', function () {
-      const ctx = document.getElementById('quiz-performance-chart').getContext('2d');
-      const quizPerformanceChart = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: ['Total Quizzes', 'Above 80%'],
-          datasets: [{
-            label: 'Quiz Performance',
-            data: [{{ stats.quizzes_completed }}, {{ stats.quizzes_above_80 }}],
-            backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)'],
-            borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
-            borderWidth: 1
-          }]
-        },
-        options: {
-          responsive: true,
-          animation: {
-            duration: 1000,
-            easing: 'easeInOutBounce'
-          },
-          scales: {
-            y: {
-              beginAtZero: true
+        const ctx = document.getElementById('quiz-performance-chart').getContext('2d');
+        const quizPerformanceChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: ['Total Quizzes', 'Above 80%'],
+                datasets: [{
+                    label: 'Quiz Performance',
+                    data: [{{ stats.quizzes_completed }}, {{ stats.quizzes_above_80 }}],
+                    backgroundColor: ['rgba(75, 192, 192, 0.2)', 'rgba(255, 99, 132, 0.2)'],
+                    borderColor: ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)'],
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                animation: {
+                    duration: 1000,
+                    easing: 'easeInOutBounce'
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
             }
-          }
-        }
-      });
+        });
 
-      document.getElementById('filter-form').addEventListener('submit', function (event) {
-        event.preventDefault();
-        const filterType = document.getElementById('filter-type').value;
-        const sortOrder = document.getElementById('sort-order').value;
+        document.getElementById('filter-form').addEventListener('submit', function (event) {
+            event.preventDefault();
+            const filterType = document.getElementById('filter-type').value;
+            const sortOrder = document.getElementById('sort-order').value;
 
         fetch('/filter_stats', {
           method: 'POST',

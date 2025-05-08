@@ -117,6 +117,8 @@ def get_question(question_index):
 
 @quiz_routes.route('/submit_answer', methods=['POST'])
 def submit_answer():
+    if not session.get('user_id'):
+        return jsonify({'error': 'Session expired. Please log in again.'}), 401
     data = request.json
     question_index = data['questionIndex']
     user_answer = data['answer']
@@ -159,19 +161,6 @@ def submit_answer():
             timestamp=timestamp,
             quiz_type=quiz_type
         )
-        db.session.add(quiz_result)
-        db.session.commit()
-
-        # Calculate and store quiz statistics
-        quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
-        quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
-        recent_topics = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
-        most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
-
-        session['quizzes_completed'] = quizzes_completed
-        session['quizzes_above_80'] = quizzes_above_80
-        session['recent_topics'] = [result.quiz_type for result in recent_topics]
-        session['most_frequent_quiz_type'] = most_frequent_quiz_type[0] if most_frequent_quiz_type else None
 
         # Clean up session
         session.pop('quiz', None)
