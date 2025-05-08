@@ -81,35 +81,40 @@
                         const delta = (now - lastTime) / 1000;
                         timeLeft -= delta;
                         lastTime = now;
-
-                        const percentage = Math.max((timeLeft / totalDuration) * 100, 0);
-                        timerProgress.css('width', `${percentage}%`);
-
-                        if (timeLeft <= 10) {
-                            timerProgress.css('background-color', '#ff0000');
-                        } else if (timeLeft <= 30) {
-                            timerProgress.css('background-color', '#ff6600');
-                        } else if (timeLeft <= 60) {
-                            timerProgress.css('background-color', '#ffcc00');
-                        } else {
-                            timerProgress.css('background-color', '#4caf50');
-                        }
-
-                        const minutes = Math.floor(timeLeft / 60);
-                        const seconds = Math.floor(timeLeft % 60);
-                        countdownText.text(`${minutes}:${seconds.toString().padStart(2, '0')}`);
-
-                        if (Math.floor(timeLeft) === 60) alert("1 minute remaining!");
-                        if (Math.floor(timeLeft) === 30) alert("30 seconds remaining!");
-                        if (Math.floor(timeLeft) === 10) alert("10 seconds remaining!");
-
-                        if (timeLeft <= 0) {
-                            countdownText.text("0:00");
-                            submitAnswer(null);
-                            return; // stop the loop
-                        }
                     } else {
                         lastTime = Date.now(); // Reset drift on pause
+                    }
+
+                    const percentage = Math.max((timeLeft / totalDuration) * 100, 0);
+                    timerProgress.css('width', `${percentage}%`);
+                    if (!isPaused) {
+                        timerProgress.css('transition', 'width 1s linear');
+                    } else {
+                        timerProgress.css('transition', 'none');
+                    }
+
+                    if (timeLeft <= 10) {
+                        timerProgress.css('background-color', '#ff0000');
+                    } else if (timeLeft <= 30) {
+                        timerProgress.css('background-color', '#ff6600');
+                    } else if (timeLeft <= 60) {
+                        timerProgress.css('background-color', '#ffcc00');
+                    } else {
+                        timerProgress.css('background-color', '#4caf50');
+                    }
+
+                    const minutes = Math.floor(timeLeft / 60);
+                    const seconds = Math.floor(timeLeft % 60);
+                    countdownText.text(`${minutes}:${seconds.toString().padStart(2, '0')}`);
+
+                    if (Math.floor(timeLeft) === 60) alert("1 minute remaining!");
+                    if (Math.floor(timeLeft) === 30) alert("30 seconds remaining!");
+                    if (Math.floor(timeLeft) === 10) alert("10 seconds remaining!");
+
+                    if (timeLeft <= 0) {
+                        countdownText.text("0:00");
+                        submitAnswer(null);
+                        return; // stop the loop
                     }
                     requestAnimationFrame(updateTimer);
                 }
