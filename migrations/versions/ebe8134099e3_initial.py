@@ -1,8 +1,8 @@
-"""Add completed column to QuizResult
+"""Initial
 
-Revision ID: 86af1a62ef4e
+Revision ID: ebe8134099e3
 Revises: 
-Create Date: 2025-05-08 14:22:41.557519
+Create Date: 2025-05-09 11:48:18.465509
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '86af1a62ef4e'
+revision = 'ebe8134099e3'
 down_revision = None
 branch_labels = None
 depends_on = None
