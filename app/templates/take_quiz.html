@@ -13,19 +13,12 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/create_quiz.css') }}">
     <link rel="stylesheet" href="../static/css/take_quiz.css">
     <script src="{{ url_for('static', filename='js/quiz_logic.js') }}"></script>
-
-    <style>
-        .timer-text {
-            text-align: center;
-            margin-top: 8px;
-        }
-    </style>
 </head>
 
 <body>
     <div class="container">
         <h2 id="quiz-title">{{ session.get('topic', 'Quiz') }}</h2>
-        <div id="timer-container">
+        <div id="timer-container" data-total-time="{{ quiz_duration * 60 }}">
             <div id="timer-progress"></div>
         </div>
         <div id="countdown-timer" class="timer-text">Loading...</div>

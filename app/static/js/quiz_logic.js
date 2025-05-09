@@ -1,5 +1,8 @@
 let answers = [];
 $(document).ready(function () {
+    // Get the total quiz time from a data attribute, fallback to 5 minutes (300s)
+    const totalQuizTime = parseInt($('#timer-container').data('total-time')) || 300; // fallback: 5 minutes
+    let remainingTime = totalQuizTime;
     let currentQuestionIndex = 0;
     let score = 0;
     let timerInterval;
@@ -14,21 +17,35 @@ $(document).ready(function () {
 
     function startTimer() {
         const $timerProgress = $('#timer-progress');
-        const $timerDisplay = $('#timer-display');
-        const totalDuration = parseInt($timerProgress.data('total-time')) || 60;
-        let elapsed = 0;
+        const $timerDisplay = $('#countdown-timer');
+        const totalDuration = totalQuizTime;
 
-        $timerProgress.css({
-            transition: `width ${totalDuration}s linear`,
-            width: '0%'
-        });
-        $timerDisplay.text(formatTime(totalDuration));
+        let warned60 = false, warned30 = false, warned10 = false;
+
+        $timerProgress.css('width', '100%');
+        $timerDisplay.text(formatTime(remainingTime));
 
         timerInterval = setInterval(() => {
-            elapsed++;
-            $timerDisplay.text(formatTime(totalDuration - elapsed));
+            remainingTime--;
+            $timerDisplay.text(formatTime(remainingTime));
+            const progressPercent = (remainingTime / totalQuizTime) * 100;
+            $timerProgress.css('width', `${progressPercent}%`);
 
-            if (elapsed >= totalDuration) {
+            if (remainingTime === 60 && !warned60) {
+                $timerProgress.removeClass().addClass('warning-1min');
+                alert('⚠️ You have 1 minute left!');
+                warned60 = true;
+            } else if (remainingTime === 30 && !warned30) {
+                $timerProgress.removeClass().addClass('warning-30s');
+                alert('⚠️ Only 30 seconds remaining!');
+                warned30 = true;
+            } else if (remainingTime === 10 && !warned10) {
+                $timerProgress.removeClass().addClass('warning-10s');
+                alert('⏰ 10 seconds left!');
+                warned10 = true;
+            }
+
+            if (remainingTime <= 0) {
                 clearInterval(timerInterval);
                 submitAnswer(null);
             }
@@ -87,7 +104,6 @@ $(document).ready(function () {
                         $('input[name="answer"]').val(prevAnswer);
                     }
                 }
-                startTimer();
             } else {
                 $questionContainer.html(`<p>Quiz completed! Your score is: ${score}</p>`);
                 $('#next-question').hide();
@@ -124,7 +140,6 @@ $(document).ready(function () {
     });
 
     function submitAnswer(selectedAnswer) {
-        stopTimer();
 
         // Store answer in the answers array
         answers[currentQuestionIndex] = selectedAnswer;
@@ -136,6 +151,9 @@ $(document).ready(function () {
             data: JSON.stringify({ questionIndex: currentQuestionIndex, answer: selectedAnswer }),
             success: function (data) {
                 if (data.completed) {
+                    stopTimer();
+                    $('#timer-container').hide();
+                    $('#countdown-timer').hide();
                     $('#question-container').html(`
                         <div class="result">
                             <p>Quiz completed! Your score is: ${data.score}</p>
@@ -147,7 +165,6 @@ $(document).ready(function () {
                             </div>
                         </div>
                     `);
-                    $('#timer-container').hide();
                     $('#prev-question').hide();
                     $('#next-question').hide();
                     $('#pause-resume-btn').hide();
@@ -164,6 +181,5 @@ $(document).ready(function () {
     }
 
     loadQuestion();
+    startTimer();
 });
-
-
