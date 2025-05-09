@@ -170,6 +170,38 @@ $(document).ready(function () {
                             </div>
                         </div>
                     `);
+                    const correctCount = data.score;
+                    const incorrectCount = data.total - data.score;
+
+                    const $chartCanvas = $('#resultChart');
+                    if ($chartCanvas.length > 0) {
+                        const chartCtx = $chartCanvas[0].getContext('2d');
+                        new Chart(chartCtx, {
+                            type: 'bar',
+                            data: {
+                                labels: ['Correct', 'Incorrect'],
+                                datasets: [{
+                                    label: 'Answers Summary',
+                                    data: [correctCount, incorrectCount],
+                                    backgroundColor: ['#82b74b', '#bc5a45']
+                                }]
+                            },
+                            options: {
+                                indexAxis: 'y',
+                                plugins: {
+                                    legend: {
+                                        display: false
+                                    }
+                                },
+                                scales: {
+                                    x: {
+                                        beginAtZero: true,
+                                        precision: 0
+                                    }
+                                }
+                            }
+                        });
+                    }
                     $('#prev-question').hide();
                     $('#next-question').hide();
                     $('#pause-resume-btn').hide();
