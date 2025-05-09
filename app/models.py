@@ -41,6 +41,7 @@ class QuizResult(db.Model):
     answers = db.Column(db.JSON, nullable=True)
     title = db.Column(db.String(255), nullable=True)
     time_remaining = db.Column(db.Integer, nullable=True)
+    quiz_duration = db.Column(db.Integer, nullable=True)  # in minutes
 
 class Folder(db.Model):
     id = db.Column(db.Integer, primary_key=True)

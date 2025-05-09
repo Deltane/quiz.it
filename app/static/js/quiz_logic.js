@@ -2,10 +2,10 @@ let answers = [];
 $(document).ready(function () {
     // Add pause state
     let isPaused = false;
-    // Get the total quiz time from a data attribute, fallback to 5 minutes (300s)
-    const totalQuizTime = parseInt($('#timer-container').data('total-time')) || 300; // fallback: 5 minutes
-    let remainingTime = totalQuizTime;
-    let currentQuestionIndex = 0;
+    // Get the full quiz time and remaining time from data attributes, fallback to 5 minutes (300s)
+    const fullQuizTime = parseInt($('#timer-container').data('full-time')) || 300;
+    let remainingTime = parseInt($('#timer-container').data('total-time')) || fullQuizTime;
+    let currentQuestionIndex = typeof INITIAL_QUESTION_INDEX !== 'undefined' ? INITIAL_QUESTION_INDEX : 0;
     let score = 0;
     let timerInterval;
 
@@ -20,18 +20,19 @@ $(document).ready(function () {
     function startTimer() {
         const $timerProgress = $('#timer-progress');
         const $timerDisplay = $('#countdown-timer');
-        const totalDuration = totalQuizTime;
+        const totalDuration = fullQuizTime;
 
         let warned60 = false, warned30 = false, warned10 = false;
 
-        $timerProgress.css('width', '100%');
+        const initialProgress = (remainingTime / totalDuration) * 100;
+        $timerProgress.css('width', `${initialProgress}%`);
         $timerDisplay.text(formatTime(remainingTime));
 
         timerInterval = setInterval(() => {
             if (!isPaused) {
                 remainingTime--;
                 $timerDisplay.text(formatTime(remainingTime));
-                const progressPercent = (remainingTime / totalQuizTime) * 100;
+                const progressPercent = (remainingTime / totalDuration) * 100;
                 $timerProgress.css('width', `${progressPercent}%`);
 
                 if (remainingTime === 60 && !warned60) {
@@ -204,4 +205,13 @@ $(document).ready(function () {
 
     loadQuestion();
     startTimer();
+
+    // Exit quiz button logic
+    $('#exit-quiz-btn').on('click', function () {
+        const confirmExit = confirm("Are you sure you want to exit the quiz? Your progress will be saved and you can resume it later.");
+        if (confirmExit) {
+            $('#time_left_input').val(remainingTime);
+            $('#exit-form').submit();
+        }
+    });
 });

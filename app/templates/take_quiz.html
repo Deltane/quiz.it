@@ -18,7 +18,9 @@
 <body>
     <div class="container">
         <h2 id="quiz-title">{{ session.get('topic', 'Quiz') }}</h2>
-        <div id="timer-container" data-total-time="{{ quiz_duration * 60 }}">
+        <div id="timer-container"
+             data-total-time="{{ time_remaining }}"
+             data-full-time="{{ quiz_duration * 60 }}">
             <div id="timer-progress"></div>
         </div>
         <div id="countdown-timer" class="timer-text">Loading...</div>
@@ -33,7 +35,13 @@
         <div style="display: flex; justify-content: center; gap: 10px; margin-top: 20px;">
             <button id="pause-resume-btn" class="btn btn-primary">Pause</button>
             <button id="exit-quiz-btn" class="btn btn-primary">Exit Quiz</button>
+            <form id="exit-form" method="POST" action="{{ url_for('quiz_routes.exit_quiz') }}" style="display: none;">
+                <input type="hidden" name="time_left" id="time_left_input">
+            </form>
         </div>
     </div>
 </body>
+<script>
+    const INITIAL_QUESTION_INDEX = {{ current_question | default(0) | int }};
+</script>
 </html>
