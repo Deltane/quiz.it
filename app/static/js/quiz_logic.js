@@ -1,5 +1,7 @@
 let answers = [];
 $(document).ready(function () {
+    // Add pause state
+    let isPaused = false;
     // Get the total quiz time from a data attribute, fallback to 5 minutes (300s)
     const totalQuizTime = parseInt($('#timer-container').data('total-time')) || 300; // fallback: 5 minutes
     let remainingTime = totalQuizTime;
@@ -26,28 +28,30 @@ $(document).ready(function () {
         $timerDisplay.text(formatTime(remainingTime));
 
         timerInterval = setInterval(() => {
-            remainingTime--;
-            $timerDisplay.text(formatTime(remainingTime));
-            const progressPercent = (remainingTime / totalQuizTime) * 100;
-            $timerProgress.css('width', `${progressPercent}%`);
+            if (!isPaused) {
+                remainingTime--;
+                $timerDisplay.text(formatTime(remainingTime));
+                const progressPercent = (remainingTime / totalQuizTime) * 100;
+                $timerProgress.css('width', `${progressPercent}%`);
 
-            if (remainingTime === 60 && !warned60) {
-                $timerProgress.removeClass().addClass('warning-1min');
-                alert('⚠️ You have 1 minute left!');
-                warned60 = true;
-            } else if (remainingTime === 30 && !warned30) {
-                $timerProgress.removeClass().addClass('warning-30s');
-                alert('⚠️ Only 30 seconds remaining!');
-                warned30 = true;
-            } else if (remainingTime === 10 && !warned10) {
-                $timerProgress.removeClass().addClass('warning-10s');
-                alert('⏰ 10 seconds left!');
-                warned10 = true;
-            }
+                if (remainingTime === 60 && !warned60) {
+                    $timerProgress.removeClass().addClass('warning-1min');
+                    alert('⚠️ You have 1 minute left!');
+                    warned60 = true;
+                } else if (remainingTime === 30 && !warned30) {
+                    $timerProgress.removeClass().addClass('warning-30s');
+                    alert('⚠️ Only 30 seconds remaining!');
+                    warned30 = true;
+                } else if (remainingTime === 10 && !warned10) {
+                    $timerProgress.removeClass().addClass('warning-10s');
+                    alert('⏰ 10 seconds left!');
+                    warned10 = true;
+                }
 
-            if (remainingTime <= 0) {
-                clearInterval(timerInterval);
-                submitAnswer(null);
+                if (remainingTime <= 0) {
+                    clearInterval(timerInterval);
+                    submitAnswer(null);
+                }
             }
         }, 1000);
     }
@@ -179,6 +183,24 @@ $(document).ready(function () {
             }
         });
     }
+
+    // Pause/resume button logic
+    $('#pause-resume-btn').on('click', function () {
+        isPaused = !isPaused;
+        if (isPaused) {
+            $(this).text('Resume');
+            $('#pause-message').show();
+            $('input[name="answer"]').prop('disabled', true);
+            $('#next-question').prop('disabled', true);
+            $('#prev-question').prop('disabled', true);
+        } else {
+            $(this).text('Pause');
+            $('#pause-message').hide();
+            $('input[name="answer"]').prop('disabled', false);
+            $('#next-question').prop('disabled', false);
+            $('#prev-question').prop('disabled', false);
+        }
+    });
 
     loadQuestion();
     startTimer();

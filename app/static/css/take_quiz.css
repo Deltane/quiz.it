@@ -225,3 +225,11 @@ body {
 #timer-progress.paused {
   transition: none;
 }
+
+#pause-message {
+    text-align: center;
+    font-size: 1.1rem;
+    color: black;
+    margin-top: 0.5rem;
+    font-weight: bold;
+}
