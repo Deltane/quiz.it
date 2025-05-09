@@ -50,9 +50,9 @@ body {
 /* Timer progress bar */
 #timer-progress {
     height: 100%;
-    background-color: #ffffff; /* Bright green for the timer */
+    background-color: #1eff00; /* Bright green for the timer */
     width: 100%; /* Start fully filled */
-    transition: width 0.25s linear; /* Smooth shrinking effect */
+    transition: width 1s linear; /* Smooth transition */
 }
 
 /* Answer options */
@@ -120,18 +120,6 @@ body {
     width: 16px;
     height: 16px;
 }
-
-/* Timer styling */
-#timer {
-    position: absolute;
-    top: 20px;
-    right: 20px;
-    background-color: rgba(255, 255, 255, 0.1);
-    padding: 0.5rem 1rem;
-    border-radius: 999px;
-    font-size: 1.2rem;
-}
-
 /* Help button styling */
 .help-button {
     position: absolute;
@@ -208,20 +196,20 @@ body {
   }
   
 /* Countdown timer text below the bar */
-#timer-countdown {
+#countdown-timer {
     text-align: center;
     font-size: 1.2rem;
-    color: #fff;
+    color: #000000;
     margin-top: 0.5rem;
 }
 
 /* Dynamic red gradient bar based on time remaining */
 #timer-progress.warning-1min {
-    background-color: #cc3333;
+    background-color: #fdf500;
 }
 
 #timer-progress.warning-30s {
-    background-color: #cc0000;
+    background-color: #ff8c00;
 }
 
 #timer-progress.warning-10s {
@@ -236,4 +224,12 @@ body {
 
 #timer-progress.paused {
   transition: none;
+}
+
+#pause-message {
+    text-align: center;
+    font-size: 1.1rem;
+    color: black;
+    margin-top: 0.5rem;
+    font-weight: bold;
 }

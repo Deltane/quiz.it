@@ -11,7 +11,12 @@ def home():
 
 @quiz_routes.route('/take_quiz')
 def take_quiz():
-    return render_template('take_quiz.html', quiz_duration=session.get("quiz_duration", 5))
+    return render_template(
+        'take_quiz.html',
+        quiz_duration=session.get("quiz_duration", 5),
+        current_question=session.get("current_question", 0),
+        time_remaining=session.get("time_remaining", 0)
+    )
 
 @quiz_routes.route('/store_quiz', methods=['POST'])
 def store_quiz():
@@ -20,7 +25,8 @@ def store_quiz():
         return jsonify({'error': 'Session expired. Please log in again.'}), 401
 
     session['quiz'] = request.json['quiz']
-    session['quiz_duration'] = request.json.get('quiz_duration', 5)
+    session['quiz_duration'] = request.json.get('quiz_duration', 5)  # in minutes
+    session['time_remaining'] = session['quiz_duration'] * 60        # in seconds
     session['score'] = 0
     session['current_question'] = 0
     session['answers'] = {}
@@ -216,6 +222,7 @@ def exit_quiz():
     topic = session.get("topic", "Untitled")
     answers = session.get("answers", {})
     time_remaining = request.form.get("time_left") or (request.json.get("time_left", 0) if request.json else 0)
+    quiz_duration = session.get("quiz_duration", 5)  # keep in minutes
 
     if not user_id or not quiz_id:
         return jsonify(success=False, message="Missing session info"), 400
@@ -230,7 +237,8 @@ def exit_quiz():
         completed=False,
         answers=json.dumps(answers),
         title=topic,
-        time_remaining=int(time_remaining)
+        time_remaining=int(time_remaining),
+        quiz_duration=int(quiz_duration)
     )
 
     db.session.add(quiz_result)
@@ -244,7 +252,7 @@ def exit_quiz():
     session.pop("quiz_duration", None)
     session.pop("topic", None)
 
-    return jsonify(success=True)
+    return redirect(url_for('stats_bp.dashboard'))
 
 
 # Route to resume an unfinished quiz attempt
@@ -275,7 +283,7 @@ def resume_quiz(attempt_id):
     session['current_question'] = first_unanswered
     session['quiz_id'] = quiz.id
     session['topic'] = attempt.title
-    session['quiz_duration'] = (attempt.time_remaining or 300) // 60 + 1
+    session['quiz_duration'] = attempt.quiz_duration
     session['time_remaining'] = attempt.time_remaining
 
     return redirect(url_for('quiz_routes.take_quiz'))
