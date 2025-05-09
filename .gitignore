@@ -39,3 +39,4 @@ dist/
 
 # Jupyter Notebook checkpoints
 instance/db
+*.db

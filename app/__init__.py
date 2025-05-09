@@ -71,10 +71,6 @@ def create_app():
     app.register_blueprint(stats_bp)
     app.register_blueprint(dashboard_bp)
 
-    # Create database tables
-    with app.app_context():
-        db.create_all()
-        app.logger.info("Database tables created successfully.")
 
     from datetime import timedelta
     from flask import session
