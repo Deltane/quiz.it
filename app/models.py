@@ -27,8 +27,6 @@ class Quiz(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     folders = db.relationship('Folder', secondary=quiz_folder_association, back_populates='quizzes')
     
-    
-
 class QuizResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
@@ -40,7 +38,6 @@ class QuizResult(db.Model):
     quiz = db.relationship('Quiz', backref=db.backref('attempts', lazy=True))
 
     completed = db.Column(db.Boolean, default=False)
-    # answers = db.Column(db.JSON, nullable=True)
     title = db.Column(db.String(255), nullable=True)
     time_remaining = db.Column(db.Integer, nullable=True)
     quiz_duration = db.Column(db.Integer, nullable=True)  # in minutes

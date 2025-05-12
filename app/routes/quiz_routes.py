@@ -240,7 +240,6 @@ def exit_quiz():
     user_id = session.get("user_id")
     quiz_id = session.get("quiz_id")
     topic = session.get("topic", "Untitled")
-    answers = session.get("answers", {})
     time_remaining = request.form.get("time_left") or (request.json.get("time_left", 0) if request.json else 0)
     quiz_duration = session.get("quiz_duration", 5)  # keep in minutes
 
@@ -255,13 +254,23 @@ def exit_quiz():
         timestamp=datetime.utcnow(),
         quiz_type=topic,
         completed=False,
-        answers=json.dumps(answers),
         title=topic,
         time_remaining=int(time_remaining),
         quiz_duration=int(quiz_duration)
     )
 
     db.session.add(quiz_result)
+    db.session.commit()
+
+    # Store each answer in QuizAnswer table
+    for index, user_ans in session.get("answers", {}).items():
+        answer_entry = QuizAnswer(
+            attempt_id=quiz_result.id,
+            question_index=int(index),
+            answer=user_ans,
+            is_correct=False  # Score will be evaluated on resume
+        )
+        db.session.add(answer_entry)
     db.session.commit()
 
     # Clear session state
@@ -287,10 +296,11 @@ def resume_quiz(attempt_id):
         return "Quiz not found", 404
 
     questions = json.loads(quiz.questions_json)
-    answers = json.loads(attempt.answers or '{}')
+    answers_query = QuizAnswer.query.filter_by(attempt_id=attempt.id).all()
+    answers = {a.question_index: a.answer for a in answers_query}
     first_unanswered = 0
     for i in range(len(questions)):
-        if str(i) not in answers:
+        if i not in answers:
             first_unanswered = i
             break
 
