@@ -86,6 +86,7 @@ def delete_quiz(quiz_id):
     # Delete related results
     QuizResult.query.filter_by(quiz_id=quiz.id).delete()
     db.session.delete(quiz)
+    QuizAnswer.query.filter_by(quiz_id=quiz.id).delete()
     db.session.commit()
     return redirect(url_for('stats_bp.dashboard'))
 
