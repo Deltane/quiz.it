@@ -63,7 +63,7 @@
                     {% if attempt.completed %}
                       <li>
                         Attempt {{ loop.index }}:
-                        finished at {{ attempt.timestamp.strftime('%Y-%m-%d %H:%M:%S') }},
+                        Finished at {{ attempt.timestamp.strftime('%Y-%m-%d %H:%M:%S') }},
                         Score: {{ attempt.score }}/{{ attempt.total_questions }}
                       </li>
                     {% endif %}

@@ -1,6 +1,6 @@
 from app import db, login_manager
 from flask_login import UserMixin
-from datetime import datetime
+from datetime import datetime, timezone
 
 quiz_folder_association = db.Table('quiz_folder_association',
     db.Column('quiz_id', db.Integer, db.ForeignKey('quiz.id'), primary_key=True),
@@ -35,7 +35,7 @@ class QuizResult(db.Model):
     quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
     score = db.Column(db.Integer, nullable=False)
     total_questions = db.Column(db.Integer, nullable=False)
-    timestamp = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
+    timestamp = db.Column(db.DateTime, nullable=False, default=lambda: datetime.now(timezone.utc))
     quiz_type = db.Column(db.String(50), nullable=False)
     quiz = db.relationship('Quiz', backref=db.backref('attempts', lazy=True))
 

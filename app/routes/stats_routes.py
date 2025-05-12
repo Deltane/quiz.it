@@ -4,6 +4,8 @@ from app import db
 from flask_login import login_required, current_user
 from app.utils.stats_helpers import get_user_stats
 from sqlalchemy import desc, func
+from datetime import timezone as dt_timezone
+from pytz import timezone
 
 stats_bp = Blueprint('stats_bp', __name__)
 
@@ -55,7 +57,19 @@ def dashboard():
         (QuizResult.timestamp == latest_attempts_subquery.c.latest)
     ).order_by(desc(QuizResult.timestamp)).limit(5).all()
 
-    recent_quizzes = [result.quiz for result in latest_results if result.quiz is not None]
+    recent_quizzes = []
+    seen_quiz_ids = set()
+    for result in latest_results:
+        quiz = result.quiz
+        if quiz and quiz.id not in seen_quiz_ids:
+            quiz.attempts = QuizResult.query.filter_by(user_id=user_id, quiz_id=quiz.id, completed=True).order_by(QuizResult.timestamp.desc()).all()
+            perth = timezone('Australia/Perth')
+            for attempt in quiz.attempts:
+                if attempt.timestamp.tzinfo is None:
+                    attempt.timestamp = attempt.timestamp.replace(tzinfo=dt_timezone.utc)
+                attempt.timestamp = attempt.timestamp.astimezone(perth)
+            recent_quizzes.append(quiz)
+            seen_quiz_ids.add(quiz.id)
     most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
 
     from app.models import Folder
