@@ -55,6 +55,22 @@
         {% for quiz in recent_quizzes %}
           <div class="quiz-entry">
             <span class="quiz-title">{{ quiz.title }}</span>
+            {% if quiz.attempts %}
+              <div class="attempt-history">
+                <strong>Attempt History:</strong>
+                <ul>
+                  {% for attempt in quiz.attempts %}
+                    {% if attempt.completed %}
+                      <li>
+                        Attempt {{ loop.index }}:
+                        finished at {{ attempt.timestamp.strftime('%Y-%m-%d %H:%M:%S') }},
+                        Score: {{ attempt.score }}/{{ attempt.total_questions }}
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
             <div class="action-button-wrapper">
               <button class="action-button" onclick="toggleRenameForm('quiz', {{ quiz.id }})">Rename</button>
               <div id="quiz-rename-form-{{ quiz.id }}" class="rename-form" style="display: none;">

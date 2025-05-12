@@ -1,7 +1,7 @@
 import json
-
+from datetime import datetime
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
-from app.models import User, Quiz, Folder, db
+from app.models import User, Quiz, Folder, QuizResult, db
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -14,19 +14,80 @@ def dashboard_view():
     if not user:
         return redirect(url_for('auth.login'))
 
-    user_quizzes = Quiz.query.filter_by(user_id=user.id, completed=True).order_by(Quiz.created_at.desc()).all()
-    recent_quizzes = user_quizzes[:3]
-    past_quizzes = user_quizzes[3:]
+    attempts = QuizResult.query.filter_by(user_id=user.id).order_by(QuizResult.timestamp.desc()).all()
+    quiz_attempts_map = {}
+    scores = []
+    quiz_type_count = {}
+    for attempt in attempts:
+        quiz_id = attempt.quiz_id
+        if quiz_id not in quiz_attempts_map:
+            quiz_attempts_map[quiz_id] = {
+                "quiz": attempt.quiz,
+                "attempts": []
+            }
+        quiz_attempts_map[quiz_id]["attempts"].append(attempt)
+
+        if attempt.completed:
+            scores.append(attempt.score / attempt.total_questions if attempt.total_questions else 0)
+            quiz_type = attempt.quiz_type
+            quiz_type_count[quiz_type] = quiz_type_count.get(quiz_type, 0) + 1
+
+    quizzes_completed = len({attempt.quiz_id for attempts in quiz_attempts_map.values() for attempt in attempts["attempts"] if attempt.completed})
+    quizzes_above_80 = sum(1 for s in scores if s >= 0.8)
+    most_frequent_quiz_type = max(quiz_type_count, key=quiz_type_count.get) if quiz_type_count else None
+    recent_topics = [quiz_data['quiz'].title for quiz_data in quiz_attempts_map.values() if quiz_data['attempts']]
+
+    # Ensure recent_quizzes and past_quizzes are constructed from unique quizzes with their attempts, sorted by most recent attempt
+    recent_quizzes = sorted(
+        quiz_attempts_map.values(),
+        key=lambda x: x["attempts"][-1].timestamp if x["attempts"] else datetime.min,
+        reverse=True
+    )
+    past_quizzes = recent_quizzes[3:]
+    recent_quizzes = recent_quizzes[:3]
+
     user_folders = Folder.query.filter_by(user_id=user.id).all()
 
-    return render_template("dashboard.html", recent_quizzes=recent_quizzes, past_quizzes=past_quizzes, folders=user_folders, all_quizzes=user_quizzes)
+    return render_template(
+        "dashboard.html",
+        recent_quizzes=recent_quizzes,
+        past_quizzes=past_quizzes,
+        folders=user_folders,
+        quizzes_completed=quizzes_completed,
+        quizzes_above_80=quizzes_above_80,
+        most_frequent_quiz_type=most_frequent_quiz_type,
+        recent_topics=recent_topics
+    )
 
 @dashboard_bp.route('/redo_quiz/<int:quiz_id>')
 def redo_quiz(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)
+    user_id = session.get("user_id")
+
+    # Create a new attempt
+    new_attempt = QuizResult(
+        user_id=user_id,
+        quiz_id=quiz.id,
+        title=quiz.title,
+        total_questions=len(json.loads(quiz.questions_json)),
+        quiz_type=quiz.title,
+        completed=False,
+        current_index=0,
+        score=0,
+        start_time=datetime.utcnow()
+    )
+    db.session.add(new_attempt)
+    db.session.commit()
+
+    # Initialize session for the new attempt
     session['quiz'] = json.loads(quiz.questions_json)
     session['score'] = 0
     session['current_question'] = 0
+    session['attempt_id'] = new_attempt.id
+    session['quiz_id'] = quiz.id
+    session['topic'] = quiz.title
+    session['time_remaining'] = session.get("quiz_duration", 5) * 60
+
     return redirect(url_for('quiz_routes.take_quiz'))
 
 @dashboard_bp.route('/create_folder', methods=['GET','POST'])

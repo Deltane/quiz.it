@@ -360,3 +360,23 @@ body {
 .action-button:hover {
     background-color: #7f3f2d;
 }
+
+.attempt-history {
+    background-color: #f8f8f8;
+    border-left: 4px solid #9a503b;
+    padding: 0.75rem 1rem;
+    margin-top: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.attempt-history ul {
+    list-style: disc;
+    margin-left: 1.5rem;
+    padding-left: 0;
+}
+
+.attempt-history li {
+    margin-bottom: 0.3rem;
+}

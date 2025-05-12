@@ -3,6 +3,7 @@ from app.models import QuizResult, Quiz
 from app import db
 from flask_login import login_required, current_user
 from app.utils.stats_helpers import get_user_stats
+from sqlalchemy import desc, func
 
 stats_bp = Blueprint('stats_bp', __name__)
 
@@ -12,8 +13,12 @@ def get_stats():
 
     user_id = current_user.id
 
-    quizzes_completed = QuizResult.query.filter_by(user_id=user_id, completed=True).count()
-    quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id, completed=True).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
+    quizzes_completed = db.session.query(QuizResult.quiz_id).filter_by(user_id=user_id, completed=True).distinct().count()
+    subquery = db.session.query(QuizResult.quiz_id, db.func.max(QuizResult.score / QuizResult.total_questions).label('max_score'))\
+        .filter_by(user_id=user_id, completed=True)\
+        .group_by(QuizResult.quiz_id)\
+        .subquery()
+    quizzes_above_80 = db.session.query(subquery).filter(subquery.c.max_score >= 0.8).count()
     recent_topics = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
     most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
 
@@ -31,10 +36,26 @@ def get_stats():
 def dashboard():
     user_id = current_user.id
 
-    quizzes_completed = QuizResult.query.filter_by(user_id=user_id, completed=True).count()
-    quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id, completed=True).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
-    recent_quiz_results = QuizResult.query.filter_by(user_id=user_id, completed=True).order_by(QuizResult.timestamp.desc()).limit(5).all()
-    recent_quizzes = [result.quiz for result in recent_quiz_results if result.quiz is not None]
+    quizzes_completed = db.session.query(QuizResult.quiz_id).filter_by(user_id=user_id, completed=True).distinct().count()
+    subquery = db.session.query(
+        QuizResult.quiz_id,
+        db.func.max(QuizResult.score / QuizResult.total_questions).label('max_score')
+    ).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_id).subquery()
+
+    quizzes_above_80 = db.session.query(subquery).filter(subquery.c.max_score >= 0.8).count()
+
+    latest_attempts_subquery = db.session.query(
+        QuizResult.quiz_id,
+        func.max(QuizResult.timestamp).label("latest")
+    ).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_id).subquery()
+
+    latest_results = db.session.query(QuizResult).join(
+        latest_attempts_subquery,
+        (QuizResult.quiz_id == latest_attempts_subquery.c.quiz_id) &
+        (QuizResult.timestamp == latest_attempts_subquery.c.latest)
+    ).order_by(desc(QuizResult.timestamp)).limit(5).all()
+
+    recent_quizzes = [result.quiz for result in latest_results if result.quiz is not None]
     most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
 
     from app.models import Folder

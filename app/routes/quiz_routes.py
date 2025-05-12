@@ -1,7 +1,9 @@
-from app.models import QuizResult
+from app.models import Quiz, QuizResult, User, Folder, QuizAnswer
 from app import db
 from datetime import datetime
 from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
+
+import json
 
 quiz_routes = Blueprint('quiz_routes', __name__)
 
@@ -32,8 +34,6 @@ def store_quiz():
     session['answers'] = {}
 
     # Save to DB
-    from app.models import Quiz, db, User, Folder
-    import json
     user_email = session.get("user_email")
     user = User.query.filter_by(email=user_email).first()
     if user:
@@ -55,26 +55,28 @@ def store_quiz():
 # Redo quiz route
 @quiz_routes.route('/redo_quiz/<int:quiz_id>', methods=['POST'])
 def redo_quiz(quiz_id):
-    from app.models import Quiz
-    import json
     quiz = Quiz.query.get_or_404(quiz_id)
 
     # Authorization check
     if quiz.user_id != session.get("user_id"):
         return "Unauthorized", 403
 
-    session['quiz'] = json.loads(quiz.questions_json)
+    questions = json.loads(quiz.questions_json)
+
+    # Reset session state
+    session['quiz'] = questions
     session['score'] = 0
     session['current_question'] = 0
     session['answers'] = {}
     session['quiz_id'] = quiz.id
     session['quiz_type'] = quiz.title
+    session['topic'] = quiz.title
+    session.pop('attempt_id', None)  # Clear existing attempt_id
 
     return redirect(url_for('quiz_routes.take_quiz'))
 
 @quiz_routes.route('/delete_quiz/<int:quiz_id>', methods=['POST'])
 def delete_quiz(quiz_id):
-    from app.models import Quiz, QuizResult, db
     quiz = Quiz.query.get_or_404(quiz_id)
 
     # Authorization check
@@ -89,7 +91,6 @@ def delete_quiz(quiz_id):
 
 @quiz_routes.route('/rename_quiz/<int:quiz_id>', methods=['POST'])
 def rename_quiz(quiz_id):
-    from app.models import Quiz
     new_title = request.form.get('new_title')
     quiz = Quiz.query.get_or_404(quiz_id)
 
@@ -156,11 +157,6 @@ def submit_answer():
 
         print("Session contents before saving QuizResult:", dict(session))
 
-        QuizResult.query.filter_by(user_id=user_id, quiz_id=quiz_id, completed=False).delete()
-        # Also remove any previously completed attempts for this quiz to prevent duplicates
-        existing_completed = QuizResult.query.filter_by(user_id=user_id, quiz_id=quiz_id, completed=True).first()
-        if existing_completed:
-            db.session.delete(existing_completed)
 
         quiz_result = QuizResult(
             user_id=user_id,
@@ -184,6 +180,32 @@ def submit_answer():
                 score += 1
 
         db.session.add(quiz_result)
+        db.session.commit()
+        session['attempt_id'] = quiz_result.id
+
+        # Mark any other unfinished attempts for this quiz as completed
+        QuizResult.query.filter(
+            QuizResult.user_id == user_id,
+            QuizResult.quiz_id == quiz_id,
+            QuizResult.completed == False,
+            QuizResult.id != quiz_result.id
+        ).update({QuizResult.completed: True})
+        db.session.commit()
+
+        # Save individual answers for this attempt
+        for i, question in enumerate(quiz):
+            user_ans = str(session['answers'].get(i, '')).lower().strip()
+            correct_ans = str(question['answer']).lower().strip()
+            is_correct = user_ans == correct_ans
+
+            answer_entry = QuizAnswer(
+                attempt_id=quiz_result.id,
+                question_index=i,
+                answer=session['answers'].get(i),
+                is_correct=is_correct
+            )
+            db.session.add(answer_entry)
+
         db.session.commit()
 
         # Calculate and store quiz statistics
@@ -214,9 +236,6 @@ def submit_answer():
 # Route to handle quiz exit and save incomplete quiz result
 @quiz_routes.route('/exit_quiz', methods=['POST'])
 def exit_quiz():
-    from app.models import QuizResult
-    import json
-
     user_id = session.get("user_id")
     quiz_id = session.get("quiz_id")
     topic = session.get("topic", "Untitled")
@@ -261,9 +280,6 @@ def resume_quiz(attempt_id):
     attempt = QuizResult.query.get_or_404(attempt_id)
     if attempt.user_id != session.get('user_id'):
         return "Unauthorized", 403
-
-    from app.models import Quiz
-    import json
 
     quiz = Quiz.query.get(attempt.quiz_id)
     if not quiz:
