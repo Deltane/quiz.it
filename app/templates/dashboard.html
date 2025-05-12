@@ -59,7 +59,7 @@
               <div class="attempt-history">
                 <strong>Attempt History:</strong>
                 <ul>
-                  {% for attempt in quiz.attempts %}
+                  {% for attempt in quiz.attempts | sort(attribute='timestamp') %}
                     {% if attempt.completed %}
                       <li>
                         Attempt {{ loop.index }}:
