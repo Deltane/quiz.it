@@ -41,15 +41,6 @@
     </section>
 
     <section class="stat-card">
-        <h2>Your Highest Scoring Quiz</h2>
-        {% if stats.best_score %}
-            <p>{{ stats.best_score.score }}/{{ stats.best_score.total }} in {{ stats.best_score.type }}</p>
-        {% else %}
-            <p>No completed quizzes yet.</p>
-        {% endif %}
-    </section>
-
-    <section class="stat-card">
       <h2>Recent Quizzes</h2>
       <div id="recent-quizzes-list">
         {% for quiz in recent_quizzes %}
