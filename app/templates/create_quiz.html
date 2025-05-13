@@ -5,128 +5,120 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Quiz</title>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Epilogue:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Syne:wght@400..800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/create_quiz.css') }}">
-    <link rel="stylesheet" href="../static/css/create_quiz.css">  
 </head>
 <body>
-    <div class="container">
-        <h2>Create a New Quiz</h2>
-        <form id="quiz-setup-form">
-            <div class="form-group">
-                <label for="quiz-name">Quiz Name</label>
-                <input type="text" class="form-control" id="quiz-name" name="quiz-name" required>
-            </div>
-            <div class="form-group">
-                <label for="upload-file">Upload File</label>
-                <input type="file" class="form-control" id="upload-file" name="upload-file" accept=".pdf,.doc,.docx,.txt">
-            </div>
-            <div class="form-group">
-                <label for="ai-prompt">Or ask AI</label>
-                <textarea class="form-control" id="ai-prompt" name="ai-prompt" rows="3"></textarea>
-            </div>
-            <div class="form-group">
-                <label for="timer">Timer (minutes)</label>
-                <input type="number" class="form-control" id="timer" name="timer" value="0" min="0">
-            </div>
-            <div class="form-group">
-                <label for="quiz-type">Quiz Type</label>
-                <select class="form-control" id="quiz-type" name="quiz-type" required>
-                    <option value="" disabled selected>Select quiz type</option>
-                    <option value="Multiple Choice">Multiple Choice</option>
-                    <option value="Short Answer">Short Answer</option>
-                    <option value="Fill in the Blank">Fill in the Blank</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="question-count">Question Count</label>
-                <input type="number" class="form-control" id="question-count" name="question-count" min="1" max="50" required>
-            </div>
-            <div class="form-group">
-                <label>Privacy</label>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="privacy" id="public" value="public" checked>
-                    <label class="form-check-label" for="public">Public</label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="privacy" id="private" value="private">
-                    <label class="form-check-label" for="private">Private</label>
-                </div>
-            </div>
-            <button type="submit" class="btn btn-primary">Generate Quiz</button>
-        </form>
-    
-        <hr>
-        <!-- <h3>Generated Quiz:</h3> -->
-        <pre id="quiz-result" style="background-color: #f0f0f000; padding: 10px; border-radius: 8px;"></pre>
-    </div>
-    <script>
-        $(document).ready(function () {
-            // Disable AI prompt when file is uploaded
-            $('#upload-file').change(function () {
-                if ($(this).val()) {
-                    $('#ai-prompt').prop('disabled', true);
-                } else {
-                    $('#ai-prompt').prop('disabled', false);
-                }
-            });
-    
-            // Disable file upload when AI prompt is typed
-            $('#ai-prompt').on('input', function () {
-                if ($(this).val()) {
-                    $('#upload-file').prop('disabled', true);
-                } else {
-                    $('#upload-file').prop('disabled', false);
-                }
-            });
-    
-            // Submit the form via AJAX
-            $('#quiz-setup-form').on('submit', function (e) {
-                e.preventDefault();
+<div class="container">
+    <h2>Create a New Quiz</h2>
+    <form id="quiz-setup-form" method="POST">
+        {{ form.csrf_token }}
 
-                 // Validate quiz type
-                const quizType = $('#quiz-type').val();
-                if (!quizType) {
-                    $('#quiz-result').html('<p class="message error">Please select a quiz type</p>');
-                    return;
-                }
-    
-                const formData = new FormData(this);
-                $('#quiz-result').html('<p class="message">Generating quiz...</p>'); 
-    
-                fetch('/generate_quiz', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => response.json())
-                .then(data => {
+        <div class="form-group">
+            {{ form.quiz_name.label }}
+            {{ form.quiz_name(class="form-control", id="quiz-name") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.upload_file.label }}
+            {{ form.upload_file(class="form-control", id="upload-file", accept=".pdf,.doc,.docx,.txt") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.ai_prompt.label }}
+            {{ form.ai_prompt(class="form-control", id="ai-prompt", rows="3") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.timer.label }}
+            {{ form.timer(class="form-control", id="timer", min="0") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.quiz_type.label }}
+            {{ form.quiz_type(class="form-control", id="quiz-type") }}
+        </div>
+
+        <div class="form-group">
+            {{ form.question_count.label }}
+            {{ form.question_count(class="form-control", id="question-count", min="1", max="50") }}
+        </div>
+
+        <div class="form-group">
+            <label>Privacy</label>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="privacy" id="public" value="public" checked>
+                <label class="form-check-label" for="public">Public</label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="privacy" id="private" value="private">
+                <label class="form-check-label" for="private">Private</label>
+            </div>
+        </div>
+
+        {{ form.submit(class="btn btn-primary") }}
+    </form>
+
+    <hr>
+    <pre id="quiz-result" style="background-color: #f0f0f000; padding: 10px; border-radius: 8px;"></pre>
+</div>
+
+<script>
+    $(document).ready(function () {
+        $('#upload-file').change(function () {
+            $('#ai-prompt').prop('disabled', !!$(this).val());
+        });
+
+        $('#ai-prompt').on('input', function () {
+            $('#upload-file').prop('disabled', !!$(this).val());
+        });
+
+        $('#quiz-setup-form').on('submit', function (e) {
+            e.preventDefault();
+            const quizType = $('#quiz-type').val();
+            if (!quizType) {
+                $('#quiz-result').html('<p class="message error">Please select a quiz type</p>');
+                return;
+            }
+
+            const formData = new FormData(this);
+            $('#quiz-result').html('<p class="message">Generating quiz...</p>');
+
+            const token = document.querySelector('input[name="csrf_token"]').value;
+
+            fetch('/generate_quiz', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
                 if (data.quiz) {
-                    // Store the quiz data in the session or backend
                     fetch('/store_quiz', {
                         method: 'POST',
                         headers: {
-                            'Content-Type': 'application/json'
+                            'Content-Type': 'application/json',
+                            'X-CSRFToken': token
                         },
                         body: JSON.stringify({
                             quiz: data.quiz,
                             quiz_title: $('#quiz-name').val(),
-                            quiz_duration: parseInt($('#timer').val()) || 5
+                            quiz_duration: parseInt($('#timer').val()) || 5,
+                            privacy: $('input[name="privacy"]:checked').val(),
+                            csrf_token: token
                         })
                     })
                     .then(() => {
-                        // Show the "Start Quiz" button
                         $('#quiz-result').html(`
                             <p class="message">Quiz generated successfully!</p>
                             <button id="start-quiz" type="button" class="btn btn-secondary">Start Quiz</button>
                         `);
-
-                        // Add click event to the "Start Quiz" button
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                         $('#start-quiz').on('click', function () {
-                            console.log('Start Quiz button clicked'); // Debugging log
-                            window.location.href = '/take_quiz'; // Redirect to the quiz-taking page
+                            window.location.href = '/take_quiz';
                         });
                     })
                     .catch(err => {
@@ -141,6 +133,6 @@
             });
         });
     });
-    </script>
- </body>
+</script>
+</body>
 </html>
