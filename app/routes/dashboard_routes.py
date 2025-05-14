@@ -1,7 +1,8 @@
 import json
 
-from flask import Blueprint, render_template, session, redirect, url_for, request, flash
-from app.models import User, Quiz, Folder, db
+from flask import Blueprint, render_template, session, redirect, url_for, request, flash, jsonify
+from flask_login import current_user
+from app.models import User, Quiz, Folder, db, QuizShare
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -131,8 +132,6 @@ def create_quiz_in_folder(folder_id):
     session['selected_folder_id'] = folder_id
     return redirect(url_for('quiz_routes.create_quiz'))
 
-from flask import jsonify
-
 @dashboard_bp.route('/assign_quiz_to_folder', methods=['POST'])
 def assign_quiz_to_folder():
     if 'user_email' not in session:
@@ -195,3 +194,46 @@ def unassign_quiz_from_folder():
         flash("Quiz was not assigned to this folder.", "error")
 
     return redirect(url_for('dashboard.dashboard_view'))
+
+@dashboard_bp.route('/share_quiz', methods=['POST'])
+def share_quiz():
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    quiz_id = request.form.get('quiz_id')
+    recipient_email = request.form.get('email')
+
+    quiz = Quiz.query.get(quiz_id)
+    if not quiz or quiz.user_id != current_user.id:
+        flash('Invalid quiz or permission denied.', 'error')
+        return redirect(url_for('dashboard.dashboard_view'))
+
+    recipient = User.query.filter_by(email=recipient_email).first()
+    if not recipient:
+        flash('Recipient not found.', 'error')
+        return redirect(url_for('dashboard.dashboard_view'))
+
+    share = QuizShare(quiz_id=quiz.id, shared_with_user_id=recipient.id, shared_by_user_id=current_user.id)
+    db.session.add(share)
+    db.session.commit()
+
+    flash('Quiz shared successfully.', 'success')
+    return redirect(url_for('dashboard.dashboard_view'))
+
+@dashboard_bp.route('/unshare_quiz/<int:share_id>', methods=['POST'])
+def unshare_quiz(share_id):
+    share = QuizShare.query.get(share_id)
+    if not share or share.shared_by_user_id != current_user.id:
+        flash('Invalid share or permission denied.', 'error')
+        return redirect(url_for('dashboard.dashboard_view'))
+
+    db.session.delete(share)
+    db.session.commit()
+
+    flash('Quiz unshared successfully.', 'success')
+    return redirect(url_for('dashboard.dashboard_view'))
+
+@dashboard_bp.route('/shared_quizzes', methods=['GET'])
+def shared_quizzes():
+    received_quizzes = QuizShare.query.filter_by(shared_with_user_id=current_user.id).all()
+    return render_template('shared_quizzes.html', received_quizzes=received_quizzes)

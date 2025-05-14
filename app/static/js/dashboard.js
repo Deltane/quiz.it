@@ -23,5 +23,43 @@ document.addEventListener('DOMContentLoaded', function() {
             event.preventDefault();
         }
     });
+
+    // Attach event listeners dynamically for newly added elements
+    document.body.addEventListener('click', function(event) {
+        if (event.target.matches('form[action^="/delete_quiz"] button')) {
+            const confirmDelete = confirm('Are you sure you want to delete this quiz? This action cannot be undone.');
+            if (!confirmDelete) event.preventDefault();
+        } else if (event.target.matches('form[action^="/unassign_quiz_from_folder"] button')) {
+            const confirmUnassign = confirm('Are you sure you want to unassign this quiz from the folder?');
+            if (!confirmUnassign) event.preventDefault();
+        }
+    });
+
+    // Handle AJAX for assigning quizzes to folders
+    document.querySelectorAll('[id^="assign-form-"]').forEach(wrapper => {
+        const form = wrapper.querySelector('form');
+        if (form) {
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                const formData = new FormData(form);
+
+                fetch('/assign_quiz_to_folder', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.quiz_html && data.folder_id) {
+                        const targetList = document.querySelector(`#assign-form-${data.folder_id}`).closest('.folder-entry').querySelector('ul');
+                        targetList.insertAdjacentHTML('beforeend', data.quiz_html);
+                        form.reset();
+                        wrapper.style.display = 'none';
+                    } else {
+                        alert("Failed to assign quiz to folder.");
+                    }
+                });
+            });
+        }
+    });
 });
 

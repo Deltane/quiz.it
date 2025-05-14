@@ -200,6 +200,35 @@
         {% endfor %}
       </div>
     </section>
+
+    <section class="shared-quizzes">
+        <h2>Shared Quizzes</h2>
+        <ul>
+            {% for share in current_user.received_quizzes %}
+            <li>
+                {{ share.quiz.title }} (Shared by: {{ share.shared_by_user.username }})
+                <form action="/unshare_quiz/{{ share.id }}" method="POST" style="display:inline;">
+                    <button type="submit">Unshare</button>
+                </form>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="share-quiz">
+        <h2>Share a Quiz</h2>
+        <form action="/share_quiz" method="POST">
+            <label for="quiz_id">Select Quiz:</label>
+            <select name="quiz_id" id="quiz_id">
+                {% for quiz in current_user.quizzes %}
+                <option value="{{ quiz.id }}">{{ quiz.title }}</option>
+                {% endfor %}
+            </select>
+            <label for="email">Recipient Email:</label>
+            <input type="email" name="email" id="email" required>
+            <button type="submit">Share</button>
+        </form>
+    </section>
   </main>
 
 <!-- Chart & Filter Script -->

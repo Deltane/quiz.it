@@ -49,3 +49,15 @@ class Folder(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('folders', lazy=True))
     quizzes = db.relationship('Quiz', secondary=quiz_folder_association, back_populates='folders')
+
+class QuizShare(db.Model):
+    __tablename__ = 'quiz_share'
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
+    shared_with_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    shared_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    shared_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    quiz = db.relationship('Quiz', backref='shared_quizzes', lazy=True)
+    shared_with_user = db.relationship('User', foreign_keys=[shared_with_user_id], backref='received_quizzes', lazy=True)
+    shared_by_user = db.relationship('User', foreign_keys=[shared_by_user_id], backref='shared_quizzes', lazy=True)
