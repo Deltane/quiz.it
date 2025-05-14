@@ -61,6 +61,36 @@ document.addEventListener('DOMContentLoaded', function() {
             });
         }
     });
+
+    // AJAX search for users to share quizzes with
+    const searchInputs = document.querySelectorAll('.user-search-input');
+
+    searchInputs.forEach(input => {
+        input.addEventListener('input', function () {
+            const query = input.value;
+            const resultsContainer = document.getElementById(`${input.dataset.resultsContainer}`);
+
+            if (query.length > 2) { // Only search if query is longer than 2 characters
+                fetch(`/search_users?query=${encodeURIComponent(query)}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        resultsContainer.innerHTML = '';
+                        data.users.forEach(user => {
+                            const userItem = document.createElement('div');
+                            userItem.className = 'user-item';
+                            userItem.textContent = user.email;
+                            userItem.addEventListener('click', () => {
+                                input.value = user.email;
+                                resultsContainer.innerHTML = '';
+                            });
+                            resultsContainer.appendChild(userItem);
+                        });
+                    });
+            } else {
+                resultsContainer.innerHTML = '';
+            }
+        });
+    });
 });
 
 function toggleRenameForm(type, id) {

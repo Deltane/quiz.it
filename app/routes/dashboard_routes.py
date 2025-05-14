@@ -246,3 +246,14 @@ def unshare_quiz(share_id):
 def shared_quizzes():
     received_quizzes = QuizShare.query.filter_by(shared_with_user_id=current_user.id).all()
     return render_template('shared_quizzes.html', received_quizzes=received_quizzes)
+
+@dashboard_bp.route('/search_users')
+def search_users():
+    query = request.args.get('query', '')
+    if not query:
+        return jsonify(users=[])
+
+    users = User.query.filter(User.email.ilike(f"%{query}%")).all()
+    user_data = [{'id': user.id, 'email': user.email} for user in users]
+
+    return jsonify(users=user_data)

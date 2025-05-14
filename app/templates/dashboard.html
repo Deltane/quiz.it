@@ -66,8 +66,9 @@
               <span class="close" onclick="closeShareModal('{{ quiz.id }}')">&times;</span>
               <form action="/share_quiz" method="POST">
                 <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                <label for="email">Recipient Email:</label>
-                <input type="email" name="email" required>
+                <label for="user-search-{{ quiz.id }}">Search for a user:</label>
+                <input type="text" id="user-search-{{ quiz.id }}" class="user-search-input" data-results-container="user-results-{{ quiz.id }}" placeholder="Enter user email or name">
+                <div id="user-results-{{ quiz.id }}" class="user-results"></div>
                 <button type="submit">Share</button>
               </form>
             </div>
