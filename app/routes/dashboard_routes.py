@@ -215,9 +215,9 @@ def share_quiz():
     if not user:
         return jsonify({'error': 'User not found. Please log in again.'}), 401
 
-    quiz_id = request.form.get('quiz_id')
-    recipient_email = request.form.get('recipient_email')
-
+    # Accept both form and JSON data for flexibility
+    quiz_id = request.form.get('quiz_id') or request.json.get('quiz_id')
+    recipient_email = request.form.get('recipient_email') or request.json.get('recipient_email')
     if not quiz_id or not recipient_email:
         return jsonify({'error': 'Quiz ID and recipient email are required.'}), 400
 
