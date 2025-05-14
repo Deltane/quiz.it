@@ -124,12 +124,12 @@ window.openShareModal = openShareModal;
 window.closeShareModal = closeShareModal;
 
 // Close modal when clicking outside of it
-window.onclick = function(event) {
+document.addEventListener('click', function(event) {
     const modals = document.querySelectorAll('.modal');
     modals.forEach(modal => {
         if (event.target === modal) {
             modal.style.display = 'none';
         }
     });
-};
+});
 
