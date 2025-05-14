@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 import os
-# import shutil
 
 load_dotenv()  # Load environment variables from .env
 
@@ -11,9 +10,11 @@ from flask_session import Session
 from authlib.integrations.flask_client import OAuth
 import requests
 from flask_login import LoginManager
+from flask_mail import Mail
 
 # Initialize extensions globally
 db = SQLAlchemy()
+mail = Mail()
 migrate = Migrate()
 session_manager = Session()
 oauth = OAuth()
@@ -30,6 +31,15 @@ def create_app():
     # Database config
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///app.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # Flask-Mail config
+    app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Example: Gmail SMTP server
+    app.config['MAIL_PORT'] = 587
+    app.config['MAIL_USE_TLS'] = True
+    app.config['MAIL_USERNAME'] = 'your-email@gmail.com'  # Replace with your email
+    app.config['MAIL_PASSWORD'] = 'your-email-password'  # Replace with your email password
+    app.config['MAIL_DEFAULT_SENDER'] = 'your-email@gmail.com'
+    # Ensure these are set in your environment or .env file
 
     # Flask-Session config
     app.config['SESSION_TYPE'] = 'filesystem'  # <- Important for server-side sessions

@@ -3,6 +3,7 @@ import json
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash, jsonify
 from flask_login import current_user
 from app.models import User, Quiz, Folder, db, QuizShare
+from app.utils.email_utils import send_email
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -216,6 +217,14 @@ def share_quiz():
     share = QuizShare(quiz_id=quiz.id, shared_with_user_id=recipient.id, shared_by_user_id=current_user.id)
     db.session.add(share)
     db.session.commit()
+
+    email_sent = send_email(
+        subject="A Quiz Has Been Shared With You!",
+        recipients=[recipient_email],
+        body=f"{current_user.name} has shared a quiz with you. Log in to take the quiz!"
+    )
+    if not email_sent:
+        flash('Quiz shared, but email notification failed.', 'error')
 
     flash('Quiz shared successfully.', 'success')
     return redirect(url_for('dashboard.dashboard_view'))

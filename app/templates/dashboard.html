@@ -54,20 +54,21 @@
       <div id="recent-quizzes-list">
         {% for quiz in recent_quizzes %}
           <div class="quiz-entry">
-            <span class="quiz-title">{{ quiz.title }}</span>
-            <div class="action-button-wrapper">
-              <button class="action-button" data-action="rename" data-type="quiz" data-id="{{ quiz.id }}">Rename</button>
-              <div id="quiz-rename-form-{{ quiz.id }}" class="rename-form" style="display: none;">
-                <form action="/rename_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
-                  <input type="text" name="new_title" placeholder="New Title" required>
-                  <button class="action-button" type="submit">Save</button>
-                </form>
-              </div>
-              <form action="/redo_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
-                <button class="action-button" type="submit">Redo</button>
-              </form>
-              <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
-                <button class="action-button" type="submit">Delete</button>
+            <h3>{{ quiz.title }}</h3>
+            <button class="action-button" onclick="openShareModal('{{ quiz.id }}')">Share</button>
+            <button class="action-button">Rename</button>
+            <button class="action-button">Redo</button>
+          </div>
+
+          <!-- Share Modal -->
+          <div id="share-modal-{{ quiz.id }}" class="modal" style="display: none;">
+            <div class="modal-content">
+              <span class="close" onclick="closeShareModal('{{ quiz.id }}')">&times;</span>
+              <form action="/share_quiz" method="POST">
+                <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                <label for="email">Recipient Email:</label>
+                <input type="email" name="email" required>
+                <button type="submit">Share</button>
               </form>
             </div>
           </div>
@@ -214,21 +215,6 @@
             {% endfor %}
         </ul>
     </section>
-
-    <section class="share-quiz">
-        <h2>Share a Quiz</h2>
-        <form action="/share_quiz" method="POST">
-            <label for="quiz_id">Select Quiz:</label>
-            <select name="quiz_id" id="quiz_id">
-                {% for quiz in current_user.quizzes %}
-                <option value="{{ quiz.id }}">{{ quiz.title }}</option>
-                {% endfor %}
-            </select>
-            <label for="email">Recipient Email:</label>
-            <input type="email" name="email" id="email" required>
-            <button type="submit">Share</button>
-        </form>
-    </section>
   </main>
 
 <!-- Chart & Filter Script -->
@@ -304,6 +290,11 @@
             });
         });
     });
+
+    function toggleShareModal(quizId) {
+        const modal = document.getElementById(`share-modal-${quizId}`);
+        modal.style.display = modal.style.display === 'none' ? 'block' : 'none';
+    }
 </script>
 </body>
 </html>
