@@ -66,13 +66,14 @@
             <!-- Share Modal -->
             <div id="share-modal-{{ quiz.id }}" class="modal" style="display: none;">
                 <div class="modal-content">
-                    <span class="close" onclick="closeShareModal('{{ quiz.id }}')">&times;</span>
-                    <form action="/share_quiz" method="POST">
-                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                        <label for="user-search-{{ quiz.id }}">Enter an email to send this quiz:</label>
-                        <input type="text" id="user-search-{{ quiz.id }}" class="user-search-input" data-results-container="user-results-{{ quiz.id }}" placeholder="Enter user email">
-                        <div id="user-results-{{ quiz.id }}" class="user-results"></div>
-                        <button type="submit">Share</button>
+                    <form class="share-quiz-form" data-quiz-id="{{ quiz.id }}">
+                        <h4>Share "{{ quiz.title }}"</h4>
+                        <label for="recipient-email-{{ quiz.id }}">Recipient's Email:</label>
+                        <input type="email" id="recipient-email-{{ quiz.id }}" class="user-search-input" name="recipient_email" data-results-container="user-search-results-{{ quiz.id }}" placeholder="Enter email to share with" required>
+                        <div class="user-search-results" id="user-search-results-{{ quiz.id }}"></div>
+                        <button type="submit" class="action-button">Share</button>
+                        <button type="button" class="action-button" onclick="closeShareModal('{{ quiz.id }}')">Cancel</button>
+                        <div class="share-message" id="share-message-{{ quiz.id }}"></div>
                     </form>
                 </div>
             </div>

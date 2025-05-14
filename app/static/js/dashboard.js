@@ -64,6 +64,52 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // Handle AJAX for sharing quizzes
+    document.querySelectorAll('.share-quiz-form').forEach(form => {
+        form.addEventListener('submit', function(event) {
+            event.preventDefault();
+            const quizId = form.dataset.quizId;
+            const recipientEmailInput = form.querySelector('input[name="recipient_email"]');
+            const recipientEmail = recipientEmailInput.value;
+            const messageDiv = form.querySelector('.share-message');
+
+            if (!recipientEmail) {
+                messageDiv.textContent = 'Recipient email is required.';
+                messageDiv.className = 'share-message error';
+                return;
+            }
+
+            fetch('/share_quiz', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    // Include CSRF token if your app uses them for AJAX POSTs
+                    // 'X-CSRFToken': getCsrfToken() 
+                },
+                body: JSON.stringify({ 
+                    quiz_id: quizId, 
+                    recipient_email: recipientEmail 
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    messageDiv.textContent = data.success;
+                    messageDiv.className = 'share-message success';
+                    recipientEmailInput.value = ''; // Clear input
+                } else {
+                    messageDiv.textContent = data.error || 'Failed to share quiz.';
+                    messageDiv.className = 'share-message error';
+                }
+            })
+            .catch(error => {
+                console.error('Error sharing quiz:', error);
+                messageDiv.textContent = 'An unexpected error occurred.';
+                messageDiv.className = 'share-message error';
+            });
+        });
+    });
+
     // AJAX search for users to share quizzes with
     const searchInputs = document.querySelectorAll('.user-search-input');
 

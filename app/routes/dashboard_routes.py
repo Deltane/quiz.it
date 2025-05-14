@@ -211,33 +211,59 @@ def share_quiz():
     if 'user_email' not in session:
         return jsonify({'error': 'You must be logged in to share quizzes.'}), 401
 
-    user = User.query.filter_by(email=session['user_email']).first()
-    if not user:
+    current_user_model = User.query.filter_by(email=session['user_email']).first()
+    if not current_user_model:
         return jsonify({'error': 'User not found. Please log in again.'}), 401
 
-    # Accept both form and JSON data for flexibility
-    quiz_id = request.form.get('quiz_id') or request.json.get('quiz_id')
-    recipient_email = request.form.get('recipient_email') or request.json.get('recipient_email')
-    if not quiz_id or not recipient_email:
+    if not request.is_json:
+        return jsonify({'error': 'Unsupported Media Type: Request must be JSON.'}), 415
+
+    data = request.get_json()
+    quiz_id_str = data.get('quiz_id')
+    recipient_email = data.get('recipient_email')
+
+    if not quiz_id_str or not recipient_email:
         return jsonify({'error': 'Quiz ID and recipient email are required.'}), 400
 
-    quiz = Quiz.query.filter_by(id=quiz_id, user_id=user.id).first()
+    try:
+        quiz_id = int(quiz_id_str)
+    except ValueError:
+        return jsonify({'error': 'Invalid Quiz ID format.'}), 400
+
+    quiz = Quiz.query.get(quiz_id)
     if not quiz:
-        return jsonify({'error': 'Quiz not found or you do not have permission to share it.'}), 404
+        return jsonify({'error': 'Quiz not found.'}), 404
+
+    # Check if the current user owns the quiz
+    if quiz.user_id != current_user_model.id:
+        return jsonify({'error': 'You do not have permission to share this quiz.'}), 403
 
     recipient = User.query.filter_by(email=recipient_email).first()
     if not recipient:
-        return jsonify({'error': 'This email address has not been authorized yet. Please ask them to sign in or choose another recipient.'}), 400
+        return jsonify({'error': 'Recipient user not found.'}), 404 # Or 400 if considered a validation error
+
+    if recipient.id == current_user_model.id:
+        return jsonify({'error': 'You cannot share a quiz with yourself.'}), 400
 
     # Check if the quiz is already shared with the recipient
-    if recipient in quiz.shared_with_users:
+    existing_share = QuizShare.query.filter_by(
+        quiz_id=quiz.id,
+        shared_with_user_id=recipient.id
+    ).first()
+
+    if existing_share:
         return jsonify({'error': 'This quiz is already shared with the specified user.'}), 400
 
-    # Append the recipient to the shared_with_users relationship
-    quiz.shared_with_users.append(recipient)
+    # Create a new QuizShare entry
+    new_share = QuizShare(
+        quiz_id=quiz.id,
+        shared_with_user_id=recipient.id,
+        shared_by_user_id=current_user_model.id  # Record who shared the quiz
+    )
+    db.session.add(new_share)
     db.session.commit()
 
-    return jsonify({'success': 'Quiz successfully shared with the user.'}), 200
+    return jsonify({'success': f'Quiz successfully shared with {recipient_email}.'}), 200
 
 @dashboard_bp.route('/unshare_quiz/<int:share_id>', methods=['POST'])
 def unshare_quiz(share_id):
