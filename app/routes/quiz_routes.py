@@ -3,6 +3,8 @@ from app import db
 from datetime import datetime
 from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
 from flask import render_template, session, request
+from app.models import QuizShare, User, Quiz  # Add this import
+from flask_login import current_user
 
 quiz_routes = Blueprint('quiz_routes', __name__)
 
@@ -299,3 +301,43 @@ def delete_quiz_attempt(attempt_id):
     db.session.delete(attempt)
     db.session.commit()
     return redirect(url_for('stats_bp.dashboard'))
+
+@quiz_routes.route('/share_quiz/<int:quiz_id>', methods=['POST'])
+def share_quiz(quiz_id):
+    """Share a quiz with a recipient email."""
+    if not current_user.is_authenticated:
+        return jsonify({'error': 'You must be logged in to share a quiz.'}), 401
+
+    recipient_email = request.json.get('email')
+    if not recipient_email:
+        return jsonify({'error': 'Recipient email is required.'}), 400
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    if quiz.user_id != current_user.id:
+        return jsonify({'error': 'You can only share your own quizzes.'}), 403
+
+    recipient = User.query.filter_by(email=recipient_email).first()
+    quiz_share = QuizShare(
+        quiz_id=quiz.id,
+        shared_with_user_id=recipient.id if recipient else None,
+        shared_by_user_id=current_user.id
+    )
+    db.session.add(quiz_share)
+    db.session.commit()
+
+    return jsonify({'message': 'Quiz shared successfully.'}), 200
+
+# Correct indentation in the view_quiz route
+@quiz_routes.route('/view_quiz/<int:quiz_id>', methods=['GET'])
+def view_quiz(quiz_id):
+    """View a quiz if access conditions are met."""
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    quiz_share = QuizShare.query.filter_by(quiz_id=quiz.id, shared_with_user_id=current_user.id).first()
+
+    if quiz.user_id != current_user.id and not quiz_share:
+        return jsonify({'error': 'You do not have access to this quiz.'}), 403
+
+    return render_template('take_quiz.html', quiz=quiz)
