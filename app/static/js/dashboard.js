@@ -63,3 +63,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 
+function toggleRenameForm(type, id) {
+    const form = document.getElementById(`${type}-rename-form-${id}`);
+    if (form) {
+        form.style.display = form.style.display === 'none' ? 'inline' : 'none';
+    }
+}
+
+function toggleAssignForm(folderId) {
+    const form = document.getElementById(`assign-form-${folderId}`);
+    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+}
+
