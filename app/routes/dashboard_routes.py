@@ -21,7 +21,17 @@ def dashboard_view():
     past_quizzes = user_quizzes[3:]
     user_folders = Folder.query.filter_by(user_id=user.id).all()
 
-    return render_template("dashboard.html", recent_quizzes=recent_quizzes, past_quizzes=past_quizzes, folders=user_folders, all_quizzes=user_quizzes)
+    # Query quizzes shared with the current user
+    shared_quizzes = Quiz.query.filter(Quiz.shared_with_users.contains(user)).all()
+
+    return render_template(
+        "dashboard.html",
+        recent_quizzes=recent_quizzes,
+        past_quizzes=past_quizzes,
+        folders=user_folders,
+        all_quizzes=user_quizzes,
+        shared_quizzes=shared_quizzes  # Pass shared quizzes to the template
+    )
 
 @dashboard_bp.route('/redo_quiz/<int:quiz_id>')
 def redo_quiz(quiz_id):

@@ -219,6 +219,17 @@
             {% endfor %}
         </ul>
     </section>
+
+    <section class="shared-quizzes">
+        <h2>Quizzes Shared With You</h2>
+        <ul>
+            {% for quiz in shared_quizzes %}
+            <li>
+                <a href="/quiz/{{ quiz.id }}">{{ quiz.title }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+    </section>
   </main>
 
 <!-- Chart & Filter Script -->
