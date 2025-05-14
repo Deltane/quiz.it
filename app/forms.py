@@ -19,8 +19,9 @@ class QuizSetupForm(FlaskForm):
         DataRequired(),
         NumberRange(min=1, max=50)
     ])
-    privacy = RadioField('Privacy', choices=[
+    # Renamed 'privacy' to 'visibility' for clarity, maps to Quiz.is_public
+    visibility = RadioField('Visibility', choices=[
         ('public', 'Public'),
         ('private', 'Private')
-    ], default='public')
+    ], default='public', validators=[DataRequired()])
     submit = SubmitField('Generate Quiz')

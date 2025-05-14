@@ -51,17 +51,23 @@ def authorize():
 
         email = user_info.get("email")
         name = user_info.get("name", email)
-        picture = user_info.get("picture", "")
+        picture = user_info.get("picture", "") # Get picture from user_info
 
         user = User.query.filter_by(email=email).first()
         if not user:
             user = User(
                 username=name,
                 email=email,
-                password_hash='google-oauth'  # Just a dummy to satisfy the schema
+                password_hash='google-oauth',
+                picture=picture  # Save picture URL to the User model
             )
             db.session.add(user)
-            db.session.commit()
+        else:
+            # Update picture if it has changed or was not set before
+            if user.picture != picture:
+                user.picture = picture
+        
+        db.session.commit() # Commit changes for new or existing user
 
         login_user(user)
         session['user_id'] = user.id

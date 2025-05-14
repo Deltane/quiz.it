@@ -22,7 +22,41 @@ def store_quiz():
         validate_csrf(csrf_token)
     except CSRFError:
         return jsonify({'error': 'Invalid CSRF token'}), 400
-    # ...rest of your logic...
+    # Check if the user session is valid
+    if not session.get('user_id'):
+        return jsonify({'error': 'Session expired. Please log in again.'}), 401
+
+    data = request.json
+    session['quiz'] = data['quiz']
+    session['quiz_duration'] = data.get('quiz_duration', 5)  # in minutes
+    session['time_remaining'] = session['quiz_duration'] * 60        # in seconds
+    session['score'] = 0
+    session['current_question'] = 0
+    session['answers'] = {}
+
+    # Save to DB
+    from app.models import Quiz, db, User, Folder # Make sure Folder is imported if used
+    import json
+    user_email = session.get("user_email")
+    user = User.query.filter_by(email=user_email).first()
+    if user:
+        # Use quiz_title and is_public from session if available (set during form submission)
+        topic = session.pop('quiz_title_from_form', data.get('quiz_title', data.get('title', 'Untitled')))
+        is_public = session.pop('is_public_from_form', data.get('is_public', True))
+        questions = data['quiz']
+        folder_id = session.pop("folder_id", None) 
+        
+        quiz = Quiz(
+            title=topic, 
+            questions_json=json.dumps(questions), 
+            user_id=user.id,
+            is_public=is_public # Save visibility status
+        )
+        if folder_id:
+            folder = Folder.query.get(folder_id)
+            if folder:
+                quiz.folders.append(folder)
+        db.session.add(quiz)
 
 # Define the blueprint
 ai_routes = Blueprint('ai_routes', __name__)
@@ -56,6 +90,9 @@ def generate_quiz():
         session['quiz_duration'] = timer_minutes
         quiz_type = form.quiz_type.data
         uploaded_file = form.upload_file.data
+        # Capture quiz name and visibility from the form
+        session['quiz_title_from_form'] = form.quiz_name.data
+        session['is_public_from_form'] = form.visibility.data == 'public'
         
     else:
         return render_template('create_quiz.html', form=form)

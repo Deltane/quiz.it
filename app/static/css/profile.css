@@ -1,0 +1,135 @@
+/* General Profile Styles */
+.profile-container {
+    max-width: 900px;
+    margin: 20px auto;
+    padding: 20px;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.profile-header {
+    text-align: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #eee;
+}
+
+.profile-picture {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 15px;
+    border: 3px solid #fff;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.profile-header h1 {
+    margin: 0;
+    font-size: 2em;
+    color: #333;
+}
+
+.profile-stats, .profile-quizzes {
+    margin-bottom: 30px;
+}
+
+.profile-stats h2, .profile-quizzes h2 {
+    font-size: 1.5em;
+    color: #444;
+    margin-bottom: 15px;
+    padding-bottom: 5px;
+    border-bottom: 2px solid #007bff; /* Accent color for section titles */
+}
+
+/* Stats Grid */
+.stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+}
+
+.stat-item {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    text-align: center;
+}
+
+.stat-item h3 {
+    font-size: 1em;
+    color: #555;
+    margin-bottom: 8px;
+}
+
+.stat-item p {
+    font-size: 1.4em;
+    font-weight: bold;
+    color: #007bff;
+    margin: 0;
+}
+
+/* Quiz List */
+.quiz-list {
+    display: grid;
+    grid-template-columns: 1fr; /* Single column for now, can be changed */
+    gap: 15px;
+}
+
+.quiz-entry {
+    background-color: #fff;
+    padding: 15px;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+    transition: box-shadow 0.3s ease;
+}
+
+.quiz-entry:hover {
+    box-shadow: 0 3px 8px rgba(0,0,0,0.12);
+}
+
+.quiz-entry h3 {
+    margin-top: 0;
+    margin-bottom: 5px;
+    font-size: 1.2em;
+}
+
+.quiz-entry h3 a {
+    text-decoration: none;
+    color: #0056b3;
+}
+
+.quiz-entry h3 a:hover {
+    text-decoration: underline;
+}
+
+.quiz-entry p {
+    font-size: 0.9em;
+    color: #666;
+    margin-bottom: 10px;
+}
+
+.privacy-tag {
+    font-size: 0.8em;
+    font-weight: normal;
+    color: #fff;
+    background-color: #dc3545; /* Red for private */
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-left: 8px;
+}
+
+.private-quiz-entry {
+    border-left: 5px solid #dc3545; /* Red accent for private quizzes when owner views */
+}
+
+/* Footer (example) */
+footer {
+    text-align: center;
+    margin-top: 40px;
+    padding-top: 20px;
+    border-top: 1px solid #eee;
+    color: #777;
+}

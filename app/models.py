@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(128), nullable=True)
+    picture = db.Column(db.String(255), nullable=True)  # New field for profile picture
     quiz_results = db.relationship('QuizResult', backref='user', lazy=True)
     quizzes_shared_with_me = db.relationship(
         'QuizShare',
@@ -38,7 +39,7 @@ class User(UserMixin, db.Model):
 
 @login_manager.user_loader
 def load_user(user_id):
-    return User.query.get(int(user_id))
+    return User.query.get(int(user_id))  # Correct implementation
 
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -46,6 +47,7 @@ class Quiz(db.Model):
     questions_json = db.Column(db.Text, nullable=False)  # stores quiz questions in JSON
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    is_public = db.Column(db.Boolean, default=True, nullable=False)  # New field for quiz visibility
     folders = db.relationship('Folder', secondary=quiz_folder_association, back_populates='quizzes')
     quiz_shares = db.relationship(
         'QuizShare',
