@@ -26,6 +26,7 @@ class Quiz(db.Model):
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     folders = db.relationship('Folder', secondary=quiz_folder_association, back_populates='quizzes')
+    shared_with_users = db.relationship('User', secondary='quiz_share', backref='shared_quizzes')
 
 class QuizResult(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -58,6 +59,6 @@ class QuizShare(db.Model):
     shared_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     shared_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-    quiz = db.relationship('Quiz', backref='shared_quizzes', lazy=True)
-    shared_with_user = db.relationship('User', foreign_keys=[shared_with_user_id], backref='received_quizzes', lazy=True)
-    shared_by_user = db.relationship('User', foreign_keys=[shared_by_user_id], backref='shared_quizzes', lazy=True)
+    quiz = db.relationship('Quiz', backref='quiz_shares')
+    shared_with_user = db.relationship('User', foreign_keys=[shared_with_user_id])
+    shared_by_user = db.relationship('User', foreign_keys=[shared_by_user_id])

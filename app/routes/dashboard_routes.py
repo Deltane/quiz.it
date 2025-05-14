@@ -198,36 +198,36 @@ def unassign_quiz_from_folder():
 
 @dashboard_bp.route('/share_quiz', methods=['POST'])
 def share_quiz():
-    if not current_user.is_authenticated:
-        return redirect(url_for('auth.login'))
+    if 'user_email' not in session:
+        return jsonify({'error': 'You must be logged in to share quizzes.'}), 401
+
+    user = User.query.filter_by(email=session['user_email']).first()
+    if not user:
+        return jsonify({'error': 'User not found. Please log in again.'}), 401
 
     quiz_id = request.form.get('quiz_id')
-    recipient_email = request.form.get('email')
+    recipient_email = request.form.get('recipient_email')
 
-    quiz = Quiz.query.get(quiz_id)
-    if not quiz or quiz.user_id != current_user.id:
-        flash('Invalid quiz or permission denied.', 'error')
-        return redirect(url_for('dashboard.dashboard_view'))
+    if not quiz_id or not recipient_email:
+        return jsonify({'error': 'Quiz ID and recipient email are required.'}), 400
+
+    quiz = Quiz.query.filter_by(id=quiz_id, user_id=user.id).first()
+    if not quiz:
+        return jsonify({'error': 'Quiz not found or you do not have permission to share it.'}), 404
 
     recipient = User.query.filter_by(email=recipient_email).first()
     if not recipient:
-        flash('Recipient not found.', 'error')
-        return redirect(url_for('dashboard.dashboard_view'))
+        return jsonify({'error': 'This email address has not been authorized yet. Please ask them to sign in or choose another recipient.'}), 400
 
-    share = QuizShare(quiz_id=quiz.id, shared_with_user_id=recipient.id, shared_by_user_id=current_user.id)
-    db.session.add(share)
+    # Check if the quiz is already shared with the recipient
+    if recipient in quiz.shared_with_users:
+        return jsonify({'error': 'This quiz is already shared with the specified user.'}), 400
+
+    # Append the recipient to the shared_with_users relationship
+    quiz.shared_with_users.append(recipient)
     db.session.commit()
 
-    email_sent = send_email(
-        subject="A Quiz Has Been Shared With You!",
-        recipients=[recipient_email],
-        body=f"{current_user.name} has shared a quiz with you. Log in to take the quiz!"
-    )
-    if not email_sent:
-        flash('Quiz shared, but email notification failed.', 'error')
-
-    flash('Quiz shared successfully.', 'success')
-    return redirect(url_for('dashboard.dashboard_view'))
+    return jsonify({'success': 'Quiz successfully shared with the user.'}), 200
 
 @dashboard_bp.route('/unshare_quiz/<int:share_id>', methods=['POST'])
 def unshare_quiz(share_id):
