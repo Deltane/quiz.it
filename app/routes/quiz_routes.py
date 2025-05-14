@@ -305,6 +305,11 @@ def delete_quiz_attempt(attempt_id):
 @quiz_routes.route('/share_quiz/<int:quiz_id>', methods=['POST'])
 def share_quiz(quiz_id):
     """Share a quiz with a recipient email."""
+    from flask import current_app
+    from app.utils.email_utils import send_email
+    import os
+    import traceback
+    
     if not current_user.is_authenticated:
         return jsonify({'error': 'You must be logged in to share a quiz.'}), 401
 
@@ -323,6 +328,9 @@ def share_quiz(quiz_id):
     # Check if recipient exists in the system
     recipient = User.query.filter_by(email=recipient_email).first()
     
+    # Variable to track if this is a new share (for sending email)
+    is_new_share = False
+    
     if recipient:
         # If recipient exists, check if quiz is already shared
         existing_share = QuizShare.query.filter_by(
@@ -340,6 +348,7 @@ def share_quiz(quiz_id):
             shared_by_user_id=current_user.id
         )
         db.session.add(quiz_share)
+        is_new_share = True
     else:
         # If recipient doesn't exist, check for pending share
         from app.models import PendingQuizShare
@@ -359,10 +368,41 @@ def share_quiz(quiz_id):
             shared_by_user_id=current_user.id
         )
         db.session.add(pending_share)
+        is_new_share = True
     
     db.session.commit()
+    
+    # Send email notification for new shares
+    if is_new_share:
+        try:
+            # Generate absolute URL for login
+            base_url = request.host_url.rstrip('/')
+            login_url = f"{base_url}{url_for('auth.login')}"
+            
+            current_app.logger.info(f"Attempting to send email to {recipient_email} via SendGrid")
+            
+            # Send email with HTML template
+            send_email(
+                subject=f"{current_user.username} shared a quiz with you on quiz.it",
+                recipients=[recipient_email],
+                body=f"Hi there! {current_user.username} has shared a quiz titled '{quiz.title}' with you on quiz.it. Sign in with Google using this email to access it.",
+                template='emails/quiz_share.html',
+                sender_name=current_user.username,
+                quiz_title=quiz.title,
+                login_url=login_url
+            )
+            current_app.logger.info(f"✅ Quiz share email sent to {recipient_email}")
+        except Exception as e:
+            import traceback
+            current_app.logger.error(f"❌ Failed to send quiz share email: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
+            # Note: We don't return an error to the user if email fails
+            # The quiz is still shared, even if notification fails
 
-    return jsonify({'message': 'Quiz shared successfully.'}), 200
+    return jsonify({
+        'success': True,
+        'message': 'Quiz shared successfully. An invitation email has been sent.'
+    }), 200
 
 @quiz_routes.route('/view_quiz/<int:quiz_id>', methods=['GET'])
 def view_quiz(quiz_id):
@@ -412,6 +452,10 @@ def share_quiz_root():
     Root-level endpoint for sharing quizzes with any email address.
     The quiz will be accessible only if the recipient logs in with the shared email.
     """
+    from flask import current_app
+    from app.utils.email_utils import send_email
+    import os
+    
     if not current_user.is_authenticated:
         return jsonify({'error': 'You must be logged in to share quizzes.'}), 401
 
@@ -443,6 +487,9 @@ def share_quiz_root():
     if recipient_email == current_user.email:
         return jsonify({'error': 'You cannot share a quiz with yourself.'}), 400
 
+    # Variable to track if this is a new share (for sending email)
+    is_new_share = False
+    
     # Check if recipient exists in the system
     recipient = User.query.filter_by(email=recipient_email).first()
     
@@ -463,6 +510,7 @@ def share_quiz_root():
             shared_by_user_id=current_user.id
         )
         db.session.add(quiz_share)
+        is_new_share = True
     else:
         # If recipient doesn't exist, check for pending share
         from app.models import PendingQuizShare
@@ -482,8 +530,33 @@ def share_quiz_root():
             shared_by_user_id=current_user.id
         )
         db.session.add(pending_share)
+        is_new_share = True
     
-    db.session.commit()    
+    db.session.commit()
+    
+    # Send email notification for new shares
+    if is_new_share:
+        try:
+            # Generate absolute URL for login
+            base_url = request.host_url.rstrip('/')
+            login_url = f"{base_url}{url_for('auth.login')}"
+            
+            # Send email with HTML template
+            send_email(
+                subject=f"{current_user.username} shared a quiz with you on quiz.it",
+                recipients=[recipient_email],
+                body=f"Hi there! {current_user.username} has shared a quiz titled '{quiz.title}' with you on quiz.it. Sign in with Google using this email to access it.",
+                template='emails/quiz_share.html',
+                sender_name=current_user.username,
+                quiz_title=quiz.title,
+                login_url=login_url
+            )
+            current_app.logger.info(f"Sent quiz share email to {recipient_email}")
+        except Exception as e:
+            current_app.logger.error(f"Failed to send quiz share email: {str(e)}")
+            # Note: We don't return an error to the user if email fails
+            # The quiz is still shared, even if notification fails
+    
     return jsonify({'success': True, 'message': f'Quiz successfully shared with {recipient_email}.'}), 200
 
 @quiz_routes.route('/check_login')

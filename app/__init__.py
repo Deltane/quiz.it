@@ -10,11 +10,11 @@ from flask_session import Session
 from authlib.integrations.flask_client import OAuth
 import requests
 from flask_login import LoginManager
-from flask_mail import Mail
+# Removed Flask-Mail import
 
 # Initialize extensions globally
 db = SQLAlchemy()
-mail = Mail()
+# Removed mail = Mail()
 migrate = Migrate()
 session_manager = Session()
 oauth = OAuth()
@@ -32,14 +32,14 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///app.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
-    # Flask-Mail config
-    app.config['MAIL_SERVER'] = 'smtp.gmail.com'  # Example: Gmail SMTP server
-    app.config['MAIL_PORT'] = 587
-    app.config['MAIL_USE_TLS'] = True
-    app.config['MAIL_USERNAME'] = 'your-email@gmail.com'  # Replace with your email
-    app.config['MAIL_PASSWORD'] = 'your-email-password'  # Replace with your email password
-    app.config['MAIL_DEFAULT_SENDER'] = 'your-email@gmail.com'
-    # Ensure these are set in your environment or .env file
+    # SendGrid Email config
+    app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', 'quiz.it <quiz.it@outlook.com>')
+    
+    # Log email configuration status
+    app.logger.info("SendGrid API configured")
+    app.logger.info(f"API Key provided: {'Yes' if app.config['SENDGRID_API_KEY'] else 'No'}")
+    app.logger.info(f"Default sender: {app.config['MAIL_DEFAULT_SENDER']}")
 
     # Flask-Session config
     app.config['SESSION_TYPE'] = 'filesystem'  # <- Important for server-side sessions
@@ -48,6 +48,7 @@ def create_app():
     migrate.init_app(app, db)
     oauth.init_app(app)
     login_manager.init_app(app)
+    # Removed Flask-Mail initialization
 
     # Log app initialization
     app.logger.info("Flask app initialized with configuration:")

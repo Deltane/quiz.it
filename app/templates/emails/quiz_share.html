@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Shared With You</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #4CAF50;
+            color: white;
+            padding: 20px;
+            text-align: center;
+            border-radius: 5px 5px 0 0;
+        }
+        .content {
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-top: none;
+            border-radius: 0 0 5px 5px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin-top: 15px;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #777;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Quiz Shared With You</h1>
+    </div>
+    <div class="content">
+        <p>Hi there!</p>
+        <p><strong>{{ sender_name }}</strong> has shared a quiz titled <strong>"{{ quiz_title }}"</strong> with you on quiz.it.</p>
+        
+        <p>To access this quiz:</p>
+        <ol>
+            <li>Sign in to quiz.it using Google with this email address.</li>
+            <li>The quiz will automatically appear in your "Quizzes Shared With Me" section.</li>
+        </ol>
+        
+        <p>Don't have an account yet? No problem! Just sign in with Google using this email and the quiz will be waiting for you.</p>
+        
+        <a href="{{ login_url }}" class="button">Sign In to View Quiz</a>
+        
+        <p><i>Note: This quiz will only be accessible when you sign in with the email address this invitation was sent to.</i></p>
+    </div>
+    <div class="footer">
+        <p>This is an automated message from quiz.it. Please do not reply to this email.</p>
+    </div>
+</body>
+</html>

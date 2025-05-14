@@ -93,11 +93,23 @@ document.addEventListener('DOMContentLoaded', function() {
             })
             .then(response => response.json())
             .then(data => {
-                if (data.success) {
-                    messageDiv.textContent = data.success;
+                console.log('Share response:', data);
+                
+                if (data.success || data.message) {
+                    // Success case
+                    messageDiv.textContent = data.message || data.success;
                     messageDiv.className = 'share-message success';
                     recipientEmailInput.value = ''; // Clear input
+                    
+                    // Show email notification info
+                    const extraInfo = document.createElement('div');
+                    extraInfo.className = 'email-notification-info';
+                    extraInfo.innerHTML = `
+                        <p><small>✉️ An invitation email has been sent to ${recipientEmail}</small></p>
+                    `;
+                    messageDiv.appendChild(extraInfo);
                 } else {
+                    // Error case
                     messageDiv.textContent = data.error || 'Failed to share quiz.';
                     messageDiv.className = 'share-message error';
                 }
