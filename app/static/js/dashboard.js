@@ -89,6 +89,10 @@ function closeShareModal(quizId) {
     }
 }
 
+// Attach modal functions to the global window object
+window.openShareModal = openShareModal;
+window.closeShareModal = closeShareModal;
+
 // Close modal when clicking outside of it
 window.onclick = function(event) {
     const modals = document.querySelectorAll('.modal');
