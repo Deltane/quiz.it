@@ -3,38 +3,143 @@
 <head>
     <meta charset="UTF-8">
     <title>Quiz Summary</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/quiz_summary.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <div class="container">
-        <h1>Quiz Summary</h1>
-        <div class="stats-section">
-            <h2>Your Score</h2>
-            <p id="user-score">{{ score }}</p>
+    
+<!-- Header Navigation -->
+<header>
+    <nav class="fixed-nav">
+        <div class="nav-left">
+            <span class="dashboard-title">Quiz Summary</span>
         </div>
-        <div class="stats-section">
-            <h2>Total Quizzes Completed</h2>
-            <p id="quizzes-completed">{{ quizzes_completed }}</p>
+        <div class="nav-right">
+            {% if session.get('user_email') %}
+                <a href="/" class="nav-button">Home</a>
+                <a href="/create_quiz" class="nav-button">Create Quiz</a>
+                <div class="user-info">
+                    <span>{{ session.get('user_name', session['user_email']) }}</span>
+                    <img src="{{ session['user_pic'] }}" alt="Profile"
+                         style="height: 30px; width: 30px; border-radius: 50%; object-fit: cover;">
+                    <a href="{{ url_for('auth.logout') }}" class="nav-button">Sign Out</a>
+                </div>
+            {% else %}
+                <a href="{{ url_for('auth.login') }}" class="nav-button">Sign In with Google</a>
+            {% endif %}
         </div>
-        <div class="stats-section">
-            <h2>Quizzes with Scores Above 80%</h2>
-            <p id="quizzes-above-80">{{ quizzes_above_80 }}</p>
-        </div>
-        <div class="stats-section">
-            <h2>Recent Topics</h2>
-            <ul id="recent-topics">
-                {% for topic in recent_topics %}
-                    <li>{{ topic }}</li>
-                {% endfor %}
-            </ul>
-        </div>
-        <div class="stats-section">
-            <h2>Most Frequent Quiz Type</h2>
-            <p id="most-frequent-quiz-type">{{ most_frequent_quiz_type }}</p>
-        </div>
-        <div class="link-section">
-            <a href="{{ url_for('stats_bp.dashboard') }}">View Detailed Statistics</a>
-        </div>
-    </div>
+    </nav>
+</header>
+
+<!-- Main Content -->
+<main class="dashboard-container">
+    <section class="stat-card">
+        <h2>Your Score</h2>
+        <p>{{ score }}</p>
+    </section>
+
+    <section class="stat-card">
+        <h2>Total Quizzes Completed</h2>
+        <p>{{ quizzes_completed }}</p>
+    </section>
+
+    <section class="stat-card">
+        <h2>Quizzes with Scores Above 80%</h2>
+        <p>{{ quizzes_above_80 }}</p>
+    </section>
+
+    <section class="stat-card">
+        <h2>Recent Topics</h2>
+        <ul>
+            {% for topic in recent_topics %}
+                <li>{{ topic }}</li>
+            {% endfor %}
+        </ul>
+    </section>
+
+    <section class="stat-card">
+        <h2>Most Frequent Quiz Type</h2>
+        <p>{{ most_frequent_quiz_type }}</p>
+    </section>
+
+    <section class="chart-section">
+        <h2>Correct Answers</h2>
+        <p>You answered {{ correct }} out of {{ total }} questions correctly.</p>
+        <canvas id="summaryChart" width="400" height="200"></canvas>
+    </section>
+
+    <section class="chart-section">
+        <h2>Time Spent Per Question</h2>
+        <canvas id="timeChart" width="400" height="200" style="margin-top: 20px;"></canvas>
+    </section>
+    
+</main>
+
+<!-- Chart Script -->
+<script>
+    const correctCount = {{ correct }};
+    const incorrectCount = {{ incorrect }};
+
+    const ctx = document.getElementById('summaryChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['Correct', 'Incorrect'],
+            datasets: [{
+                label: 'Answers Summary',
+                data: [correctCount, incorrectCount],
+                backgroundColor: ['#7bf542', '#f56342']
+            }]
+        },
+        options: {
+            indexAxis: 'y',
+            plugins: {
+                legend: { display: false }
+            },
+            scales: {
+                x: {
+                    beginAtZero: true,
+                    precision: 0
+                }
+            }
+        }
+    });
+    const durations = JSON.parse(localStorage.getItem("quiz_durations") || "[]");
+    const labels = durations.map((_, i) => `Q${i + 1}`);
+
+    const timeCtx = document.getElementById('timeChart').getContext('2d');
+    new Chart(timeCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Time (s)',
+                data: durations,
+                fill: false,
+                borderColor: 'blue',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Seconds'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Question Number'
+                    }
+                }
+            }
+        }
+    });
+
+</script>
+
 </body>
 </html>
