@@ -21,10 +21,14 @@
             {% if session.get('user_email') %}
                 <a href="/" class="nav-button">Home</a>
                 <a href="/create_quiz" class="nav-button">Create Quiz</a>
-                <div class="user-info">
+                <div class="user-info"> <!-- Groups pic, name, sign out -->
+                    <div class="profile-trigger"> <!-- Hover target for dropdown -->
+                        <img src="{{ session['user_pic'] }}" alt="Profile" class="nav-profile-pic"> <!-- Moved pic to left, added class -->
+                        <div class="profile-dropdown">
+                            <a href="{{ url_for('profile.view_profile', username=session['user_name']) }}">View Your Profile</a>
+                        </div>
+                    </div>
                     <span>{{ session.get('user_name', session['user_email']) }}</span>
-                    <img src="{{ session['user_pic'] }}" alt="Profile"
-                         style="height: 30px; width: 30px; border-radius: 50%; object-fit: cover;">
                     <a href="{{ url_for('auth.logout') }}" class="nav-button">Sign Out</a>
                 </div>
             {% else %}
