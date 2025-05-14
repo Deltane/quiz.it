@@ -87,7 +87,19 @@ class QuizShare(db.Model):
     shared_with_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     shared_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     shared_at = db.Column(db.DateTime, default=datetime.utcnow)
+    # Note: recipient_email is handled separately through PendingQuizShare for non-registered users
 
     quiz = db.relationship('Quiz', foreign_keys=[quiz_id], back_populates='quiz_shares', overlaps="shared_quizzes,shared_with_users")
     shared_with_user = db.relationship('User', foreign_keys=[shared_with_user_id], back_populates='quizzes_shared_with_me', overlaps="shared_quizzes,shared_with_users")
     shared_by_user = db.relationship('User', foreign_keys=[shared_by_user_id], back_populates='quizzes_shared_by_me')
+
+class PendingQuizShare(db.Model):
+    __tablename__ = 'pending_quiz_share'
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
+    recipient_email = db.Column(db.String(120), nullable=False)  # Email of recipient who hasn't registered yet
+    shared_by_user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    shared_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    quiz = db.relationship('Quiz', backref=db.backref('pending_shares', lazy='dynamic'))
+    shared_by_user = db.relationship('User', foreign_keys=[shared_by_user_id], backref=db.backref('pending_shared_quizzes', lazy='dynamic'))

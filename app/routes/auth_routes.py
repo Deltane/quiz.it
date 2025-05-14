@@ -74,6 +74,23 @@ def authorize():
         session['user_email'] = email
         session['user_name'] = name
         session['user_pic'] = picture
+        
+        # Check for any pending quiz shares for this email
+        from app.models import PendingQuizShare, QuizShare
+        pending_shares = PendingQuizShare.query.filter_by(recipient_email=email).all()
+        
+        # Convert pending shares to actual shares
+        for pending in pending_shares:
+            # Create a new QuizShare entry
+            new_share = QuizShare(
+                quiz_id=pending.quiz_id,
+                shared_with_user_id=user.id,
+                shared_by_user_id=pending.shared_by_user_id
+            )
+            db.session.add(new_share)
+            db.session.delete(pending)  # Remove the pending share
+        
+        db.session.commit()
 
         return redirect(url_for('dashboard.dashboard_view'))
 
@@ -87,6 +104,7 @@ def logout():
     session.clear()
     return redirect(url_for('quiz_routes.home'))
 
-@auth_bp.route('/check_login')
-def check_login():
-    return jsonify({'logged_in': current_user.is_authenticated})
+# This function has been moved to quiz_routes.py to be accessible at root URL
+# @auth_bp.route('/check_login')
+# def check_login():
+#     return jsonify({'logged_in': current_user.is_authenticated})
