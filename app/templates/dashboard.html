@@ -50,32 +50,34 @@
         {% endif %}
     </section>
 
-    <section class="stat-card">
-      <h2>Recent Quizzes</h2>
-      <div id="recent-quizzes-list">
-        {% for quiz in recent_quizzes %}
-          <div class="quiz-entry">
-            <h3>{{ quiz.title }}</h3>
-            <button class="action-button" onclick="openShareModal('{{ quiz.id }}')">Share</button>
-            <button class="action-button">Rename</button>
-            <button class="action-button">Redo</button>
-          </div>
-
-          <!-- Share Modal -->
-          <div id="share-modal-{{ quiz.id }}" class="modal" style="display: none;">
-            <div class="modal-content">
-              <span class="close" onclick="closeShareModal('{{ quiz.id }}')">&times;</span>
-              <form action="/share_quiz" method="POST">
-                <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
-                <label for="user-search-{{ quiz.id }}">Search for a user:</label>
-                <input type="text" id="user-search-{{ quiz.id }}" class="user-search-input" data-results-container="user-results-{{ quiz.id }}" placeholder="Enter user email or name">
-                <div id="user-results-{{ quiz.id }}" class="user-results"></div>
-                <button type="submit">Share</button>
-              </form>
+    <section class="stat-card recent-quizzes">
+        <h2>Recent Quizzes</h2>
+        <div class="recent-quizzes-list">
+            {% for quiz in recent_quizzes %}
+            <div class="quiz-entry">
+                <h3>{{ quiz.title }}</h3>
+                <div>
+                    <button class="action-button" onclick="openShareModal('{{ quiz.id }}')">Share</button>
+                    <button class="action-button">Rename</button>
+                    <button class="action-button">Redo</button>
+                </div>
             </div>
-          </div>
-        {% endfor %}
-      </div>
+
+            <!-- Share Modal -->
+            <div id="share-modal-{{ quiz.id }}" class="modal" style="display: none;">
+                <div class="modal-content">
+                    <span class="close" onclick="closeShareModal('{{ quiz.id }}')">&times;</span>
+                    <form action="/share_quiz" method="POST">
+                        <input type="hidden" name="quiz_id" value="{{ quiz.id }}">
+                        <label for="user-search-{{ quiz.id }}">Enter an email to send this quiz:</label>
+                        <input type="text" id="user-search-{{ quiz.id }}" class="user-search-input" data-results-container="user-results-{{ quiz.id }}" placeholder="Enter user email">
+                        <div id="user-results-{{ quiz.id }}" class="user-results"></div>
+                        <button type="submit">Share</button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
     </section>
 
     <section class="stat-card">
