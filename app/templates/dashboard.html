@@ -43,17 +43,24 @@
 <div id="shared-quiz-modal" class="modal" style="display: block;">
     <div class="modal-content">
         <span class="close-button" onclick="closeSharedQuizModal()">&times;</span>
-        <h3>This quiz was shared with you by {{ sender.username }}</h3>
-        <h4>Title: "{{ shared_quiz.title }}"</h4>
-        <button id="start-shared-quiz" class="action-button" onclick="startSharedQuiz('{{ shared_quiz.id }}')">Start Quiz</button>
+        <div class="modal-header">
+            <h3>Quiz Shared With You</h3>
+        </div>
+        <div class="modal-body">
+            <p>This quiz was shared with you by <strong>{{ sender.username }}</strong></p>
+            <h4>Title: "{{ shared_quiz.title }}"</h4>
+            <button id="start-shared-quiz" class="action-button" onclick="startSharedQuiz('{{ shared_quiz.id }}')">Start Quiz</button>
+        </div>
     </div>
 </div>
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+        console.log("Checking for shared quiz modal");
         // Ensure modal is displayed on page load if needed
         const sharedQuizModal = document.getElementById('shared-quiz-modal');
         if (sharedQuizModal) {
+            console.log("Displaying shared quiz modal");
             sharedQuizModal.style.display = 'block';
         }
     });
@@ -76,17 +83,45 @@
         width: 100%;
         height: 100%;
         background-color: rgba(0,0,0,0.7);
+        animation: fadeIn 0.3s ease-in-out;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
     }
     
     .modal-content {
         background-color: #fff;
-        margin: 15% auto;
-        padding: 20px;
+        margin: 10% auto;
+        padding: 25px;
         border-radius: 8px;
         width: 50%;
         max-width: 500px;
         text-align: center;
         position: relative;
+        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        animation: slideDown 0.4s ease-out;
+    }
+    
+    @keyframes slideDown {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    .modal-header {
+        border-bottom: 1px solid #eee;
+        margin-bottom: 15px;
+        padding-bottom: 10px;
+    }
+    
+    .modal-header h3 {
+        color: #4285F4;
+        margin: 0;
+    }
+    
+    .modal-body {
+        padding: 10px 0;
     }
     
     .close-button {
@@ -94,7 +129,14 @@
         right: 15px;
         top: 10px;
         font-size: 24px;
+        font-weight: bold;
         cursor: pointer;
+        color: #999;
+        transition: color 0.2s;
+    }
+    
+    .close-button:hover {
+        color: #333;
     }
     
     #start-shared-quiz {
@@ -307,21 +349,58 @@
         {% if shared_quizzes %}
         <ul class="shared-quiz-list">
             {% for shared_item in shared_quizzes %}
-            <li class="quiz-entry">
+            <li class="quiz-entry shared-quiz-item">
                 <div class="quiz-header">
-                    <span class="quiz-title">{{ shared_item.quiz.title }}</span>
-                    <span class="quiz-sender">Shared by: {{ shared_item.sender.username }}</span>
+                    <div class="quiz-info">
+                        <span class="quiz-title">{{ shared_item.quiz.title }}</span>
+                        <span class="quiz-sender">Shared by: {{ shared_item.sender.username }}</span>
+                    </div>
                     <div class="action-button-wrapper">
-                        <a href="{{ url_for('quiz_routes.start_shared_quiz', quiz_id=shared_item.quiz.id) }}" class="action-button">Start Quiz</a>
+                        <a href="{{ url_for('quiz_routes.start_shared_quiz', quiz_id=shared_item.quiz.id) }}" class="action-button start-shared-quiz-btn">Start Quiz</a>
                     </div>
                 </div>
             </li>
             {% endfor %}
         </ul>
         {% else %}
-        <p>No quizzes have been shared with you yet.</p>
+        <p class="no-quizzes-message">No quizzes have been shared with you yet.</p>
         {% endif %}
     </section>
+    
+    <style>
+        .shared-quiz-item {
+            transition: transform 0.2s, box-shadow 0.2s;
+            border: 1px solid #e0e0e0;
+        }
+        
+        .shared-quiz-item:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .quiz-info {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .start-shared-quiz-btn {
+            background-color: #4CAF50;
+            color: white;
+            transition: background-color 0.3s;
+        }
+        
+        .start-shared-quiz-btn:hover {
+            background-color: #45a049;
+        }
+        
+        .no-quizzes-message {
+            text-align: center;
+            color: #666;
+            font-style: italic;
+            padding: 20px 0;
+        }
+    </style>
   </main>
 
 <!-- Chart & Filter Script -->

@@ -42,6 +42,13 @@
             margin-bottom: 2rem;
         }
         
+        /* Google Dots Animation */
+        .google-dots-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
         .google-dot {
             width: 16px;
             height: 16px;
@@ -146,16 +153,38 @@
     </div>
 
     <script>
-        // Auto-redirect to Google authentication after a short delay
-        setTimeout(function() {
-            window.location.href = "{{ auth_url }}";
-        }, 2000);
-        
-        // This will show the sign-in button as a fallback if automatic redirect fails
-        setTimeout(function() {
-            document.getElementById('signin-button').classList.remove('visually-hidden');
-            document.querySelector('.status-message').textContent = 'Please sign in with Google to access the shared quiz.';
-        }, 5000);
+        document.addEventListener('DOMContentLoaded', function() {
+            // Display a status animation with multiple messages
+            const statusMessages = [
+                "Checking authentication status...",
+                "Verifying shared quiz access...",
+                "Preparing Google authentication...",
+                "Redirecting to Google Sign-in..."
+            ];
+            
+            const statusElement = document.querySelector('.status-message');
+            let messageIndex = 0;
+            
+            // Show messages in sequence
+            const messageInterval = setInterval(function() {
+                if (messageIndex < statusMessages.length) {
+                    statusElement.textContent = statusMessages[messageIndex++];
+                } else {
+                    clearInterval(messageInterval);
+                }
+            }, 1200);
+            
+            // Auto-redirect to Google authentication after showing all messages
+            setTimeout(function() {
+                window.location.href = "{{ auth_url }}";
+            }, 5000);
+            
+            // This will show the sign-in button as a fallback if automatic redirect fails
+            setTimeout(function() {
+                document.getElementById('signin-button').classList.remove('visually-hidden');
+                document.querySelector('.status-message').textContent = 'Please sign in with Google to access the shared quiz.';
+            }, 8000);
+        });
     </script>
 </body>
 </html>

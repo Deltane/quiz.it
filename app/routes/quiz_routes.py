@@ -20,13 +20,15 @@ def direct_quiz_link(quiz_id):
     If user is not logged in, show auth loading animation and redirect to login
     If user is logged in, check if quiz is shared with them and show confirmation
     """
-    # Store the quiz_id for after login
-    session['shared_quiz_id'] = quiz_id
-    
     # If user is not logged in, show auth loading animation and redirect to Google OAuth
     if not current_user.is_authenticated:
+        # Store the quiz_id for after login - use a persistent session
+        session.permanent = True
+        session['shared_quiz_id'] = quiz_id
+        session.modified = True
+        
         # Generate the Google auth URL but don't redirect yet - we'll show the animation first
-        auth_url = url_for('auth.login')
+        auth_url = url_for('auth.login', next=f'/{quiz_id}')
         return render_template('auth_loading.html', auth_url=auth_url)
     
     # User is logged in, now check if quiz is shared with them
@@ -63,14 +65,24 @@ def direct_quiz_link(quiz_id):
             db.session.commit()
     
     if quiz_share:
-        # Add a flag to session to show modal on dashboard redirect
-        session['show_shared_quiz_modal'] = True
-        session['shared_quiz_id'] = quiz_id
-        session['shared_quiz_sender_id'] = quiz_share.shared_by_user_id
+        # Get the sender user
+        sender = User.query.get(quiz_share.shared_by_user_id)
         
-        # Redirect to dashboard with a flash message
-        flash(f"Quiz '{quiz.title}' has been shared with you.", "info")
-        return redirect(url_for('dashboard.dashboard_view'))
+        # Show the modal directly instead of redirecting to dashboard
+        return render_template(
+            'dashboard.html',
+            show_shared_quiz_modal=True,
+            shared_quiz=quiz,
+            sender=sender,
+            # Add the regular dashboard data too
+            recent_quizzes=Quiz.query.filter_by(user_id=current_user.id).order_by(Quiz.created_at.desc()).limit(3).all(),
+            shared_quizzes=[{'quiz': quiz, 'sender': sender}],  # Include this shared quiz 
+            stats={
+                'quizzes_completed': 0,  # These will be properly calculated in dashboard_view
+                'quizzes_above_80': 0,
+                'most_frequent_quiz_type': 'None'
+            }
+        )
     
     # Quiz isn't shared with this user
     flash("This quiz hasn't been shared with you or doesn't exist.", "error")
@@ -80,6 +92,7 @@ def direct_quiz_link(quiz_id):
 @login_required
 def start_shared_quiz(quiz_id):
     """Start a quiz that was shared with the current user"""
+    from flask import current_app
     quiz = Quiz.query.get_or_404(quiz_id)
     
     # Verify the quiz is shared with this user
@@ -92,18 +105,38 @@ def start_shared_quiz(quiz_id):
         flash("This quiz hasn't been shared with you.", "error")
         return redirect(url_for('dashboard.dashboard_view'))
     
-    # Set up the quiz session
-    import json
-    session['quiz'] = json.loads(quiz.questions_json)
-    session['score'] = 0
-    session['current_question'] = 0
-    session['answers'] = {}
-    session['quiz_id'] = quiz.id
-    session['topic'] = quiz.title
-    session['quiz_duration'] = 5  # Default duration in minutes
-    session['time_remaining'] = 5 * 60  # Default time in seconds
+    # Log access for debugging
+    current_app.logger.info(f"User {current_user.email} ({current_user.id}) accessing shared quiz {quiz_id}")
     
-    return redirect(url_for('quiz_routes.take_quiz'))
+    try:
+        # Set up the quiz session
+        import json
+        quiz_data = json.loads(quiz.questions_json)
+        current_app.logger.info(f"Quiz {quiz_id} loaded with {len(quiz_data)} questions")
+        
+        # Store all necessary quiz data in session
+        session['quiz'] = quiz_data
+        session['score'] = 0
+        session['current_question'] = 0
+        session['answers'] = {}
+        session['quiz_id'] = quiz.id
+        session['topic'] = quiz.title
+        
+        # Ensure we have sensible defaults for quiz configuration
+        if 'quiz_duration' not in session or not session['quiz_duration']:
+            session['quiz_duration'] = 5  # Default duration in minutes
+            
+        if 'time_remaining' not in session or not session['time_remaining']:
+            session['time_remaining'] = session['quiz_duration'] * 60  # Time in seconds
+            
+        # Make sure session is saved
+        session.modified = True
+        
+        return redirect(url_for('quiz_routes.take_quiz'))
+    except Exception as e:
+        current_app.logger.error(f"Error starting shared quiz: {e}")
+        flash("There was a problem loading the quiz. Please try again.", "error")
+        return redirect(url_for('dashboard.dashboard_view'))
 
 @quiz_routes.route('/take_quiz')
 def take_quiz():
