@@ -7,10 +7,14 @@ def get_user_stats(user_id):
     quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
     recent_topics = QuizResult.query.filter_by(user_id=user_id)\
         .order_by(QuizResult.timestamp.desc()).limit(5).all()
-    most_frequent_quiz_type = db.session.query(
-        QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)
-    ).filter_by(user_id=user_id).group_by(QuizResult.quiz_type)\
-     .order_by(db.func.count(QuizResult.quiz_type).desc()).first()
+    with db.session.no_autoflush:
+        most_frequent_quiz_type = db.session.query(
+            QuizResult.quiz_type,
+            db.func.count(QuizResult.quiz_type)
+        ).filter_by(user_id=user_id, completed=True)\
+         .group_by(QuizResult.quiz_type)\
+         .order_by(db.func.count(QuizResult.quiz_type).desc())\
+         .first()
 
     highest = get_highest_scoring_quiz(user_id)
 
