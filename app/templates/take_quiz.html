@@ -43,5 +43,31 @@
 </body>
 <script>
     const INITIAL_QUESTION_INDEX = {{ current_question | default(0) | int }};
+    const quizId = "{{ quiz_id }}";
+    let attemptId = "{{ attempt_id }}";
+
+    // Clean up any stale or invalid localStorage entries
+    Object.keys(localStorage).forEach((key) => {
+        if (key.includes("None")) {
+            localStorage.removeItem(key);
+        }
+    });
+
+    // Validate or assign a fresh attemptId if invalid
+    if (!attemptId || attemptId === "None" || isNaN(parseInt(attemptId))) {
+        const attemptIndexKey = `quiz_attempt_index_${quizId}`;
+        let attemptIds = JSON.parse(localStorage.getItem(attemptIndexKey) || "[]");
+        attemptId = attemptIds.length + 1;
+        sessionStorage.setItem("attempt_id", attemptId);
+
+        if (!attemptIds.includes(attemptId)) {
+            attemptIds.push(attemptId);
+            localStorage.setItem(attemptIndexKey, JSON.stringify(attemptIds));
+        }
+    } else {
+        sessionStorage.setItem("attempt_id", attemptId);
+    }
+
+    sessionStorage.setItem("quiz_id", quizId);
 </script>
 </html>

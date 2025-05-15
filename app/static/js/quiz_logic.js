@@ -2,6 +2,39 @@ let answers = [];
 let questionTimestamps = [];
 
 $(document).ready(function () {
+    // Remove any localStorage keys containing "None"
+    Object.keys(localStorage).forEach(key => {
+        if (key.includes("None")) {
+            localStorage.removeItem(key);
+        }
+    });
+    // Initialize unique quiz session ID if not already set
+    if (!sessionStorage.getItem("quiz_session_id")) {
+        const timestamp = Date.now();
+        sessionStorage.setItem("quiz_session_id", `session_${timestamp}`);
+    }
+    // Ensure quiz_id is set early
+    if (!sessionStorage.getItem("quiz_id")) {
+        const quizIdMatch = window.location.href.match(/take_quiz\/(\d+)/);
+        const quizId = quizIdMatch ? quizIdMatch[1] : "default";
+        sessionStorage.setItem("quiz_id", quizId);
+    }
+    // Ensure attempt_id is set early and stored consistently
+    const quizId = sessionStorage.getItem("quiz_id") || "default";
+    const attemptIndexKey = `quiz_attempt_index_${quizId}`;
+    let attemptIds = JSON.parse(localStorage.getItem(attemptIndexKey) || "[]");
+
+    // Validate and assign attemptId early
+    if (!sessionStorage.getItem("attempt_id")) {
+        const newAttemptId = attemptIds.length + 1;
+        sessionStorage.setItem("attempt_id", newAttemptId);
+
+        // Add to attempt index immediately to lock it in
+        if (!attemptIds.includes(newAttemptId)) {
+            attemptIds.push(newAttemptId);
+            localStorage.setItem(attemptIndexKey, JSON.stringify(attemptIds));
+        }
+    }
     // Add pause state
     let isPaused = false;
     // Get the full quiz time and remaining time from data attributes, fallback to 5 minutes (300s)
@@ -70,7 +103,6 @@ $(document).ready(function () {
     }
 
     function loadQuestion() {
-        questionTimestamps.push(Date.now());
         if (currentQuestionIndex === 0) resetQuiz();
         $.getJSON(`/get_question/${currentQuestionIndex}`, function (data) {
             const $questionContainer = $('#question-container').empty();
@@ -95,6 +127,18 @@ $(document).ready(function () {
                         </div>
                     `);
                 }
+
+                const quizId = sessionStorage.getItem("quiz_id") || "default";
+                const attemptId = sessionStorage.getItem("attempt_id") || Date.now();
+                const currentQuizKey = `current_quiz_${quizId}_${attemptId}`;
+                let quizData = JSON.parse(localStorage.getItem(currentQuizKey) || "[]");
+                quizData[currentQuestionIndex] = {
+                    question: data.question,
+                    answer: data.answer,
+                    options: data.options || [],
+                    type: data.type || 'text'
+                };
+                localStorage.setItem(currentQuizKey, JSON.stringify(quizData));
 
                 $('#next-question').show();
                 // Show/hide previous-question button
@@ -148,8 +192,20 @@ $(document).ready(function () {
     });
 
     function submitAnswer(selectedAnswer) {
+        // Add timestamp for this answer
+        questionTimestamps.push(Date.now());
         // Store answer in the answers array
         answers[currentQuestionIndex] = selectedAnswer;
+
+        // Strictly get quizId and attemptId from sessionStorage, enforce presence
+        const quizId = parseInt(sessionStorage.getItem("quiz_id"));
+        const attemptId = parseInt(sessionStorage.getItem("attempt_id"));
+        console.log("SUBMITTING: quizId =", quizId, "attemptId =", attemptId);
+        // Fallback safety net
+        if (!quizId || !attemptId) {
+            alert("Error: quizId or attemptId is missing from sessionStorage.");
+            return;
+        }
 
         $.ajax({
             url: '/submit_answer',
@@ -158,20 +214,99 @@ $(document).ready(function () {
             data: JSON.stringify({ questionIndex: currentQuestionIndex, answer: selectedAnswer }),
             success: function (data) {
                 if (data.completed) {
+                    // Use strictly correct quizId and attemptId
+                    const durationsKey = `quiz_durations_${quizId}_${attemptId}`;
+                    const reviewKey = `quiz_review_${quizId}_${attemptId}`;
+                    const scoresKey = `quiz_attempts_${quizId}_${attemptId}`;
+                    const attemptIndexKey = `quiz_attempt_index_${quizId}`;
+
+                    // Save current attemptId to the quiz's attempt index
+                    let attemptIndex = JSON.parse(localStorage.getItem(attemptIndexKey) || "[]");
+                    if (!attemptIndex.includes(attemptId)) {
+                        attemptIndex.push(attemptId);
+                        localStorage.setItem(attemptIndexKey, JSON.stringify(attemptIndex));
+                    }
+
                     stopTimer();
                     $('#timer-container').hide();
+
+                    // Save durations
+                    questionTimestamps.push(Date.now());  // Add end timestamp for final question
+
+                    // Remove all previous quiz_durations keys for this quizId except current attempt
+                    Object.keys(localStorage).forEach((key) => {
+                        if (key.startsWith(`quiz_durations_${quizId}_`) && key !== durationsKey) {
+                            localStorage.removeItem(key);
+                        }
+                    });
                     const durations = [];
                     for (let i = 1; i < questionTimestamps.length; i++) {
                         durations.push((questionTimestamps[i] - questionTimestamps[i - 1]) / 1000);
                     }
-                    localStorage.setItem("quiz_durations", JSON.stringify(durations));
+                    localStorage.removeItem(durationsKey);
+                    localStorage.setItem(durationsKey, JSON.stringify(durations));
 
-                    $('#countdown-timer').hide();
+                    // Always overwrite with latest score (one entry only per attempt)
+                    localStorage.setItem(scoresKey, JSON.stringify([data.score]));
+
+                    // Clean up any duplicated or incorrect score keys
+                    Object.keys(localStorage).forEach(key => {
+                        if (
+                            key.startsWith(`quiz_attempts_${quizId}_`) &&
+                            key !== scoresKey &&
+                            key !== `quiz_attempts_${quizId}_1` &&
+                            key !== `quiz_attempts_${quizId}_2` &&
+                            key !== `quiz_attempts_${quizId}_${attemptId}`
+                        ) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+
+                    // Save latest keys
+                    localStorage.setItem("latest_quiz_durations_key", durationsKey);
+                    localStorage.setItem("latest_quiz_review_key", reviewKey);
+                    localStorage.setItem("latest_quiz_attempts_key", scoresKey);
+
+                    // Save quiz review data from local copy with logging and guard
+                    const currentQuizKey = `current_quiz_${quizId}_${attemptId}`;
+                    const quizData = JSON.parse(localStorage.getItem(currentQuizKey) || "[]");
+                    localStorage.removeItem("current_quiz"); // clear any legacy data
+                    console.log("Generating quiz review...");
+                    console.log("Quiz Data:", quizData);
+                    console.log("Answers:", answers);
+
+                    // Remove all previous quiz_review keys for this quizId except current attempt
+                    Object.keys(localStorage).forEach((key) => {
+                        if (key.startsWith(`quiz_review_${quizId}_`) && key !== reviewKey) {
+                            localStorage.removeItem(key);
+                        }
+                    });
+
+                    let quizReview = [];
+
+                    if (quizData.length === answers.length) {
+                        quizReview = quizData.map((q, i) => {
+                            const userAnswer = answers[i] || "";
+                            const correctAnswer = q.answer || "";
+                            return {
+                                question: q.question,
+                                userAnswer: userAnswer,
+                                correctAnswer: correctAnswer,
+                                isCorrect: userAnswer.trim().toLowerCase() === correctAnswer.trim().toLowerCase()
+                            };
+                        });
+                    } else {
+                        console.warn("Mismatch in quizData and answers length. Skipping review.");
+                    }
+
+                    localStorage.removeItem(reviewKey);
+                    localStorage.setItem(reviewKey, JSON.stringify(quizReview));
+
+                    // Then show result after storing review
                     const redirectURL = data.redirect_url || '/';
                     $('#question-container').html(`
                         <div class="result">
                             <p><b>Quiz completed! Your score is: ${data.score}</b></p>
-                            <canvas id="resultChart" width="400" height="200" style="margin-top: 5px;"></canvas>
                             <div class="button-group" style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                                 <a href="/create_quiz" class="btn">Redo</a>
                                 <a href="/" class="btn">Home</a>
@@ -181,9 +316,7 @@ $(document).ready(function () {
                         </div>
                     `);
 
-                    const correctCount = data.score;
-                    const incorrectCount = data.total - data.score;
-
+                    $('#countdown-timer').hide();
                     $('#prev-question').hide();
                     $('#next-question').hide();
                     $('#pause-resume-btn').hide();

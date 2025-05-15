@@ -103,7 +103,37 @@ def dashboard():
             'most_frequent_quiz_type': most_frequent_quiz_type[0] if most_frequent_quiz_type else None
         }
 
-        return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders, unfinished_attempts=unfinished_attempts)
+        rendered = render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders, unfinished_attempts=unfinished_attempts)
+        # Inject the script to clear localStorage for deleted quizzes
+        script = '''
+<script>
+    const cookies = document.cookie.split("; ");
+    const clearKey = cookies.find(row => row.startsWith("clearLocalStorage_quiz_"));
+    if (clearKey) {
+        const quizId = clearKey.split("=")[0].split("_").pop();
+        Object.keys(localStorage).forEach(key => {
+            if (
+                key.startsWith(`quiz_attempts_${quizId}_`) ||
+                key.startsWith(`quiz_durations_${quizId}_`) ||
+                key.startsWith(`quiz_review_${quizId}_`) ||
+                key.startsWith(`current_quiz_${quizId}_`) ||
+                key === `quiz_attempt_index_${quizId}`
+            ) {
+                localStorage.removeItem(key);
+            }
+        });
+        // Clear the cookie so it doesn’t run again
+        document.cookie = clearKey.split("=")[0] + "=; Max-Age=0";
+    }
+</script>
+'''
+        # Insert the script before closing </body> tag if present
+        if '</body>' in rendered:
+            rendered = rendered.replace('</body>', script + '</body>')
+        else:
+            rendered += script
+
+        return rendered
 
 @stats_bp.route('/filter_stats', methods=['POST'])
 @login_required

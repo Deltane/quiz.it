@@ -18,7 +18,9 @@ def take_quiz():
         'take_quiz.html',
         quiz_duration=session.get("quiz_duration", 5),
         current_question=session.get("current_question", 0),
-        time_remaining=session.get("time_remaining", 0)
+        time_remaining=session.get("time_remaining", 0),
+        quiz_id=session.get("quiz_id"),
+        attempt_id=session.get("attempt_id")
     )
 
 @quiz_routes.route('/store_quiz', methods=['POST'])
@@ -49,6 +51,7 @@ def store_quiz():
         db.session.commit()
         
         session['quiz_id'] = quiz.id
+        session['quiz_session_id'] = f"{quiz.id}_{datetime.utcnow().timestamp()}"
         session['topic'] = topic  # Or whatever type you use
 
     return '', 204
@@ -70,6 +73,7 @@ def redo_quiz(quiz_id):
     session['current_question'] = 0
     session['answers'] = {}
     session['quiz_id'] = quiz.id
+    session['quiz_session_id'] = f"{quiz.id}_{datetime.utcnow().timestamp()}"
     session['quiz_type'] = quiz.title
     session['topic'] = quiz.title
     session.pop('attempt_id', None)  # Clear existing attempt_id
@@ -86,14 +90,23 @@ def delete_quiz(quiz_id):
 
     # Delete related results
     QuizResult.query.filter_by(quiz_id=quiz.id).delete()
-    db.session.delete(quiz)
     QuizAnswer.query.filter(
         QuizAnswer.attempt_id.in_(
             db.session.query(QuizResult.id).filter_by(quiz_id=quiz.id)
         )
     ).delete(synchronize_session=False)
+    QuizSummary.query.filter(
+        QuizSummary.result_id.in_(
+            db.session.query(QuizResult.id).filter_by(quiz_id=quiz.id)
+        )
+    ).delete(synchronize_session=False)
+    db.session.delete(quiz)
     db.session.commit()
-    return redirect(url_for('stats_bp.dashboard'))
+
+    # Inject a cookie to signal the frontend to clear relevant localStorage for this quiz
+    response = redirect(url_for('stats_bp.dashboard'))
+    response.set_cookie(f"clearLocalStorage_quiz_{quiz_id}", "true", max_age=10)
+    return response
 
 @quiz_routes.route('/rename_quiz/<int:quiz_id>', methods=['POST'])
 def rename_quiz(quiz_id):
@@ -117,14 +130,15 @@ def get_question(question_index):
         question = quiz[question_index]
         response = {
             'question': question['question'],
+            'answer': question.get('answer', ''),
             'type': 'multiple-choice' if 'options' in question else 'fill-in-blank',
             'time_limit': session.get('quiz_duration', 5)
         }
-        
+
         # Only include options for multiple choice questions
         if 'options' in question:
             response['options'] = question['options']
-            
+
         return jsonify(response)
     return jsonify({}), 404
 
@@ -144,110 +158,115 @@ def submit_answer():
     # Check if the quiz is completed
     quiz = session.get('quiz', [])
     if question_index + 1 >= len(quiz):
-        # Calculate score
-        score = 0
-        for i, question in enumerate(quiz):
-            user_ans = str(session['answers'].get(i, '')).lower().strip()
-            correct_ans = str(question['answer']).lower().strip()
-            if user_ans == correct_ans:
-                score += 1
-        
-        session['score'] = score
+        try:
+            # Calculate score
+            score = 0
+            for i, question in enumerate(quiz):
+                user_ans = str(session['answers'].get(i, '')).lower().strip()
+                correct_ans = str(question['answer']).lower().strip()
+                if user_ans == correct_ans:
+                    score += 1
+            
+            session['score'] = score
 
-        # Store quiz result in the database
-        user_id = session.get('user_id')
-        quiz_id = session.get('quiz_id')
-        quiz_title = session.get('topic') or 'Untitled'
-        total_questions = len(quiz)
-        timestamp = datetime.utcnow()
+            # Store quiz result in the database
+            user_id = session.get('user_id')
+            quiz_id = session.get('quiz_id')
+            quiz_title = session.get('topic') or 'Untitled'
+            total_questions = len(quiz)
+            timestamp = datetime.utcnow()
 
-        print("Session contents before saving QuizResult:", dict(session))
+            print("Session contents before saving QuizResult:", dict(session))
 
-        quiz_result = QuizResult(
-            user_id=user_id,
-            quiz_id=quiz_id,
-            score=score,
-            total_questions=total_questions,
-            timestamp=timestamp,
-            quiz_type=quiz_title,
-            title=quiz_title,
-            completed=True
-        )
-        
-        correctness_list = []
-
-        for i, question in enumerate(quiz):
-            user_ans = str(session['answers'].get(i, '')).lower().strip()
-            correct_ans = str(question['answer']).lower().strip()
-            is_correct = user_ans == correct_ans
-            correctness_list.append(is_correct)
-            if is_correct:
-                score += 1
-
-        db.session.add(quiz_result)
-        db.session.commit()
-        session['attempt_id'] = quiz_result.id
-
-
-        # Save individual answers for this attempt
-        for i, question in enumerate(quiz):
-            user_ans = str(session['answers'].get(i, '')).lower().strip()
-            correct_ans = str(question['answer']).lower().strip()
-            is_correct = user_ans == correct_ans
-
-            answer_entry = QuizAnswer(
-                attempt_id=quiz_result.id,
-                question_index=i,
-                answer=session['answers'].get(i),
-                is_correct=is_correct
+            quiz_result = QuizResult(
+                user_id=user_id,
+                quiz_id=quiz_id,
+                score=score,
+                total_questions=total_questions,
+                timestamp=timestamp,
+                quiz_type=quiz_title,
+                title=quiz_title,
+                completed=True
             )
-            db.session.add(answer_entry)
+            
+            correctness_list = []
 
-        db.session.commit()
+            for i, question in enumerate(quiz):
+                user_ans = str(session['answers'].get(i, '')).lower().strip()
+                correct_ans = str(question['answer']).lower().strip()
+                is_correct = user_ans == correct_ans
+                correctness_list.append(is_correct)
 
-        # AFTER saving quiz_result
-        summary = QuizSummary(
-            quiz_id=quiz_result.quiz_id,
-            result_id=quiz_result.id,
-            user_email=session.get('user_email'),
-            correct_answers=quiz_result.score,
-            total_questions=quiz_result.total_questions,
-            time_per_question=json.dumps(session.get('time_per_question', {})),
-        )
-        db.session.add(summary)
-        db.session.commit()
+            db.session.add(quiz_result)
+            db.session.flush()  # Ensure quiz_result.id is available for related inserts
+            db.session.commit()
+            session['attempt_id'] = quiz_result.id
 
-        # Calculate and store quiz statistics
-        quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
-        quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
-        recent_topics = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
-        with db.session.no_autoflush:
-            most_frequent_quiz_type = db.session.query(
-                QuizResult.quiz_type,
-                db.func.count(QuizResult.quiz_type)
-            ).filter_by(user_id=user_id, completed=True)\
-             .group_by(QuizResult.quiz_type)\
-             .order_by(db.func.count(QuizResult.quiz_type).desc())\
-             .first()
+            # Save individual answers for this attempt
+            for i, question in enumerate(quiz):
+                user_ans = str(session['answers'].get(i, '')).lower().strip()
+                correct_ans = str(question['answer']).lower().strip()
+                is_correct = user_ans == correct_ans
 
-        session['quizzes_completed'] = quizzes_completed
-        session['quizzes_above_80'] = quizzes_above_80
-        session['recent_topics'] = [result.title for result in recent_topics]
-        session['most_frequent_quiz_type'] = most_frequent_quiz_type[0] if most_frequent_quiz_type else None
+                answer_entry = QuizAnswer(
+                    attempt_id=quiz_result.id,
+                    question_index=i,
+                    answer=session['answers'].get(i),
+                    is_correct=is_correct
+                )
+                db.session.add(answer_entry)
 
-        # Clean up session
-        session.pop('quiz', None)
-        session.pop('answers', None)
-        session.pop('current_question', None)
-        session['quiz_total'] = len(quiz)
+            db.session.commit()
 
-        return jsonify({
-            'completed': True,
-            'score': score,
-            'total': len(quiz),
-            'results': correctness_list,
-            'redirect_url': url_for('quiz_routes.quiz_summary', attempt_id=quiz_result.id)
-        })
+            time_data = session.get('time_per_question', {})
+            if not isinstance(time_data, dict):
+                time_data = {}
+            existing_summary = QuizSummary.query.filter_by(result_id=quiz_result.id).first()
+            if not existing_summary:
+                summary = QuizSummary(
+                    quiz_id=quiz_result.quiz_id,
+                    result_id=quiz_result.id,
+                    user_email=session.get('user_email'),
+                    correct_answers=quiz_result.score,
+                    total_questions=quiz_result.total_questions,
+                    time_per_question=json.dumps(time_data),
+                )
+                db.session.add(summary)
+                db.session.commit()
+
+            quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
+            quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
+            recent_topics = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
+            with db.session.no_autoflush:
+                most_frequent_quiz_type = db.session.query(
+                    QuizResult.quiz_type,
+                    db.func.count(QuizResult.quiz_type)
+                ).filter_by(user_id=user_id, completed=True)\
+                 .group_by(QuizResult.quiz_type)\
+                 .order_by(db.func.count(QuizResult.quiz_type).desc())\
+                 .first()
+
+            session['quizzes_completed'] = quizzes_completed
+            session['quizzes_above_80'] = quizzes_above_80
+            session['recent_topics'] = [result.title for result in recent_topics]
+            session['most_frequent_quiz_type'] = most_frequent_quiz_type[0] if most_frequent_quiz_type else None
+
+            session.pop('quiz', None)
+            session.pop('answers', None)
+            session.pop('current_question', None)
+            session['quiz_total'] = len(quiz)
+
+            return jsonify({
+                'completed': True,
+                'score': score,
+                'total': len(quiz),
+                'results': correctness_list,
+                'redirect_url': url_for('quiz_routes.quiz_summary', attempt_id=quiz_result.id)
+            })
+        except Exception as e:
+            import traceback
+            traceback.print_exc()
+            return jsonify({'error': str(e)}), 500
     
     return jsonify({'completed': False})
 
@@ -277,6 +296,7 @@ def exit_quiz():
     )
 
     db.session.add(quiz_result)
+    db.session.flush()
     db.session.commit()
 
     # Store each answer in QuizAnswer table
@@ -332,15 +352,15 @@ def resume_quiz(attempt_id):
 
     return redirect(url_for('quiz_routes.take_quiz'))
 
-@quiz_routes.route('/delete_quiz_attempt/<int:attempt_id>', methods=['POST'])
-def delete_quiz_attempt(attempt_id):
-    attempt = QuizResult.query.get_or_404(attempt_id)
-    if attempt.user_id != session.get('user_id'):
-        return "Unauthorized", 403
+# @quiz_routes.route('/delete_quiz_attempt/<int:attempt_id>', methods=['POST'])
+# def delete_quiz_attempt(attempt_id):
+#     attempt = QuizResult.query.get_or_404(attempt_id)
+#     if attempt.user_id != session.get('user_id'):
+#         return "Unauthorized", 403
 
-    db.session.delete(attempt)
-    db.session.commit()
-    return redirect(url_for('stats_bp.dashboard'))
+#     db.session.delete(attempt)
+#     db.session.commit()
+#     return redirect(url_for('stats_bp.dashboard'))
 
 @quiz_routes.route('/quiz_summary/<int:attempt_id>')
 def quiz_summary(attempt_id):
@@ -368,6 +388,16 @@ def quiz_summary(attempt_id):
      .order_by(db.func.count(QuizResult.quiz_type).desc()) \
      .first()
 
+    # Fetch extra context for JS charts
+    quiz = Quiz.query.get(attempt.quiz_id)
+    quiz_questions = json.loads(quiz.questions_json) if quiz else []
+
+    summary = QuizSummary.query.filter_by(result_id=attempt_id).first()
+    time_per_question = json.loads(summary.time_per_question) if summary and summary.time_per_question else {}
+
+    answers = QuizAnswer.query.filter_by(attempt_id=attempt_id).all()
+    user_answers = {a.question_index: a.answer for a in answers}
+
     return render_template(
         'quiz_summary.html',
         score=score,
@@ -377,6 +407,17 @@ def quiz_summary(attempt_id):
         quizzes_completed=quizzes_completed,
         quizzes_above_80=quizzes_above_80,
         recent_topics=[r.title for r in recent_topics],
-        most_frequent_quiz_type=most_frequent_quiz_type[0] if most_frequent_quiz_type else 'N/A'
+        most_frequent_quiz_type=most_frequent_quiz_type[0] if most_frequent_quiz_type else 'N/A',
+        quiz_id=quiz.id,
+        attempt_id=attempt.id,
+        quiz_title=quiz.title if quiz else 'Untitled',
+        quiz_questions=quiz_questions,
+        time_per_question=time_per_question,
+        user_answers=user_answers
     )
 
+# Endpoint to get the full quiz from the session for review
+@quiz_routes.route('/get_full_quiz')
+def get_full_quiz():
+    quiz = session.get('quiz', [])
+    return jsonify(quiz)
