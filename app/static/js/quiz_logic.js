@@ -1,4 +1,6 @@
 let answers = [];
+let questionTimestamps = [];
+
 $(document).ready(function () {
     // Add pause state
     let isPaused = false;
@@ -68,6 +70,7 @@ $(document).ready(function () {
     }
 
     function loadQuestion() {
+        questionTimestamps.push(Date.now());
         if (currentQuestionIndex === 0) resetQuiz();
         $.getJSON(`/get_question/${currentQuestionIndex}`, function (data) {
             const $questionContainer = $('#question-container').empty();
@@ -158,50 +161,31 @@ $(document).ready(function () {
                 if (data.completed) {
                     stopTimer();
                     $('#timer-container').hide();
+                    // Track time per question
+                    const durations = [];
+                    for (let i = 1; i < questionTimestamps.length; i++) {
+                        durations.push((questionTimestamps[i] - questionTimestamps[i - 1]) / 1000); // seconds
+                    }
+                    localStorage.setItem("quiz_durations", JSON.stringify(durations));
+
                     $('#countdown-timer').hide();
                     $('#question-container').html(`
                         <div class="result">
-                            <p>Quiz completed! Your score is: ${data.score}</p>
-                            <canvas id="resultChart" width="400" height="200" style="margin-top: 20px;"></canvas>
+                            <p><b>Quiz completed! Your score is: ${data.score}</b></p>
+                            <canvas id="resultChart" width="400" height="200" style="margin-top: 5px;"></canvas>
                             <div class="button-group" style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                                 <a href="/create_quiz" class="btn">Redo</a>
                                 <a href="/" class="btn">Home</a>
                                 <a href="/dashboard" class="btn">Quiz Dashboard</a>
+                                <a href="/quiz_summary" class="btn">Quiz Summary</a>
                             </div>
                         </div>
                     `);
+
+
                     const correctCount = data.score;
                     const incorrectCount = data.total - data.score;
 
-                    const $chartCanvas = $('#resultChart');
-                    if ($chartCanvas.length > 0) {
-                        const chartCtx = $chartCanvas[0].getContext('2d');
-                        new Chart(chartCtx, {
-                            type: 'bar',
-                            data: {
-                                labels: ['Correct', 'Incorrect'],
-                                datasets: [{
-                                    label: 'Answers Summary',
-                                    data: [correctCount, incorrectCount],
-                                    backgroundColor: ['#82b74b', '#bc5a45']
-                                }]
-                            },
-                            options: {
-                                indexAxis: 'y',
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                },
-                                scales: {
-                                    x: {
-                                        beginAtZero: true,
-                                        precision: 0
-                                    }
-                                }
-                            }
-                        });
-                    }
                     $('#prev-question').hide();
                     $('#next-question').hide();
                     $('#pause-resume-btn').hide();

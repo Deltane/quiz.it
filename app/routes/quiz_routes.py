@@ -173,7 +173,7 @@ def submit_answer():
             title=quiz_title,
             completed=True
         )
-        score = 0
+        
         correctness_list = []
 
         for i, question in enumerate(quiz):
@@ -227,7 +227,8 @@ def submit_answer():
         session.pop('quiz', None)
         session.pop('answers', None)
         session.pop('current_question', None)
-        
+        session['quiz_total'] = len(quiz)
+
         return jsonify({
             'completed': True,
             'score': score,
@@ -327,3 +328,22 @@ def delete_quiz_attempt(attempt_id):
     db.session.delete(attempt)
     db.session.commit()
     return redirect(url_for('stats_bp.dashboard'))
+
+@quiz_routes.route('/quiz_summary')
+def quiz_summary():
+    score = session.get('score', 0)
+    total = session.get('quiz_total', 0)
+    incorrect = total - score
+
+    return render_template(
+        'quiz_summary.html',
+        score=score,
+        correct=score,
+        incorrect=incorrect,
+        total=total,
+        quizzes_completed=session.get('quizzes_completed', 0),
+        quizzes_above_80=session.get('quizzes_above_80', 0),
+        recent_topics=session.get('recent_topics', []),
+        most_frequent_quiz_type=session.get('most_frequent_quiz_type', 'N/A')
+    )
+
