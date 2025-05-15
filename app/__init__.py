@@ -75,14 +75,14 @@ def create_app():
     from app.routes.ai_routes import ai_routes
     from app.routes.stats_routes import stats_bp
     from app.routes.dashboard_routes import dashboard_bp
-    from app.routes.profile_routes import profile_bp # Import the new profile blueprint
+    # from app.routes.profile_routes import profile_bp # Profile feature removed
 
     app.register_blueprint(quiz_routes)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(ai_routes)
     app.register_blueprint(stats_bp)
     app.register_blueprint(dashboard_bp)
-    app.register_blueprint(profile_bp) # Register the profile blueprint
+    # app.register_blueprint(profile_bp) # Profile feature removed
 
     from datetime import timedelta
     from flask import session

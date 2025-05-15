@@ -25,7 +25,7 @@
                     <div class="profile-trigger"> <!-- Hover target for dropdown -->
                         <img src="{{ session['user_pic'] }}" alt="Profile" class="nav-profile-pic"> <!-- Moved pic to left, added class -->
                         <div class="profile-dropdown">
-                            <a href="{{ url_for('profile.view_profile', username=session['user_name']) }}">View Your Profile</a>
+                            <!-- Profile link removed -->
                         </div>
                     </div>
                     <span>{{ session.get('user_name', session['user_email']) }}</span>
