@@ -86,7 +86,11 @@ def delete_quiz(quiz_id):
     # Delete related results
     QuizResult.query.filter_by(quiz_id=quiz.id).delete()
     db.session.delete(quiz)
-    QuizAnswer.query.filter_by(quiz_id=quiz.id).delete()
+    QuizAnswer.query.filter(
+        QuizAnswer.attempt_id.in_(
+            db.session.query(QuizResult.id).filter_by(quiz_id=quiz.id)
+        )
+    ).delete(synchronize_session=False)
     db.session.commit()
     return redirect(url_for('stats_bp.dashboard'))
 
@@ -108,7 +112,6 @@ def rename_quiz(quiz_id):
 @quiz_routes.route('/get_question/<int:question_index>', methods=['GET'])
 def get_question(question_index):
     quiz = session.get('quiz', [])
-    print(f"Fetching question {question_index}, quiz length = {len(quiz)}")
     if question_index < len(quiz):
         question = quiz[question_index]
         response = {
@@ -158,7 +161,6 @@ def submit_answer():
 
         print("Session contents before saving QuizResult:", dict(session))
 
-
         quiz_result = QuizResult(
             user_id=user_id,
             quiz_id=quiz_id,
@@ -184,14 +186,6 @@ def submit_answer():
         db.session.commit()
         session['attempt_id'] = quiz_result.id
 
-        # Mark any other unfinished attempts for this quiz as completed
-        QuizResult.query.filter(
-            QuizResult.user_id == user_id,
-            QuizResult.quiz_id == quiz_id,
-            QuizResult.completed == False,
-            QuizResult.id != quiz_result.id
-        ).update({QuizResult.completed: True})
-        db.session.commit()
 
         # Save individual answers for this attempt
         for i, question in enumerate(quiz):
@@ -213,7 +207,14 @@ def submit_answer():
         quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
         quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
         recent_topics = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
-        most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
+        with db.session.no_autoflush:
+            most_frequent_quiz_type = db.session.query(
+                QuizResult.quiz_type,
+                db.func.count(QuizResult.quiz_type)
+            ).filter_by(user_id=user_id, completed=True)\
+             .group_by(QuizResult.quiz_type)\
+             .order_by(db.func.count(QuizResult.quiz_type).desc())\
+             .first()
 
         session['quizzes_completed'] = quizzes_completed
         session['quizzes_above_80'] = quizzes_above_80

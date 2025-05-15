@@ -14,7 +14,7 @@ def dashboard_view():
     if not user:
         return redirect(url_for('auth.login'))
 
-    attempts = QuizResult.query.filter_by(user_id=user.id).order_by(QuizResult.timestamp.desc()).all()
+    attempts = QuizResult.query.filter_by(user_id=user.id, completed=True).order_by(QuizResult.timestamp.desc()).all()
     quiz_attempts_map = {}
     scores = []
     quiz_type_count = {}

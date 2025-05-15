@@ -22,7 +22,14 @@ def get_stats():
         .subquery()
     quizzes_above_80 = db.session.query(subquery).filter(subquery.c.max_score >= 0.8).count()
     recent_topics = QuizResult.query.filter_by(user_id=user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
-    most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
+    with db.session.no_autoflush:
+        most_frequent_quiz_type = db.session.query(
+            QuizResult.quiz_type,
+            db.func.count(QuizResult.quiz_type)
+        ).filter_by(user_id=user_id, completed=True)\
+         .group_by(QuizResult.quiz_type)\
+         .order_by(db.func.count(QuizResult.quiz_type).desc())\
+         .first()
 
     stats = {
         'quizzes_completed': quizzes_completed,
@@ -36,54 +43,61 @@ def get_stats():
 @stats_bp.route('/dashboard', methods=['GET'])
 @login_required
 def dashboard():
-    user_id = current_user.id
+    with db.session.no_autoflush:
+        user_id = current_user.id
 
-    quizzes_completed = db.session.query(QuizResult.quiz_id).filter_by(user_id=user_id, completed=True).distinct().count()
-    subquery = db.session.query(
-        QuizResult.quiz_id,
-        db.func.max(QuizResult.score / QuizResult.total_questions).label('max_score')
-    ).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_id).subquery()
+        quizzes_completed = db.session.query(QuizResult.quiz_id).filter_by(user_id=user_id, completed=True).distinct().count()
+        subquery = db.session.query(
+            QuizResult.quiz_id,
+            db.func.max(QuizResult.score / QuizResult.total_questions).label('max_score')
+        ).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_id).subquery()
 
-    quizzes_above_80 = db.session.query(subquery).filter(subquery.c.max_score >= 0.8).count()
+        quizzes_above_80 = db.session.query(subquery).filter(subquery.c.max_score >= 0.8).count()
 
-    latest_attempts_subquery = db.session.query(
-        QuizResult.quiz_id,
-        func.max(QuizResult.timestamp).label("latest")
-    ).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_id).subquery()
+        latest_attempts_subquery = db.session.query(
+            QuizResult.quiz_id,
+            func.max(QuizResult.timestamp).label("latest")
+        ).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_id).subquery()
 
-    latest_results = db.session.query(QuizResult).join(
-        latest_attempts_subquery,
-        (QuizResult.quiz_id == latest_attempts_subquery.c.quiz_id) &
-        (QuizResult.timestamp == latest_attempts_subquery.c.latest)
-    ).order_by(desc(QuizResult.timestamp)).limit(5).all()
+        latest_results = db.session.query(QuizResult).join(
+            latest_attempts_subquery,
+            (QuizResult.quiz_id == latest_attempts_subquery.c.quiz_id) &
+            (QuizResult.timestamp == latest_attempts_subquery.c.latest)
+        ).order_by(desc(QuizResult.timestamp)).limit(5).all()
 
-    recent_quizzes = []
-    seen_quiz_ids = set()
-    for result in latest_results:
-        quiz = result.quiz
-        if quiz and quiz.id not in seen_quiz_ids:
-            quiz.attempts = QuizResult.query.filter_by(user_id=user_id, quiz_id=quiz.id, completed=True).order_by(QuizResult.timestamp.desc()).all()
-            perth = timezone('Australia/Perth')
-            for attempt in quiz.attempts:
-                if attempt.timestamp.tzinfo is None:
-                    attempt.timestamp = attempt.timestamp.replace(tzinfo=dt_timezone.utc)
-                attempt.timestamp = attempt.timestamp.astimezone(perth)
-            recent_quizzes.append(quiz)
-            seen_quiz_ids.add(quiz.id)
-    most_frequent_quiz_type = db.session.query(QuizResult.quiz_type, db.func.count(QuizResult.quiz_type)).filter_by(user_id=user_id, completed=True).group_by(QuizResult.quiz_type).order_by(db.func.count(QuizResult.quiz_type).desc()).first()
+        recent_quizzes = []
+        seen_quiz_ids = set()
+        for result in latest_results:
+            quiz = result.quiz
+            if quiz and quiz.id not in seen_quiz_ids:
+                quiz.attempts = QuizResult.query.filter_by(user_id=user_id, quiz_id=quiz.id, completed=True).order_by(QuizResult.timestamp.desc()).all()
+                perth = timezone('Australia/Perth')
+                for attempt in quiz.attempts:
+                    if attempt.timestamp.tzinfo is None:
+                        attempt.timestamp = attempt.timestamp.replace(tzinfo=dt_timezone.utc)
+                    attempt.timestamp = attempt.timestamp.astimezone(perth)
+                recent_quizzes.append(quiz)
+                seen_quiz_ids.add(quiz.id)
+        most_frequent_quiz_type = db.session.query(
+            QuizResult.quiz_type,
+            db.func.count(QuizResult.quiz_type)
+        ).filter_by(user_id=user_id, completed=True)\
+         .group_by(QuizResult.quiz_type)\
+         .order_by(db.func.count(QuizResult.quiz_type).desc())\
+         .first()
+        
+        from app.models import Folder
+        folders = Folder.query.filter_by(user_id=user_id).all()
+        unfinished_attempts = QuizResult.query.filter_by(user_id=user_id, completed=False).order_by(QuizResult.timestamp.desc()).all()
 
-    from app.models import Folder
-    folders = Folder.query.filter_by(user_id=user_id).all()
-    unfinished_attempts = QuizResult.query.filter_by(user_id=user_id, completed=False).order_by(QuizResult.timestamp.desc()).all()
+        stats = {
+            'quizzes_completed': quizzes_completed,
+            'quizzes_above_80': quizzes_above_80,
+            'recent_quizzes': [{'id': quiz.id, 'title': quiz.title} for quiz in recent_quizzes],
+            'most_frequent_quiz_type': most_frequent_quiz_type[0] if most_frequent_quiz_type else None
+        }
 
-    stats = {
-        'quizzes_completed': quizzes_completed,
-        'quizzes_above_80': quizzes_above_80,
-        'recent_quizzes': [{'id': quiz.id, 'title': quiz.title} for quiz in recent_quizzes],
-        'most_frequent_quiz_type': most_frequent_quiz_type[0] if most_frequent_quiz_type else None
-    }
-
-    return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders, unfinished_attempts=unfinished_attempts)
+        return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders, unfinished_attempts=unfinished_attempts)
 
 @stats_bp.route('/filter_stats', methods=['POST'])
 @login_required
