@@ -25,14 +25,18 @@ def dashboard_view():
     shared_quizzes = []
     quiz_shares = QuizShare.query.filter_by(shared_with_user_id=user.id).all()
 
+    current_app.logger.info(f"Found {len(quiz_shares)} shared quizzes for user {user.id}")
+
     for share in quiz_shares:
         quiz = Quiz.query.get(share.quiz_id)
+        sender = User.query.get(share.shared_by_user_id)
         if quiz:
             shared_quiz = {
                 'quiz': quiz,
-                'sender': User.query.get(share.shared_by_user_id)
+                'sender': sender
             }
             shared_quizzes.append(shared_quiz)
+            current_app.logger.info(f"Adding shared quiz: {quiz.id} - {quiz.title} from {sender.username if sender else 'Unknown'}")
 
     # Log shared quizzes for debugging
     current_app.logger.info(f"Shared quizzes retrieved: {len(shared_quizzes)}")

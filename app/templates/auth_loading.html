@@ -176,6 +176,11 @@
             
             // Auto-redirect to Google authentication after showing all messages
             setTimeout(function() {
+                // Store quiz ID in localStorage as a backup in case session is lost
+                {% if quiz_id %}
+                localStorage.setItem('shared_quiz_id', '{{ quiz_id }}');
+                console.log('Stored quiz_id {{ quiz_id }} in localStorage');
+                {% endif %}
                 window.location.href = "{{ auth_url }}";
             }, 5000);
             

@@ -27,9 +27,11 @@ def direct_quiz_link(quiz_id):
         session['shared_quiz_id'] = quiz_id
         session.modified = True
         
+        current_app.logger.info(f"User not authenticated, storing quiz_id {quiz_id} in session and redirecting to login")
+        
         # Generate the Google auth URL but don't redirect yet - we'll show the animation first
         auth_url = url_for('auth.login', next=f'/{quiz_id}')
-        return render_template('auth_loading.html', auth_url=auth_url)
+        return render_template('auth_loading.html', auth_url=auth_url, quiz_id=quiz_id)
     
     # User is logged in, now check if quiz is shared with them
     quiz = Quiz.query.get_or_404(quiz_id)

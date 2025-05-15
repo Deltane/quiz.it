@@ -61,6 +61,17 @@
         const sharedQuizModal = document.getElementById('shared-quiz-modal');
         if (sharedQuizModal) {
             sharedQuizModal.style.display = 'block';
+        } else {
+            // Check localStorage as backup for shared quiz ID
+            const storedQuizId = localStorage.getItem('shared_quiz_id');
+            if (storedQuizId) {
+                console.log("Found shared quiz ID in localStorage:", storedQuizId);
+                // If we found a quiz ID in localStorage but no modal is showing,
+                // redirect to it to trigger the proper flow
+                window.location.href = `/${storedQuizId}`;
+                // Clear it so we don't get stuck in a loop
+                localStorage.removeItem('shared_quiz_id');
+            }
         }
     });
 

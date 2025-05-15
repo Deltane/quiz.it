@@ -49,9 +49,6 @@ def login():
                 quiz_id = int(next_url[1:])
                 session['shared_quiz_id'] = quiz_id
                 current_app.logger.info(f"Extracted and stored quiz_id from next_url: {quiz_id}")
-                quiz_id = int(next_url[1:])
-                session['shared_quiz_id'] = quiz_id
-                current_app.logger.info(f"Extracted and stored quiz_id from next_url: {quiz_id}")
         
         # Save session before redirecting
         session.modified = True
@@ -126,11 +123,15 @@ def authorize():
         db.session.commit()
 
         # Check if there's a shared quiz to handle after login
-        shared_quiz_id = session.pop('shared_quiz_id', None)
+        # Use get instead of pop to first check if it exists before removing it
+        shared_quiz_id = session.get('shared_quiz_id')
         if shared_quiz_id:
-            current_app.logger.info(f"Redirecting to shared quiz: {shared_quiz_id}")
+            current_app.logger.info(f"Handling shared quiz after login: {shared_quiz_id}")
             
-            # Check if the quiz exists and is shared with this user
+            # Now remove it from session since we're processing it
+            session.pop('shared_quiz_id', None)
+            
+            # Check if the quiz exists
             shared_quiz = Quiz.query.get(shared_quiz_id)
             if shared_quiz:
                 # First, check if a share entry already exists
@@ -139,6 +140,8 @@ def authorize():
                     shared_with_user_id=user.id
                 ).first()
                 
+                sender_id = None
+                
                 if not quiz_share:
                     # Check for pending share
                     pending_share = PendingQuizShare.query.filter_by(
@@ -146,7 +149,6 @@ def authorize():
                         recipient_email=email
                     ).first()
                     
-                    sender_id = None
                     if pending_share:
                         sender_id = pending_share.shared_by_user_id
                         # Convert pending to regular share
@@ -189,53 +191,13 @@ def authorize():
                 # Make sure session is saved
                 session.modified = True
                 
+                current_app.logger.info(f"Shared quiz processed, redirecting to dashboard with modal. Session: {session}")
+                
                 # Redirect to the dashboard which will show the modal
                 return redirect(url_for('dashboard.dashboard_view'))
 
-        # Ensure the shared quiz is added to the 'Quizzes Shared With You' section
-        if shared_quiz_id and shared_quiz:
-            quiz_share = QuizShare.query.filter_by(
-                quiz_id=shared_quiz_id,
-                shared_with_user_id=user.id
-            ).first()
-
-            if not quiz_share:
-                quiz_share = QuizShare(
-                    quiz_id=shared_quiz_id,
-                    shared_with_user_id=user.id,
-                    shared_by_user_id=sender_id
-                )
-                db.session.add(quiz_share)
-                db.session.commit()
-
-            # Ensure the shared quiz modal is set up
-            session['show_shared_quiz_modal'] = True
-            session['shared_quiz_id'] = shared_quiz_id
-            session['shared_quiz_title'] = shared_quiz.title
-
-            if sender_id:
-                session['shared_quiz_sender_id'] = sender_id
-                sender = User.query.get(sender_id)
-                if sender:
-                    session['shared_quiz_sender_name'] = sender.username
-
-            # Log session variables for debugging
-            current_app.logger.info(f"Session variables set for shared quiz modal: {session}")
-
-        # Ensure session variables for shared quiz modal are set correctly
-        if shared_quiz_id:
-            session['show_shared_quiz_modal'] = True
-            session['shared_quiz_id'] = shared_quiz_id
-            session['shared_quiz_title'] = shared_quiz.title
-
-            if sender_id:
-                session['shared_quiz_sender_id'] = sender_id
-                sender = User.query.get(sender_id)
-                if sender:
-                    session['shared_quiz_sender_name'] = sender.username
-
-            # Log session variables for debugging
-            current_app.logger.info(f"Session variables set for shared quiz modal: {session}")
+        # Check for a quiz ID in localStorage as backup (added via auth_loading.html)
+        # This is handled client-side in a script we'll add to dashboard.html
 
         # Check if there's a next URL to redirect to
         next_url = session.pop('next_url', None)
