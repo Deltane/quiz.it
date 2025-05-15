@@ -101,10 +101,54 @@ def authorize():
         shared_quiz_id = session.get('shared_quiz_id')
         if shared_quiz_id:
             current_app.logger.info(f"Redirecting to shared quiz: {shared_quiz_id}")
-            # Remove from session to avoid confusion on next login
-            session.pop('shared_quiz_id')
-            return redirect(url_for('quiz_routes.direct_quiz_link', quiz_id=shared_quiz_id))
-
+            
+            # Get the quiz and check if it's shared with this user
+            quiz = Quiz.query.get(shared_quiz_id)
+            if not quiz:
+                flash("The requested quiz could not be found.", "error")
+                return redirect(url_for('dashboard.dashboard_view'))
+                
+            # Check if the user is the quiz owner
+            if quiz.user_id == user.id:
+                return redirect(url_for('quiz_routes.redo_quiz', quiz_id=shared_quiz_id))
+                
+            # Check if quiz is shared with this user through QuizShare
+            quiz_share = QuizShare.query.filter_by(
+                quiz_id=shared_quiz_id,
+                shared_with_user_id=user.id
+            ).first()
+            
+            # Check for pending share
+            if not quiz_share:
+                pending_share = PendingQuizShare.query.filter_by(
+                    quiz_id=shared_quiz_id,
+                    recipient_email=user.email
+                ).first()
+                
+                if pending_share:
+                    # Convert pending share to actual share
+                    quiz_share = QuizShare(
+                        quiz_id=shared_quiz_id,
+                        shared_with_user_id=user.id,
+                        shared_by_user_id=pending_share.shared_by_user_id
+                    )
+                    db.session.add(quiz_share)
+                    db.session.delete(pending_share)
+                    db.session.commit()
+            
+            if quiz_share:
+                # Set session variables to show the shared quiz modal on dashboard
+                session['show_shared_quiz_modal'] = True
+                session['shared_quiz_id'] = shared_quiz_id
+                session['shared_quiz_sender_id'] = quiz_share.shared_by_user_id
+                
+                # Redirect to dashboard with the modal setup
+                flash(f"Quiz '{quiz.title}' has been shared with you.", "info")
+                return redirect(url_for('dashboard.dashboard_view'))
+            
+            # The quiz is not shared with this user
+            flash("This quiz hasn't been shared with you or doesn't exist.", "error")
+            
         return redirect(url_for('dashboard.dashboard_view'))
 
     except Exception as e:

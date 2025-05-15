@@ -17,15 +17,17 @@ def home():
 def direct_quiz_link(quiz_id):
     """
     Handle direct quiz links (e.g., /123) for shared quizzes
-    If user is not logged in, redirect to login with shared_quiz_id parameter
+    If user is not logged in, show auth loading animation and redirect to login
     If user is logged in, check if quiz is shared with them and show confirmation
     """
     # Store the quiz_id for after login
     session['shared_quiz_id'] = quiz_id
     
-    # If user is not logged in, redirect to login
+    # If user is not logged in, show auth loading animation and redirect to Google OAuth
     if not current_user.is_authenticated:
-        return redirect(url_for('auth.login'))
+        # Generate the Google auth URL but don't redirect yet - we'll show the animation first
+        auth_url = url_for('auth.login')
+        return render_template('auth_loading.html', auth_url=auth_url)
     
     # User is logged in, now check if quiz is shared with them
     quiz = Quiz.query.get_or_404(quiz_id)
