@@ -148,7 +148,6 @@ $(document).ready(function () {
     });
 
     function submitAnswer(selectedAnswer) {
-
         // Store answer in the answers array
         answers[currentQuestionIndex] = selectedAnswer;
 
@@ -161,14 +160,14 @@ $(document).ready(function () {
                 if (data.completed) {
                     stopTimer();
                     $('#timer-container').hide();
-                    // Track time per question
                     const durations = [];
                     for (let i = 1; i < questionTimestamps.length; i++) {
-                        durations.push((questionTimestamps[i] - questionTimestamps[i - 1]) / 1000); // seconds
+                        durations.push((questionTimestamps[i] - questionTimestamps[i - 1]) / 1000);
                     }
                     localStorage.setItem("quiz_durations", JSON.stringify(durations));
 
                     $('#countdown-timer').hide();
+                    const redirectURL = data.redirect_url || '/';
                     $('#question-container').html(`
                         <div class="result">
                             <p><b>Quiz completed! Your score is: ${data.score}</b></p>
@@ -177,11 +176,10 @@ $(document).ready(function () {
                                 <a href="/create_quiz" class="btn">Redo</a>
                                 <a href="/" class="btn">Home</a>
                                 <a href="/dashboard" class="btn">Quiz Dashboard</a>
-                                <a href="/quiz_summary" class="btn">Quiz Summary</a>
+                                <a href="${redirectURL}" class="btn">Quiz Summary</a>
                             </div>
                         </div>
                     `);
-
 
                     const correctCount = data.score;
                     const incorrectCount = data.total - data.score;

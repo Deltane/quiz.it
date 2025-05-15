@@ -245,11 +245,10 @@ def submit_answer():
             'completed': True,
             'score': score,
             'total': len(quiz),
-            'results': correctness_list
+            'results': correctness_list,
+            'redirect_url': url_for('quiz_routes.quiz_summary', attempt_id=quiz_result.id)
         })
     
-
-
     return jsonify({'completed': False})
 
 # Route to handle quiz exit and save incomplete quiz result
@@ -343,11 +342,31 @@ def delete_quiz_attempt(attempt_id):
     db.session.commit()
     return redirect(url_for('stats_bp.dashboard'))
 
-@quiz_routes.route('/quiz_summary')
-def quiz_summary():
-    score = session.get('score', 0)
-    total = session.get('quiz_total', 0)
+@quiz_routes.route('/quiz_summary/<int:attempt_id>')
+def quiz_summary(attempt_id):
+    attempt = QuizResult.query.get_or_404(attempt_id)
+
+    # Authorization check
+    if attempt.user_id != session.get('user_id'):
+        return "Unauthorized", 403
+
+    score = attempt.score
+    total = attempt.total_questions
     incorrect = total - score
+
+    # Restore useful session stats
+    quizzes_completed = QuizResult.query.filter_by(user_id=attempt.user_id).count()
+    quizzes_above_80 = QuizResult.query.filter_by(user_id=attempt.user_id).filter(
+        QuizResult.score / QuizResult.total_questions >= 0.8
+    ).count()
+    recent_topics = QuizResult.query.filter_by(user_id=attempt.user_id).order_by(QuizResult.timestamp.desc()).limit(5).all()
+    most_frequent_quiz_type = db.session.query(
+        QuizResult.quiz_type,
+        db.func.count(QuizResult.quiz_type)
+    ).filter_by(user_id=attempt.user_id, completed=True) \
+     .group_by(QuizResult.quiz_type) \
+     .order_by(db.func.count(QuizResult.quiz_type).desc()) \
+     .first()
 
     return render_template(
         'quiz_summary.html',
@@ -355,9 +374,9 @@ def quiz_summary():
         correct=score,
         incorrect=incorrect,
         total=total,
-        quizzes_completed=session.get('quizzes_completed', 0),
-        quizzes_above_80=session.get('quizzes_above_80', 0),
-        recent_topics=session.get('recent_topics', []),
-        most_frequent_quiz_type=session.get('most_frequent_quiz_type', 'N/A')
+        quizzes_completed=quizzes_completed,
+        quizzes_above_80=quizzes_above_80,
+        recent_topics=[r.title for r in recent_topics],
+        most_frequent_quiz_type=most_frequent_quiz_type[0] if most_frequent_quiz_type else 'N/A'
     )
 
