@@ -48,6 +48,8 @@ def login():
             if next_url.startswith('/') and next_url[1:].isdigit():
                 quiz_id = int(next_url[1:])
                 session['shared_quiz_id'] = quiz_id
+                current_app.logger.info(f"Extracted and stored quiz_id from next_url: {quiz_id}")quiz_id = int(next_url[1:])
+                session['shared_quiz_id'] = quiz_id
                 current_app.logger.info(f"Extracted and stored quiz_id from next_url: {quiz_id}")
         
         # Save session before redirecting
@@ -143,25 +145,51 @@ def authorize():
                         recipient_email=email
                     ).first()
                     
+                    sender_id = None
                     if pending_share:
+                        sender_id = pending_share.shared_by_user_id
                         # Convert pending to regular share
                         quiz_share = QuizShare(
                             quiz_id=shared_quiz_id,
                             shared_with_user_id=user.id,
-                            shared_by_user_id=pending_share.shared_by_user_id
+                            shared_by_user_id=sender_id
                         )
                         db.session.add(quiz_share)
                         db.session.delete(pending_share)
                         db.session.commit()
+                    else:
+                        # Check if it's shared by someone else
+                        quiz_creator = User.query.get(shared_quiz.user_id)
+                        if quiz_creator and quiz_creator.id != user.id:
+                            sender_id = quiz_creator.id
+                            # Auto-create a share entry if it doesn't exist
+                            quiz_share = QuizShare(
+                                quiz_id=shared_quiz_id,
+                                shared_with_user_id=user.id,
+                                shared_by_user_id=sender_id
+                            )
+                            db.session.add(quiz_share)
+                            db.session.commit()
+                else:
+                    sender_id = quiz_share.shared_by_user_id
                 
                 # Set up the shared quiz modal to display on dashboard
                 session['show_shared_quiz_modal'] = True
-                sender = None
-                if quiz_share:
-                    session['shared_quiz_sender_id'] = quiz_share.shared_by_user_id
+                session['shared_quiz_id'] = shared_quiz_id
+                session['shared_quiz_title'] = shared_quiz.title
                 
-                # Redirect back to the direct quiz link, which will now handle auth correctly
-                return redirect(url_for('quiz_routes.direct_quiz_link', quiz_id=shared_quiz_id))
+                if sender_id:
+                    session['shared_quiz_sender_id'] = sender_id
+                    # Get sender's name for the modal
+                    sender = User.query.get(sender_id)
+                    if sender:
+                        session['shared_quiz_sender_name'] = sender.username
+                
+                # Make sure session is saved
+                session.modified = True
+                
+                # Redirect to the dashboard which will show the modal
+                return redirect(url_for('dashboard.dashboard_view'))
 
         # Check if there's a next URL to redirect to
         next_url = session.pop('next_url', None)

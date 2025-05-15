@@ -1,6 +1,6 @@
 import json
 
-from flask import Blueprint, render_template, session, redirect, url_for, request, flash, jsonify
+from flask import Blueprint, render_template, session, redirect, url_for, request, flash, jsonify, current_app
 from flask_login import current_user, login_required
 from app.models import User, Quiz, Folder, db, QuizShare
 from app.utils.email_utils import send_email
@@ -39,17 +39,34 @@ def dashboard_view():
     shared_quiz = None
     sender = None
     
-    if show_shared_quiz_modal and 'shared_quiz_id' in session:
-        shared_quiz_id = session.get('shared_quiz_id')
-        sender_id = session.get('shared_quiz_sender_id')
+    if show_shared_quiz_modal:
+        shared_quiz_id = session.pop('shared_quiz_id', None)
+        sender_id = session.pop('shared_quiz_sender_id', None)
+        sender_name = session.pop('shared_quiz_sender_name', None)
         
-        # Get the shared quiz and sender details
-        shared_quiz = Quiz.query.get(shared_quiz_id)
-        sender = User.query.get(sender_id)
-        
-        # Clear the session variables
-        session.pop('shared_quiz_id', None)
-        session.pop('shared_quiz_sender_id', None)
+        if shared_quiz_id:
+            current_app.logger.info(f"Showing shared quiz modal for quiz ID: {shared_quiz_id}")
+            
+            # Get the shared quiz details
+            shared_quiz = Quiz.query.get(shared_quiz_id)
+            
+            if sender_id:
+                sender = User.query.get(sender_id)
+                
+                # If sender wasn't found but we have a name, create a temporary object
+                if not sender and sender_name:
+                    from types import SimpleNamespace
+                    sender = SimpleNamespace(username=sender_name)
+                # If still no sender and we have the quiz, use quiz owner as fallback
+                elif not sender and shared_quiz:
+                    sender = User.query.get(shared_quiz.user_id)
+            elif shared_quiz:
+                # If no sender_id but we have a quiz, use quiz owner as fallback
+                sender = User.query.get(shared_quiz.user_id)
+                
+        if not shared_quiz or not sender:
+            current_app.logger.error(f"Failed to display shared quiz modal. Quiz: {shared_quiz}, Sender: {sender}")
+            show_shared_quiz_modal = False
 
     # Get any unfinished quiz attempts
     from app.models import QuizResult

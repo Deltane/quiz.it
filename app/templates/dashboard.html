@@ -43,13 +43,15 @@
 <div id="shared-quiz-modal" class="modal" style="display: block;">
     <div class="modal-content">
         <span class="close-button" onclick="closeSharedQuizModal()">&times;</span>
-        <div class="modal-header">
-            <h3>Quiz Shared With You</h3>
-        </div>
         <div class="modal-body">
-            <p>This quiz was shared with you by <strong>{{ sender.username }}</strong></p>
-            <h4>Title: "{{ shared_quiz.title }}"</h4>
-            <button id="start-shared-quiz" class="action-button" onclick="startSharedQuiz('{{ shared_quiz.id }}')">Start Quiz</button>
+            <div class="shared-quiz-info">
+                <h3>Start quiz "{{ shared_quiz.title }}" shared with you by {{ sender.username }}?</h3>
+                <div class="shared-quiz-actions">
+                    <button id="start-shared-quiz" class="action-button start-quiz-btn" onclick="startSharedQuiz('{{ shared_quiz.id }}')">Start Quiz</button>
+                    <button class="action-button view-later-btn" onclick="closeSharedQuizModal()">View Later</button>
+                </div>
+                <p class="shared-quiz-note">You can always find this quiz in your "Quizzes Shared With You" section.</p>
+            </div>
         </div>
     </div>
 </div>
@@ -73,6 +75,53 @@
         window.location.href = `/start_shared_quiz/${quizId}`;
     }
 </script>
+
+<style>
+    /* Enhanced styles for shared quiz modal */
+    .shared-quiz-info {
+        text-align: center;
+        padding: 10px 0;
+    }
+    
+    .shared-quiz-actions {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin: 25px 0;
+    }
+    
+    .start-quiz-btn {
+        background-color: #9a503b;
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        border-radius: 4px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .start-quiz-btn:hover {
+        background-color: #7f3f2d;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    }
+    
+    .view-later-btn {
+        background-color: #6c757d;
+        padding: 12px 25px;
+        font-size: 1.1rem;
+    }
+    
+    .view-later-btn:hover {
+        background-color: #5a6268;
+    }
+    
+    .shared-quiz-note {
+        font-size: 0.9rem;
+        color: #666;
+        font-style: italic;
+        margin-top: 10px;
+    }
+</style>
 <style>
     .modal {
         display: none;
@@ -93,15 +142,16 @@
     
     .modal-content {
         background-color: #fff;
-        margin: 10% auto;
-        padding: 25px;
-        border-radius: 8px;
+        margin: 15% auto;
+        padding: 30px;
+        border-radius: 10px;
         width: 50%;
         max-width: 500px;
         text-align: center;
         position: relative;
-        box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        animation: slideDown 0.4s ease-out;
+        box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+        animation: slideDown 0.5s ease-out;
+        border-top: 5px solid #9a503b;
     }
     
     @keyframes slideDown {
@@ -109,19 +159,15 @@
         to { transform: translateY(0); opacity: 1; }
     }
     
-    .modal-header {
-        border-bottom: 1px solid #eee;
-        margin-bottom: 15px;
-        padding-bottom: 10px;
-    }
-    
-    .modal-header h3 {
-        color: #4285F4;
-        margin: 0;
-    }
-    
     .modal-body {
-        padding: 10px 0;
+        padding: 20px 0;
+    }
+    
+    .modal-body h3 {
+        color: #333;
+        margin: 0 0 25px 0;
+        font-size: 1.3rem;
+        line-height: 1.5;
     }
     
     .close-button {
@@ -140,19 +186,22 @@
     }
     
     #start-shared-quiz {
-        margin-top: 20px;
-        padding: 10px 20px;
-        font-size: 16px;
-        background-color: #4CAF50;
+        margin-top: 30px;
+        background-color: #9a503b;
         color: white;
+        padding: 12px 30px;
+        font-size: 18px;
         border: none;
-        border-radius: 4px;
+        border-radius: 5px;
         cursor: pointer;
-        transition: background-color 0.3s;
+        transition: all 0.3s ease;
+        font-weight: bold;
     }
     
     #start-shared-quiz:hover {
-        background-color: #45a049;
+        background-color: #7f3f2d;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
     }
 </style>
 {% endif %}
