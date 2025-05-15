@@ -21,10 +21,10 @@ def dashboard_view():
     past_quizzes = user_quizzes[3:] if len(user_quizzes) > 3 else []
     user_folders = Folder.query.filter_by(user_id=user.id).all()
 
-    # Query quizzes shared with the current user
+    # Ensure shared quizzes are correctly retrieved
     shared_quizzes = []
     quiz_shares = QuizShare.query.filter_by(shared_with_user_id=user.id).all()
-    
+
     for share in quiz_shares:
         quiz = Quiz.query.get(share.quiz_id)
         if quiz:
@@ -33,6 +33,9 @@ def dashboard_view():
                 'sender': User.query.get(share.shared_by_user_id)
             }
             shared_quizzes.append(shared_quiz)
+
+    # Log shared quizzes for debugging
+    current_app.logger.info(f"Shared quizzes retrieved: {len(shared_quizzes)}")
             
     # Check if we should show the shared quiz modal
     show_shared_quiz_modal = session.pop('show_shared_quiz_modal', False)

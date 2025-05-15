@@ -192,6 +192,21 @@ def authorize():
                 # Redirect to the dashboard which will show the modal
                 return redirect(url_for('dashboard.dashboard_view'))
 
+        # Ensure session variables for shared quiz modal are set correctly
+        if shared_quiz_id:
+            session['show_shared_quiz_modal'] = True
+            session['shared_quiz_id'] = shared_quiz_id
+            session['shared_quiz_title'] = shared_quiz.title
+
+            if sender_id:
+                session['shared_quiz_sender_id'] = sender_id
+                sender = User.query.get(sender_id)
+                if sender:
+                    session['shared_quiz_sender_name'] = sender.username
+
+            # Log session variables for debugging
+            current_app.logger.info(f"Session variables set for shared quiz modal: {session}")
+
         # Check if there's a next URL to redirect to
         next_url = session.pop('next_url', None)
         if next_url:
