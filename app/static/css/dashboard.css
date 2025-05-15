@@ -569,3 +569,120 @@ body {
 .email-notification-info p {
     margin: 3px 0;
 }
+
+/* Shared Quizzes Section */
+.shared-quizzes {
+    margin-top: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shared-quizzes h2 {
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 0.5rem;
+    color: #333;
+}
+
+.shared-quiz-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.shared-quiz-list .quiz-entry {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.shared-quiz-list .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.shared-quiz-list .quiz-title {
+    font-weight: bold;
+    flex: 1;
+}
+
+.shared-quiz-list .quiz-sender {
+    font-style: italic;
+    color: #666;
+}
+
+/* Modal styles for shared quiz confirmation */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%;
+    max-width: 500px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+/* Button for starting shared quiz */
+#start-shared-quiz {
+    display: block;
+    width: 80%;
+    margin: 1rem auto;
+    padding: 0.75rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#start-shared-quiz:hover {
+    background-color: #45a049;
+}

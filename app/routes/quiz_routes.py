@@ -1,16 +1,104 @@
 from app.models import QuizResult
 from app import db
 from datetime import datetime
-from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
+from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for, flash
 from flask import render_template, session, request
-from app.models import QuizShare, User, Quiz  # Add this import
-from flask_login import current_user
+from app.models import QuizShare, User, Quiz, PendingQuizShare  # Add PendingQuizShare to imports
+from flask_login import current_user, login_required
 
 quiz_routes = Blueprint('quiz_routes', __name__)
 
 @quiz_routes.route('/')
 def home():
     return render_template('landing_page.html')
+
+# Direct quiz link handler - new route
+@quiz_routes.route('/<int:quiz_id>')
+def direct_quiz_link(quiz_id):
+    """
+    Handle direct quiz links (e.g., /123) for shared quizzes
+    If user is not logged in, redirect to login with shared_quiz_id parameter
+    If user is logged in, check if quiz is shared with them and show confirmation
+    """
+    # Store the quiz_id for after login
+    session['shared_quiz_id'] = quiz_id
+    
+    # If user is not logged in, redirect to login
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+    
+    # User is logged in, now check if quiz is shared with them
+    quiz = Quiz.query.get_or_404(quiz_id)
+    
+    # Check if user is the quiz owner
+    if quiz.user_id == current_user.id:
+        # Redirect to standard quiz taking flow
+        return redirect(url_for('quiz_routes.redo_quiz', quiz_id=quiz_id))
+        
+    # Check if quiz is shared with this user
+    quiz_share = QuizShare.query.filter_by(
+        quiz_id=quiz_id,
+        shared_with_user_id=current_user.id
+    ).first()
+    
+    # Check for pending share
+    pending_share = None
+    if not quiz_share:
+        pending_share = PendingQuizShare.query.filter_by(
+            quiz_id=quiz_id,
+            recipient_email=current_user.email
+        ).first()
+        
+        if pending_share:
+            # Convert pending share to actual share
+            quiz_share = QuizShare(
+                quiz_id=quiz_id,
+                shared_with_user_id=current_user.id,
+                shared_by_user_id=pending_share.shared_by_user_id
+            )
+            db.session.add(quiz_share)
+            db.session.delete(pending_share)
+            db.session.commit()
+    
+    if quiz_share:
+        sender = User.query.get(quiz_share.shared_by_user_id)
+        return render_template('dashboard.html', 
+                               show_shared_quiz_modal=True, 
+                               shared_quiz=quiz,
+                               sender=sender)
+    
+    # Quiz isn't shared with this user
+    flash("This quiz hasn't been shared with you or doesn't exist.", "error")
+    return redirect(url_for('dashboard.dashboard_view'))
+
+@quiz_routes.route('/start_shared_quiz/<int:quiz_id>', methods=['GET'])
+@login_required
+def start_shared_quiz(quiz_id):
+    """Start a quiz that was shared with the current user"""
+    quiz = Quiz.query.get_or_404(quiz_id)
+    
+    # Verify the quiz is shared with this user
+    quiz_share = QuizShare.query.filter_by(
+        quiz_id=quiz_id,
+        shared_with_user_id=current_user.id
+    ).first()
+    
+    if not quiz_share and quiz.user_id != current_user.id:
+        flash("This quiz hasn't been shared with you.", "error")
+        return redirect(url_for('dashboard.dashboard_view'))
+    
+    # Set up the quiz session
+    import json
+    session['quiz'] = json.loads(quiz.questions_json)
+    session['score'] = 0
+    session['current_question'] = 0
+    session['answers'] = {}
+    session['quiz_id'] = quiz.id
+    session['topic'] = quiz.title
+    session['quiz_duration'] = 5  # Default duration in minutes
+    session['time_remaining'] = 5 * 60  # Default time in seconds
+    
+    return redirect(url_for('quiz_routes.take_quiz'))
 
 @quiz_routes.route('/take_quiz')
 def take_quiz():

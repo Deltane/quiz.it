@@ -38,6 +38,75 @@
     </nav>
 </header>
 
+<!-- Display the shared quiz modal if applicable -->
+{% if show_shared_quiz_modal and shared_quiz and sender %}
+<div id="shared-quiz-modal" class="modal" style="display: block;">
+    <div class="modal-content">
+        <span class="close-button" onclick="closeSharedQuizModal()">&times;</span>
+        <h3>This quiz was shared with you by {{ sender.username }}</h3>
+        <h4>Title: "{{ shared_quiz.title }}"</h4>
+        <button id="start-shared-quiz" class="action-button" onclick="startSharedQuiz('{{ shared_quiz.id }}')">Start Quiz</button>
+    </div>
+</div>
+
+<script>
+    function closeSharedQuizModal() {
+        document.getElementById('shared-quiz-modal').style.display = 'none';
+    }
+    
+    function startSharedQuiz(quizId) {
+        window.location.href = `/start_shared_quiz/${quizId}`;
+    }
+</script>
+<style>
+    .modal {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        left: 0;
+        top: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.7);
+    }
+    
+    .modal-content {
+        background-color: #fff;
+        margin: 15% auto;
+        padding: 20px;
+        border-radius: 8px;
+        width: 50%;
+        max-width: 500px;
+        text-align: center;
+        position: relative;
+    }
+    
+    .close-button {
+        position: absolute;
+        right: 15px;
+        top: 10px;
+        font-size: 24px;
+        cursor: pointer;
+    }
+    
+    #start-shared-quiz {
+        margin-top: 20px;
+        padding: 10px 20px;
+        font-size: 16px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+    }
+    
+    #start-shared-quiz:hover {
+        background-color: #45a049;
+    }
+</style>
+{% endif %}
+
 <!-- Main Dashboard Content -->
 <main class="dashboard-container">
     <section class="stat-card">
@@ -227,13 +296,23 @@
 
     <section class="shared-quizzes">
         <h2>Quizzes Shared With You</h2>
-        <ul>
-            {% for quiz in shared_quizzes %}
-            <li>
-                <a href="/quiz/{{ quiz.id }}">{{ quiz.title }}</a>
+        {% if shared_quizzes %}
+        <ul class="shared-quiz-list">
+            {% for shared_item in shared_quizzes %}
+            <li class="quiz-entry">
+                <div class="quiz-header">
+                    <span class="quiz-title">{{ shared_item.quiz.title }}</span>
+                    <span class="quiz-sender">Shared by: {{ shared_item.sender.username }}</span>
+                    <div class="action-button-wrapper">
+                        <a href="{{ url_for('quiz_routes.start_shared_quiz', quiz_id=shared_item.quiz.id) }}" class="action-button">Start Quiz</a>
+                    </div>
+                </div>
             </li>
             {% endfor %}
         </ul>
+        {% else %}
+        <p>No quizzes have been shared with you yet.</p>
+        {% endif %}
     </section>
   </main>
 

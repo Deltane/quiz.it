@@ -1,7 +1,7 @@
 import json
 
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash, jsonify
-from flask_login import current_user
+from flask_login import current_user, login_required
 from app.models import User, Quiz, Folder, db, QuizShare
 from app.utils.email_utils import send_email
 
@@ -9,20 +9,63 @@ dashboard_bp = Blueprint("dashboard", __name__)
 
 @dashboard_bp.route("/dashboard")
 def dashboard_view():
-    if 'user_email' not in session:
+    if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    user = User.query.filter_by(email=session['user_email']).first()
+    user = User.query.filter_by(email=current_user.email).first()
     if not user:
         return redirect(url_for('auth.login'))
 
-    user_quizzes = Quiz.query.filter_by(user_id=user.id, completed=True).order_by(Quiz.created_at.desc()).all()
-    recent_quizzes = user_quizzes[:3]
-    past_quizzes = user_quizzes[3:]
+    user_quizzes = Quiz.query.filter_by(user_id=user.id).order_by(Quiz.created_at.desc()).all()
+    recent_quizzes = user_quizzes[:3] if user_quizzes else []
+    past_quizzes = user_quizzes[3:] if len(user_quizzes) > 3 else []
     user_folders = Folder.query.filter_by(user_id=user.id).all()
 
     # Query quizzes shared with the current user
-    shared_quizzes = Quiz.query.filter(Quiz.shared_with_users.contains(user)).all()
+    shared_quizzes = []
+    quiz_shares = QuizShare.query.filter_by(shared_with_user_id=user.id).all()
+    
+    for share in quiz_shares:
+        quiz = Quiz.query.get(share.quiz_id)
+        if quiz:
+            shared_quiz = {
+                'quiz': quiz,
+                'sender': User.query.get(share.shared_by_user_id)
+            }
+            shared_quizzes.append(shared_quiz)
+
+    # Get any unfinished quiz attempts
+    from app.models import QuizResult
+    unfinished_attempts = QuizResult.query.filter_by(user_id=user.id, completed=False).all()
+
+    # Get stats
+    from sqlalchemy import func
+    
+    stats = {
+        'quizzes_completed': QuizResult.query.filter_by(user_id=user.id, completed=True).count(),
+        'quizzes_above_80': QuizResult.query.filter_by(user_id=user.id, completed=True) \
+            .filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
+    }
+    
+    # Best score
+    best_score = QuizResult.query.filter_by(user_id=user.id, completed=True) \
+        .order_by((QuizResult.score * 100 / QuizResult.total_questions).desc()).first()
+    
+    if best_score:
+        stats['best_score'] = {
+            'score': best_score.score,
+            'total': best_score.total_questions,
+            'type': best_score.quiz_type
+        }
+    
+    # Most frequent type
+    most_frequent = db.session.query(
+        QuizResult.quiz_type, 
+        func.count(QuizResult.quiz_type).label('type_count')
+    ).filter_by(user_id=user.id).group_by(QuizResult.quiz_type) \
+     .order_by(func.count(QuizResult.quiz_type).desc()).first()
+    
+    stats['most_frequent_quiz_type'] = most_frequent[0] if most_frequent else 'None'
 
     return render_template(
         "dashboard.html",
@@ -30,7 +73,9 @@ def dashboard_view():
         past_quizzes=past_quizzes,
         folders=user_folders,
         all_quizzes=user_quizzes,
-        shared_quizzes=shared_quizzes  # Pass shared quizzes to the template
+        shared_quizzes=shared_quizzes,
+        unfinished_attempts=unfinished_attempts,
+        stats=stats
     )
 
 @dashboard_bp.route('/redo_quiz/<int:quiz_id>')

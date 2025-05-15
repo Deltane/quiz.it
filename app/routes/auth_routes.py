@@ -31,6 +31,11 @@ def login():
         state = str(uuid.uuid4())
         session['oauth_nonce'] = nonce
         session['oauth_state'] = state
+        
+        # If we have a shared_quiz_id in the session, preserve it
+        if 'shared_quiz_id' in session:
+            current_app.logger.info(f"Preserving shared_quiz_id: {session['shared_quiz_id']}")
+        
         return oauth.google.authorize_redirect(redirect_uri, nonce=nonce, state=state)
     except Exception as e:
         current_app.logger.error(f"Login error: {e}")
@@ -91,6 +96,14 @@ def authorize():
             db.session.delete(pending)  # Remove the pending share
         
         db.session.commit()
+
+        # Check if there's a shared quiz to handle after login
+        shared_quiz_id = session.get('shared_quiz_id')
+        if shared_quiz_id:
+            current_app.logger.info(f"Redirecting to shared quiz: {shared_quiz_id}")
+            # Remove from session to avoid confusion on next login
+            session.pop('shared_quiz_id')
+            return redirect(url_for('quiz_routes.direct_quiz_link', quiz_id=shared_quiz_id))
 
         return redirect(url_for('dashboard.dashboard_view'))
 
