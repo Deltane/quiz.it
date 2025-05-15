@@ -1,4 +1,4 @@
-from app.models import Quiz, QuizResult, User, Folder, QuizAnswer
+from app.models import Quiz, QuizResult, User, Folder, QuizAnswer, QuizSummary
 from app import db
 from datetime import datetime
 from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
@@ -205,6 +205,18 @@ def submit_answer():
 
         db.session.commit()
 
+        # AFTER saving quiz_result
+        summary = QuizSummary(
+            quiz_id=quiz_result.quiz_id,
+            result_id=quiz_result.id,
+            user_email=session.get('user_email'),
+            correct_answers=quiz_result.score,
+            total_questions=quiz_result.total_questions,
+            time_per_question=json.dumps(session.get('time_per_question', {})),
+        )
+        db.session.add(summary)
+        db.session.commit()
+
         # Calculate and store quiz statistics
         quizzes_completed = QuizResult.query.filter_by(user_id=user_id).count()
         quizzes_above_80 = QuizResult.query.filter_by(user_id=user_id).filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
@@ -235,6 +247,8 @@ def submit_answer():
             'total': len(quiz),
             'results': correctness_list
         })
+    
+
 
     return jsonify({'completed': False})
 

@@ -1,7 +1,7 @@
 import json
 from datetime import datetime
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash
-from app.models import User, Quiz, Folder, QuizResult, db
+from app.models import User, Quiz, Folder, QuizResult, QuizSummary, db
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -256,3 +256,8 @@ def unassign_quiz_from_folder():
         flash("Quiz was not assigned to this folder.", "error")
 
     return redirect(url_for('dashboard.dashboard_view'))
+
+@dashboard_bp.route('/quiz_summary/<int:attempt_id>', methods=['GET'])
+def quiz_summary(attempt_id):
+    summary = QuizSummary.query.filter_by(result_id=attempt_id).first_or_404()
+    return render_template('quiz_summary.html', summary=summary)

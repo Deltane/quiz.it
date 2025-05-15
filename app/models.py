@@ -46,6 +46,7 @@ class QuizResult(db.Model):
     start_time = db.Column(db.DateTime, nullable=False, default=db.func.current_timestamp())
     end_time = db.Column(db.DateTime, nullable=True)
 
+
 class QuizAnswer(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     attempt_id = db.Column(db.Integer, db.ForeignKey('quiz_result.id'), nullable=False)
@@ -59,3 +60,17 @@ class Folder(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     user = db.relationship('User', backref=db.backref('folders', lazy=True))
     quizzes = db.relationship('Quiz', secondary=quiz_folder_association, back_populates='folders')
+
+class QuizSummary(db.Model):
+    __tablename__ = 'quiz_summary'
+
+    id = db.Column(db.Integer, primary_key=True)
+    quiz_id = db.Column(db.Integer, db.ForeignKey('quiz.id'), nullable=False)
+    result_id = db.Column(db.Integer, db.ForeignKey('quiz_result.id'), nullable=False, unique=True)
+    user_email = db.Column(db.String(120), nullable=False, index=True)
+    correct_answers = db.Column(db.Integer, nullable=False)
+    total_questions = db.Column(db.Integer, nullable=False)
+    time_per_question = db.Column(db.Text, nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    result = db.relationship('QuizResult', backref='summary')

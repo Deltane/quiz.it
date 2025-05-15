@@ -33,34 +33,6 @@
 
 <!-- Main Content -->
 <main class="dashboard-container">
-    <section class="stat-card">
-        <h2>Your Score</h2>
-        <p>{{ score }}</p>
-    </section>
-
-    <section class="stat-card">
-        <h2>Total Quizzes Completed</h2>
-        <p>{{ quizzes_completed }}</p>
-    </section>
-
-    <section class="stat-card">
-        <h2>Quizzes with Scores Above 80%</h2>
-        <p>{{ quizzes_above_80 }}</p>
-    </section>
-
-    <section class="stat-card">
-        <h2>Recent Topics</h2>
-        <ul>
-            {% for topic in recent_topics %}
-                <li>{{ topic }}</li>
-            {% endfor %}
-        </ul>
-    </section>
-
-    <section class="stat-card">
-        <h2>Most Frequent Quiz Type</h2>
-        <p>{{ most_frequent_quiz_type }}</p>
-    </section>
 
     <section class="chart-section">
         <h2>Correct Answers</h2>
