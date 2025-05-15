@@ -21,7 +21,7 @@ def dashboard_view():
     past_quizzes = user_quizzes[3:] if len(user_quizzes) > 3 else []
     user_folders = Folder.query.filter_by(user_id=user.id).all()
 
-    # Ensure shared quizzes are correctly retrieved
+    # Ensure shared quizzes are correctly retrieved and populate 'Quizzes Shared With You' section
     shared_quizzes = []
     quiz_shares = QuizShare.query.filter_by(shared_with_user_id=user.id).all()
 
@@ -70,6 +70,13 @@ def dashboard_view():
         if not shared_quiz or not sender:
             current_app.logger.error(f"Failed to display shared quiz modal. Quiz: {shared_quiz}, Sender: {sender}")
             show_shared_quiz_modal = False
+
+    # Automatically populate shared quizzes regardless of user action
+    if show_shared_quiz_modal and shared_quiz:
+        shared_quizzes.append({
+            'quiz': shared_quiz,
+            'sender': sender
+        })
 
     # Get any unfinished quiz attempts
     from app.models import QuizResult

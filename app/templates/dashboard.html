@@ -48,7 +48,7 @@
                 <h3>Start quiz "{{ shared_quiz.title }}" shared with you by {{ sender.username }}?</h3>
                 <div class="shared-quiz-actions">
                     <button id="start-shared-quiz" class="action-button start-quiz-btn" onclick="startSharedQuiz('{{ shared_quiz.id }}')">Start Quiz</button>
-                    <button class="action-button view-later-btn" onclick="closeSharedQuizModal()">View Later</button>
+                    <button class="action-button view-later-btn" onclick="closeSharedQuizModal()" style="font-size: 0.8rem; padding: 5px 10px; background-color: #d3d3d3; color: #333;">View Later</button>
                 </div>
                 <p class="shared-quiz-note">You can always find this quiz in your "Quizzes Shared With You" section.</p>
             </div>
@@ -379,19 +379,7 @@
       </div>
     </section>
 
-    <section class="shared-quizzes">
-        <h2>Shared Quizzes</h2>
-        <ul>
-            {% for share in current_user.received_quizzes %}
-            <li>
-                {{ share.quiz.title }} (Shared by: {{ share.shared_by_user.username }})
-                <form action="/unshare_quiz/{{ share.id }}" method="POST" style="display:inline;">
-                    <button type="submit">Unshare</button>
-                </form>
-            </li>
-            {% endfor %}
-        </ul>
-    </section>
+    <!-- Removed the redundant 'Shared Quizzes' section as it is no longer needed -->
 
     <section class="shared-quizzes">
         <h2>Quizzes Shared With You</h2>
