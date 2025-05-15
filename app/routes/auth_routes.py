@@ -48,7 +48,8 @@ def login():
             if next_url.startswith('/') and next_url[1:].isdigit():
                 quiz_id = int(next_url[1:])
                 session['shared_quiz_id'] = quiz_id
-                current_app.logger.info(f"Extracted and stored quiz_id from next_url: {quiz_id}")quiz_id = int(next_url[1:])
+                current_app.logger.info(f"Extracted and stored quiz_id from next_url: {quiz_id}")
+                quiz_id = int(next_url[1:])
                 session['shared_quiz_id'] = quiz_id
                 current_app.logger.info(f"Extracted and stored quiz_id from next_url: {quiz_id}")
         
