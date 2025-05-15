@@ -41,20 +41,27 @@
     </section>
 
     <section class="stat-card">
-        <h2>Your Highest Scoring Quiz</h2>
-        {% if stats.best_score %}
-            <p>{{ stats.best_score.score }}/{{ stats.best_score.total }} in {{ stats.best_score.type }}</p>
-        {% else %}
-            <p>No completed quizzes yet.</p>
-        {% endif %}
-    </section>
-
-    <section class="stat-card">
       <h2>Recent Quizzes</h2>
       <div id="recent-quizzes-list">
         {% for quiz in recent_quizzes %}
           <div class="quiz-entry">
             <span class="quiz-title">{{ quiz.title }}</span>
+            {% if quiz.attempts %}
+              <div class="attempt-history">
+                <strong>Attempt History:</strong>
+                <ul>
+                  {% for attempt in quiz.attempts | sort(attribute='timestamp') %}
+                    {% if attempt.completed %}
+                      <li>
+                        Attempt {{ loop.index }}:
+                        Finished at {{ attempt.timestamp.strftime('%Y-%m-%d %H:%M:%S') }},
+                        Score: {{ attempt.score }}/{{ attempt.total_questions }}
+                      </li>
+                    {% endif %}
+                  {% endfor %}
+                </ul>
+              </div>
+            {% endif %}
             <div class="action-button-wrapper">
               <button class="action-button" onclick="toggleRenameForm('quiz', {{ quiz.id }})">Rename</button>
               <div id="quiz-rename-form-{{ quiz.id }}" class="rename-form" style="display: none;">
