@@ -88,7 +88,13 @@ def dashboard():
         
         from app.models import Folder
         folders = Folder.query.filter_by(user_id=user_id).all()
-        unfinished_attempts = QuizResult.query.filter_by(user_id=user_id, completed=False).order_by(QuizResult.timestamp.desc()).all()
+        unfinished_attempts = db.session.query(QuizResult).filter(
+            QuizResult.user_id == user_id,
+            QuizResult.completed == False,
+            ~QuizResult.quiz_id.in_(
+                db.session.query(QuizResult.quiz_id).filter_by(user_id=user_id, completed=True)
+            )
+        ).order_by(QuizResult.timestamp.desc()).all()
 
         stats = {
             'quizzes_completed': quizzes_completed,
