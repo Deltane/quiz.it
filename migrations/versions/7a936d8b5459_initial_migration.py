@@ -1,8 +1,8 @@
 """Initial migration
 
-Revision ID: 4a8aecd983ef
+Revision ID: 7a936d8b5459
 Revises: 
-Create Date: 2025-05-14 06:25:37.389802
+Create Date: 2025-05-16 04:30:59.736185
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = '4a8aecd983ef'
+revision = '7a936d8b5459'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -23,6 +23,7 @@ def upgrade():
     sa.Column('username', sa.String(length=80), nullable=False),
     sa.Column('email', sa.String(length=120), nullable=False),
     sa.Column('password_hash', sa.String(length=128), nullable=True),
+    sa.Column('picture', sa.String(length=255), nullable=True),
     sa.PrimaryKeyConstraint('id'),
     sa.UniqueConstraint('email'),
     sa.UniqueConstraint('username')
@@ -40,7 +41,18 @@ def upgrade():
     sa.Column('questions_json', sa.Text(), nullable=False),
     sa.Column('created_at', sa.DateTime(), nullable=True),
     sa.Column('user_id', sa.Integer(), nullable=False),
+    sa.Column('is_public', sa.Boolean(), nullable=False),
     sa.ForeignKeyConstraint(['user_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id')
+    )
+    op.create_table('pending_quiz_share',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('quiz_id', sa.Integer(), nullable=False),
+    sa.Column('recipient_email', sa.String(length=120), nullable=False),
+    sa.Column('shared_by_user_id', sa.Integer(), nullable=False),
+    sa.Column('shared_at', sa.DateTime(), nullable=True),
+    sa.ForeignKeyConstraint(['quiz_id'], ['quiz.id'], ),
+    sa.ForeignKeyConstraint(['shared_by_user_id'], ['user.id'], ),
     sa.PrimaryKeyConstraint('id')
     )
     op.create_table('quiz_folder_association',
@@ -86,6 +98,7 @@ def downgrade():
     op.drop_table('quiz_share')
     op.drop_table('quiz_result')
     op.drop_table('quiz_folder_association')
+    op.drop_table('pending_quiz_share')
     op.drop_table('quiz')
     op.drop_table('folder')
     op.drop_table('user')
