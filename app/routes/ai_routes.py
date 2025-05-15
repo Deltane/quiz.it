@@ -22,7 +22,6 @@ def store_quiz():
         validate_csrf(csrf_token)
     except CSRFError:
         return jsonify({'error': 'Invalid CSRF token'}), 400
-    # ...rest of your logic...
 
 # Define the blueprint
 ai_routes = Blueprint('ai_routes', __name__)
@@ -131,6 +130,7 @@ def generate_quiz():
                 "Return only a JSON array in this format: "
                 "[{\"question\": \"The process of _____ is used to convert analog signals to digital.\", "
                 "\"answer\": \"digitization\"}, ...]"
+                "DO NOT INCLUDE THE ABOVE QUESTION IN THE QUIZ: The process of _____ is used to convert analog signals to digital "
             )
         elif quiz_type == "Short Answer":
             system_prompt = (
@@ -182,6 +182,54 @@ def generate_quiz():
 
     except Exception as e:
         return jsonify({"error": f"OpenAI API error: {str(e)}"})
+    
+# Add this function after your generate_quiz function
+
+@ai_routes.route('/verify_quiz', methods=['POST'])
+def verify_quiz():
+    try:
+        data = request.get_json()
+        quiz_data = data.get('quiz')
+        original_text = data.get('original_text')
+        
+        if not quiz_data or not original_text:
+            return jsonify({"error": "Missing quiz data or original text"}), 400
+        
+        # Format the quiz for verification
+        formatted_quiz = json.dumps(quiz_data, indent=2)
+        
+        # Send to OpenAI for verification
+        verification_prompt = (
+            "You are a quiz verification assistant. Review the following quiz questions and answers "
+            "that were generated based on the provided content. For each question-answer pair:\n"
+            "1. Verify the answer is correct based on the content\n"
+            "2. Check for ambiguity or unclear wording\n"
+            "3. Confirm the difficulty is appropriate\n\n"
+            "Return your verification in JSON format as follows:\n"
+            "[{\"question_index\": 0, \"is_correct\": true/false, \"issue\": \"description if any\", \"suggested_correction\": \"correction if needed\"}, ...]\n\n"
+            f"Quiz to verify: {formatted_quiz}\n\n"
+            f"Original content: {original_text}"
+        )
+        
+        response = client.chat.completions.create(
+            model="gpt-4", # Using GPT-4 for verification for higher accuracy
+            messages=[
+                {"role": "system", "content": "You are a quiz verification assistant that checks answers for accuracy."},
+                {"role": "user", "content": verification_prompt}
+            ],
+            temperature=0.3, # Lower temperature for more deterministic responses
+            max_tokens=1500
+        )
+        
+        # Parse the response
+        verification_result = json.loads(response.choices[0].message.content.strip())
+        
+        return jsonify({"verification": verification_result})
+    
+    except json.JSONDecodeError as je:
+        return jsonify({"error": f"Failed to parse verification result: {str(je)}"}), 500
+    except Exception as e:
+        return jsonify({"error": f"Verification error: {str(e)}"}), 500
     
 # Route to handle quiz submission
 @ai_routes.route('/submit_quiz', methods=['POST'])
