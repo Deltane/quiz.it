@@ -192,6 +192,36 @@ def authorize():
                 # Redirect to the dashboard which will show the modal
                 return redirect(url_for('dashboard.dashboard_view'))
 
+        # Ensure the shared quiz is added to the 'Quizzes Shared With You' section
+        if shared_quiz_id and shared_quiz:
+            quiz_share = QuizShare.query.filter_by(
+                quiz_id=shared_quiz_id,
+                shared_with_user_id=user.id
+            ).first()
+
+            if not quiz_share:
+                quiz_share = QuizShare(
+                    quiz_id=shared_quiz_id,
+                    shared_with_user_id=user.id,
+                    shared_by_user_id=sender_id
+                )
+                db.session.add(quiz_share)
+                db.session.commit()
+
+            # Ensure the shared quiz modal is set up
+            session['show_shared_quiz_modal'] = True
+            session['shared_quiz_id'] = shared_quiz_id
+            session['shared_quiz_title'] = shared_quiz.title
+
+            if sender_id:
+                session['shared_quiz_sender_id'] = sender_id
+                sender = User.query.get(sender_id)
+                if sender:
+                    session['shared_quiz_sender_name'] = sender.username
+
+            # Log session variables for debugging
+            current_app.logger.info(f"Session variables set for shared quiz modal: {session}")
+
         # Ensure session variables for shared quiz modal are set correctly
         if shared_quiz_id:
             session['show_shared_quiz_modal'] = True

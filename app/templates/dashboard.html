@@ -48,7 +48,7 @@
                 <h3>Start quiz "{{ shared_quiz.title }}" shared with you by {{ sender.username }}?</h3>
                 <div class="shared-quiz-actions">
                     <button id="start-shared-quiz" class="action-button start-quiz-btn" onclick="startSharedQuiz('{{ shared_quiz.id }}')">Start Quiz</button>
-                    <button class="action-button view-later-btn" onclick="closeSharedQuizModal()" style="font-size: 0.8rem; padding: 5px 10px; background-color: #d3d3d3; color: #333;">View Later</button>
+                    <button class="action-button view-later-btn" onclick="closeSharedQuizModal()">View Later</button>
                 </div>
                 <p class="shared-quiz-note">You can always find this quiz in your "Quizzes Shared With You" section.</p>
             </div>
@@ -58,23 +58,34 @@
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
-        console.log("Checking for shared quiz modal");
-        // Ensure modal is displayed on page load if needed
         const sharedQuizModal = document.getElementById('shared-quiz-modal');
         if (sharedQuizModal) {
-            console.log("Displaying shared quiz modal");
             sharedQuizModal.style.display = 'block';
         }
     });
-    
+
     function closeSharedQuizModal() {
         document.getElementById('shared-quiz-modal').style.display = 'none';
     }
-    
+
     function startSharedQuiz(quizId) {
         window.location.href = `/start_shared_quiz/${quizId}`;
     }
 </script>
+
+<style>
+    .view-later-btn {
+        background-color: #6c757d;
+        padding: 8px 15px;
+        font-size: 0.9rem;
+        border-radius: 3px;
+        margin-left: 10px;
+    }
+
+    .view-later-btn:hover {
+        background-color: #5a6268;
+    }
+</style>
 
 <style>
     /* Enhanced styles for shared quiz modal */

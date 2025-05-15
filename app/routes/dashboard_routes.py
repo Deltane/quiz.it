@@ -78,6 +78,9 @@ def dashboard_view():
             'sender': sender
         })
 
+    # Log shared quizzes for debugging
+    current_app.logger.info(f"Shared quizzes updated: {len(shared_quizzes)}")
+
     # Get any unfinished quiz attempts
     from app.models import QuizResult
     unfinished_attempts = QuizResult.query.filter_by(user_id=user.id, completed=False).all()
