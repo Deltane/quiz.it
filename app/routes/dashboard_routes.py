@@ -33,6 +33,23 @@ def dashboard_view():
                 'sender': User.query.get(share.shared_by_user_id)
             }
             shared_quizzes.append(shared_quiz)
+            
+    # Check if we should show the shared quiz modal
+    show_shared_quiz_modal = session.pop('show_shared_quiz_modal', False)
+    shared_quiz = None
+    sender = None
+    
+    if show_shared_quiz_modal and 'shared_quiz_id' in session:
+        shared_quiz_id = session.get('shared_quiz_id')
+        sender_id = session.get('shared_quiz_sender_id')
+        
+        # Get the shared quiz and sender details
+        shared_quiz = Quiz.query.get(shared_quiz_id)
+        sender = User.query.get(sender_id)
+        
+        # Clear the session variables
+        session.pop('shared_quiz_id', None)
+        session.pop('shared_quiz_sender_id', None)
 
     # Get any unfinished quiz attempts
     from app.models import QuizResult
@@ -75,7 +92,10 @@ def dashboard_view():
         all_quizzes=user_quizzes,
         shared_quizzes=shared_quizzes,
         unfinished_attempts=unfinished_attempts,
-        stats=stats
+        stats=stats,
+        show_shared_quiz_modal=show_shared_quiz_modal,
+        shared_quiz=shared_quiz,
+        sender=sender
     )
 
 @dashboard_bp.route('/redo_quiz/<int:quiz_id>')

@@ -61,11 +61,14 @@ def direct_quiz_link(quiz_id):
             db.session.commit()
     
     if quiz_share:
-        sender = User.query.get(quiz_share.shared_by_user_id)
-        return render_template('dashboard.html', 
-                               show_shared_quiz_modal=True, 
-                               shared_quiz=quiz,
-                               sender=sender)
+        # Add a flag to session to show modal on dashboard redirect
+        session['show_shared_quiz_modal'] = True
+        session['shared_quiz_id'] = quiz_id
+        session['shared_quiz_sender_id'] = quiz_share.shared_by_user_id
+        
+        # Redirect to dashboard with a flash message
+        flash(f"Quiz '{quiz.title}' has been shared with you.", "info")
+        return redirect(url_for('dashboard.dashboard_view'))
     
     # Quiz isn't shared with this user
     flash("This quiz hasn't been shared with you or doesn't exist.", "error")
@@ -463,9 +466,10 @@ def share_quiz(quiz_id):
     # Send email notification for new shares
     if is_new_share:
         try:
-            # Generate absolute URL for login
+            # Generate absolute URLs
             base_url = request.host_url.rstrip('/')
             login_url = f"{base_url}{url_for('auth.login')}"
+            quiz_url = f"{base_url}/{quiz.id}"  # Direct link to the quiz
             
             current_app.logger.info(f"Attempting to send email to {recipient_email} via SendGrid")
             
@@ -477,7 +481,8 @@ def share_quiz(quiz_id):
                 template='emails/quiz_share.html',
                 sender_name=current_user.username,
                 quiz_title=quiz.title,
-                login_url=login_url
+                login_url=login_url,
+                quiz_url=quiz_url
             )
             current_app.logger.info(f"✅ Quiz share email sent to {recipient_email}")
         except Exception as e:
@@ -625,9 +630,10 @@ def share_quiz_root():
     # Send email notification for new shares
     if is_new_share:
         try:
-            # Generate absolute URL for login
+            # Generate absolute URLs
             base_url = request.host_url.rstrip('/')
             login_url = f"{base_url}{url_for('auth.login')}"
+            quiz_url = f"{base_url}/{quiz.id}"  # Direct link to the quiz
             
             # Send email with HTML template
             send_email(
@@ -637,7 +643,8 @@ def share_quiz_root():
                 template='emails/quiz_share.html',
                 sender_name=current_user.username,
                 quiz_title=quiz.title,
-                login_url=login_url
+                login_url=login_url,
+                quiz_url=quiz_url
             )
             current_app.logger.info(f"Sent quiz share email to {recipient_email}")
         except Exception as e:

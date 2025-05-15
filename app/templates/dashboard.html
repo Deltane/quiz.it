@@ -50,6 +50,14 @@
 </div>
 
 <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        // Ensure modal is displayed on page load if needed
+        const sharedQuizModal = document.getElementById('shared-quiz-modal');
+        if (sharedQuizModal) {
+            sharedQuizModal.style.display = 'block';
+        }
+    });
+    
     function closeSharedQuizModal() {
         document.getElementById('shared-quiz-modal').style.display = 'none';
     }
