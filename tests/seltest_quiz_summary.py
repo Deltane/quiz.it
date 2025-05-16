@@ -20,5 +20,24 @@ class QuizSummaryTest(unittest.TestCase):
         body_text = self.driver.page_source
         self.assertIn("Correct Answers", body_text)
 
+    def test_time_chart_displayed(self):
+        """Test that the time spent per question chart section is displayed"""
+        self.driver.get(self.base_url + "/quiz_summary")
+        
+        # Find all chart sections
+        chart_sections = self.driver.find_elements("tag name", "section")
+        
+        # Look for the time chart section
+        time_chart_found = False
+        for section in chart_sections:
+            if "Time Spent Per Question" in section.text:
+                time_chart_found = True
+                # Check if canvas element exists
+                canvas = section.find_element("id", "timeChart")
+                self.assertTrue(canvas.is_displayed(), "Time chart canvas should be visible")
+                break
+                
+        self.assertTrue(time_chart_found, "Time Spent Per Question section should be present")
+
 if __name__ == "__main__":
     unittest.main()
