@@ -127,7 +127,7 @@ def dashboard_view():
         shared_quizzes=shared_quizzes,
         unfinished_attempts=unfinished_attempts,
         stats=stats,
-        show_shared_quiz_modal=show_shared_quiz_modal,
+        show_shared_quiz_modal=show_shared_quiz_modal if show_shared_quiz_modal is not None else False,
         shared_quiz=shared_quiz,
         sender=sender
     )
