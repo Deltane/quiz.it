@@ -362,6 +362,11 @@ def share_quiz():
     db.session.add(new_share)
     db.session.commit()
 
+    # Send email notification to the recipient
+    subject = f"{current_user_model.username} has shared a quiz with you!"
+    body = f"Hi {recipient.username},\n\n{current_user_model.username} has shared a quiz with you. Click the link below to view and start the quiz:\n\n{url_for('dashboard.dashboard_view', _external=True)}\n\nBest regards,\nQuiz.it Team"
+    send_email(subject, [recipient.email], body)
+
     return jsonify({'success': f'Quiz successfully shared with {recipient_email}.'}), 200
 
 @dashboard_bp.route('/unshare_quiz/<int:share_id>', methods=['POST'])
