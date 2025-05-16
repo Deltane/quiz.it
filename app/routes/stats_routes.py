@@ -103,7 +103,9 @@ def dashboard():
             'most_frequent_quiz_type': most_frequent_quiz_type[0] if most_frequent_quiz_type else None
         }
 
-        return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders, unfinished_attempts=unfinished_attempts)
+        rendered = render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders, unfinished_attempts=unfinished_attempts)
+
+        return rendered
 
 @stats_bp.route('/filter_stats', methods=['POST'])
 @login_required

@@ -56,6 +56,9 @@
                         Attempt {{ loop.index }}:
                         Finished at {{ attempt.timestamp.strftime('%Y-%m-%d %H:%M:%S') }},
                         Score: {{ attempt.score }}/{{ attempt.total_questions }}
+                        <form action="/quiz_summary/{{ attempt.id }}" method="GET" style="display:inline;">
+                          <button class="action-button" type="submit">View Summary</button>
+                        </form>
                       </li>
                     {% endif %}
                   {% endfor %}
