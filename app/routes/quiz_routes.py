@@ -3,6 +3,7 @@ from app import db
 from datetime import datetime
 from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
 from flask import render_template, session, request
+from pytz import timezone
 
 import json
 
@@ -431,4 +432,32 @@ def quiz_summary(attempt_id):
         time_per_question_list=time_per_question_list,
         attempt_scores=attempt_scores,
         attempt_labels=attempt_labels
+
+# Route for viewing "My Quizzes" history page
+@quiz_routes.route('/my_quizzes')
+def my_quizzes():
+    user_id = session.get("user_id")
+    if not user_id:
+        return redirect(url_for('auth_routes.login'))
+
+    quizzes = Quiz.query.filter_by(user_id=user_id).order_by(Quiz.id.desc()).all()
+
+    from datetime import timezone as dt_timezone
+
+    perth = timezone("Australia/Perth")
+    quiz_attempts_map = {}
+
+    for quiz in quizzes:
+        attempts = QuizResult.query.filter_by(user_id=user_id, quiz_id=quiz.id).order_by(QuizResult.timestamp.desc()).all()
+        for attempt in attempts:
+            if attempt.timestamp and attempt.timestamp.tzinfo is None:
+                attempt.timestamp = attempt.timestamp.replace(tzinfo=dt_timezone.utc)
+            if attempt.timestamp:
+                attempt.timestamp = attempt.timestamp.astimezone(perth)
+        quiz_attempts_map[quiz.id] = attempts
+
+    return render_template(
+        'my_quizzes.html',
+        quizzes=quizzes,
+        quiz_attempts_map=quiz_attempts_map
     )
