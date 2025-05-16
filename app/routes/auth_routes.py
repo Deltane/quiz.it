@@ -180,6 +180,7 @@ def authorize():
                 session['show_shared_quiz_modal'] = True
                 session['shared_quiz_id'] = shared_quiz_id
                 session['shared_quiz_title'] = shared_quiz.title
+                session['shared_quiz_description'] = shared_quiz.description  # Add description to session
                 
                 if sender_id:
                     session['shared_quiz_sender_id'] = sender_id

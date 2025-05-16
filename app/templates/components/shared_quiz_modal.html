@@ -4,6 +4,7 @@
         <span class="close-button" onclick="closeSharedQuizModal()">&times;</span>
         <h3>This quiz was shared with you by {{ sender_username }}</h3>
         <h4>Title: "{{ quiz_title }}"</h4>
+        <p>Description: "{{ quiz_description }}"</p>
         <button id="start-shared-quiz" class="action-button" onclick="startSharedQuiz('{{ quiz_id }}')">Start Quiz</button>
     </div>
 </div>
