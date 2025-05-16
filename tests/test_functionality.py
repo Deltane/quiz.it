@@ -7,7 +7,6 @@ from app import create_app
 
 # Ignore deprecation warnings
 warnings.filterwarnings("ignore", category=DeprecationWarning)
-
 class TestFunctionality(unittest.TestCase):
     """Test basic application functionality with enhanced tests"""
     
@@ -61,11 +60,11 @@ class TestFunctionality(unittest.TestCase):
         self.assertTrue("Quiz" in test_string)
         self.assertEqual(test_string.split()[0], "Quiz")
         
-        # Test string normalization (useful for answer comparison)
+        # Test string normalisation
         answer1 = "  Washington, D.C.  "
         answer2 = "washington dc"
         
-        # Normalize both answers (lowercase, strip, remove punctuation)
+        # Normalise both answers
         normalized1 = re.sub(r'[^\w\s]', '', answer1.lower().strip())
         normalized2 = re.sub(r'[^\w\s]', '', answer2.lower().strip())
         

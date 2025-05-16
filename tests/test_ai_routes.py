@@ -10,8 +10,6 @@ class TestAiRoutes(unittest.TestCase):
         self.fuzzy_inputs = [("htps", "https")]
 
     def tearDown(self):
-        """Clean up after tests (if needed)."""
-        # No cleanup needed in this case, but you can add logic here if necessary
         pass
 
     def test_normalise_answer(self):
