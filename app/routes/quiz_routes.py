@@ -432,9 +432,3 @@ def quiz_summary(attempt_id):
         attempt_scores=attempt_scores,
         attempt_labels=attempt_labels
     )
-
-# Endpoint to get the full quiz from the session for review
-@quiz_routes.route('/get_full_quiz')
-def get_full_quiz():
-    quiz = session.get('quiz', [])
-    return jsonify(quiz)
