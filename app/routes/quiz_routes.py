@@ -328,11 +328,7 @@ def resume_quiz(attempt_id):
     questions = json.loads(quiz.questions_json)
     answers_query = QuizAnswer.query.filter_by(attempt_id=attempt.id).all()
     answers = {a.question_index: a.answer for a in answers_query}
-    first_unanswered = 0
-    for i in range(len(questions)):
-        if i not in answers:
-            first_unanswered = i
-            break
+    first_unanswered = len(answers) if len(answers) < len(questions) else len(questions) - 1
 
     session['quiz'] = questions
     session['answers'] = answers
@@ -345,15 +341,15 @@ def resume_quiz(attempt_id):
 
     return redirect(url_for('quiz_routes.take_quiz'))
 
-# @quiz_routes.route('/delete_quiz_attempt/<int:attempt_id>', methods=['POST'])
-# def delete_quiz_attempt(attempt_id):
-#     attempt = QuizResult.query.get_or_404(attempt_id)
-#     if attempt.user_id != session.get('user_id'):
-#         return "Unauthorized", 403
+@quiz_routes.route('/delete_quiz_attempt/<int:attempt_id>', methods=['POST'])
+def delete_quiz_attempt(attempt_id):
+    attempt = QuizResult.query.get_or_404(attempt_id)
+    if attempt.user_id != session.get('user_id'):
+        return "Unauthorized", 403
 
-#     db.session.delete(attempt)
-#     db.session.commit()
-#     return redirect(url_for('stats_bp.dashboard'))
+    db.session.delete(attempt)
+    db.session.commit()
+    return redirect(url_for('stats_bp.dashboard'))
 
 @quiz_routes.route('/quiz_summary/<int:attempt_id>')
 def quiz_summary(attempt_id):
