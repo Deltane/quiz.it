@@ -39,5 +39,25 @@ class QuizSummaryTest(unittest.TestCase):
                 
         self.assertTrue(time_chart_found, "Time Spent Per Question section should be present")
 
+        def test_navigation_bar_elements(self):
+            """Test that the navigation bar contains expected elements"""
+            self.driver.get(self.base_url + "/quiz_summary")
+            
+            # Check if navigation exists
+            nav = self.driver.find_element("tag name", "nav")
+            self.assertTrue(nav.is_displayed(), "Navigation bar should be visible")
+            
+            # Check for title in navigation
+            nav_title = nav.find_element("class name", "dashboard-title")
+            self.assertEqual(nav_title.text, "Quiz Summary", "Navigation should have correct title")
+            
+            # Check for navigation buttons
+            nav_links = nav.find_elements("tag name", "a")
+            link_texts = [link.text for link in nav_links if link.text]
+            
+            # Verify essential navigation links exist
+            self.assertIn("Home", link_texts, "Navigation should contain Home link")
+            self.assertIn("Create Quiz", link_texts, "Navigation should contain Create Quiz link")
+
 if __name__ == "__main__":
     unittest.main()
