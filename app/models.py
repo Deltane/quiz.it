@@ -44,6 +44,7 @@ def load_user(user_id):
 class Quiz(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String(255), nullable=False)
+    description = db.Column(db.Text, nullable=True)  # New field for quiz description
     questions_json = db.Column(db.Text, nullable=False)  # stores quiz questions in JSON
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)

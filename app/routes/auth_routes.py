@@ -180,7 +180,7 @@ def authorize():
                 session['show_shared_quiz_modal'] = True
                 session['shared_quiz_id'] = shared_quiz_id
                 session['shared_quiz_title'] = shared_quiz.title
-                session['shared_quiz_description'] = shared_quiz.description  # Add description to session
+                session['shared_quiz_description'] = getattr(shared_quiz, 'description', '')  # Add description to session
                 
                 if sender_id:
                     session['shared_quiz_sender_id'] = sender_id
@@ -198,7 +198,6 @@ def authorize():
                 return redirect(url_for('dashboard.dashboard_view'))
 
         # Check for a quiz ID in localStorage as backup (added via auth_loading.html)
-        # This is handled client-side in a script we'll add to dashboard.html
 
         # Check if there's a next URL to redirect to
         next_url = session.pop('next_url', None)
