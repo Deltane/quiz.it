@@ -69,6 +69,11 @@
     const correctCount = {{ correct }};
     const incorrectCount = {{ incorrect }};
 
+    const durations = {{ time_per_question_list | tojson }};
+    const quizReview = {{ quiz_review_data | tojson }};
+    const attemptScores = {{ attempt_scores | tojson }};
+    const attemptLabels = {{ attempt_labels | tojson }};
+
     const ctx = document.getElementById('summaryChart').getContext('2d');
     new Chart(ctx, {
         type: 'bar',
@@ -94,110 +99,83 @@
         }
     });
 
-    const attemptIndexKey = `quiz_attempt_index_${quizId}`;
-    const attemptIds = JSON.parse(localStorage.getItem(attemptIndexKey) || "[]");
-
-    // Always reset and store only unique, sorted attemptIds
-    const updatedAttemptIds = Array.from(new Set([...attemptIds, attemptId])).sort((a, b) => a - b);
-    localStorage.setItem(attemptIndexKey, JSON.stringify(updatedAttemptIds));
-
-    if (updatedAttemptIds.length === 0) {
-        console.warn("No attempts found for this quiz.");
-    } else {
-        const durationsKey = `quiz_durations_${quizId}_${attemptId}`;
-        const durations = JSON.parse(localStorage.getItem(durationsKey) || "[]");
-        console.log("Loaded durations from", durationsKey, ":", durations);
-        const labels = durations.map((_, i) => `Q${i + 1}`);
-
-        const timeCtx = document.getElementById('timeChart').getContext('2d');
-        new Chart(timeCtx, {
-            type: 'line',
-            data: {
-                labels: labels,
-                datasets: [{
-                    label: 'Time (s)',
-                    data: durations,
-                    fill: false,
-                    borderColor: 'blue',
-                    tension: 0.1
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: { display: true, text: 'Seconds' }
-                    },
-                    x: {
-                        title: { display: true, text: 'Question Number' }
-                    }
+    const labels = durations.map((_, i) => `Q${i + 1}`);
+    const timeCtx = document.getElementById('timeChart').getContext('2d');
+    new Chart(timeCtx, {
+        type: 'line',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Time (s)',
+                data: durations,
+                fill: false,
+                borderColor: 'blue',
+                tension: 0.1
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    title: { display: true, text: 'Seconds' }
+                },
+                x: {
+                    title: { display: true, text: 'Question Number' }
                 }
             }
-        });
-
-        const reviewKey = `quiz_review_${quizId}_${attemptId}`;
-        const quizReview = JSON.parse(localStorage.getItem(reviewKey) || "[]");
-        console.log("Loaded quiz review from", reviewKey, ":", quizReview);
-        const reviewContainer = document.getElementById("quizReviewContainer");
-
-        if (quizReview.length > 0) {
-            const table = document.createElement("table");
-            table.style.borderCollapse = "collapse";
-            table.style.width = "100%";
-            table.innerHTML = `
-                <thead>
-                    <tr>
-                        <th style="text-align:left; padding: 8px;">Question</th>
-                        <th style="text-align:left; padding: 8px;">Your Answer</th>
-                        <th style="text-align:left; padding: 8px;">Correct Answer</th>
-                        <th style="text-align:left; padding: 8px;">Result</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${quizReview.map(q => `
-                        <tr>
-                            <td style="padding: 8px;">${q.question}</td>
-                            <td style="padding: 8px;">${q.userAnswer}</td>
-                            <td style="padding: 8px;">${q.correctAnswer}</td>
-                            <td style="padding: 8px; color: ${q.isCorrect ? 'green' : 'red'};">
-                                ${q.isCorrect ? 'Correct' : 'Incorrect'}
-                            </td>
-                        </tr>
-                    `).join("")}
-                </tbody>
-            `;
-            reviewContainer.appendChild(table);
         }
+    });
 
-        const attemptScores = updatedAttemptIds.map(id => {
-            const scoresKey = `quiz_attempts_${quizId}_${id}`;
-            const scoreList = JSON.parse(localStorage.getItem(scoresKey) || "[]");
-            console.log("Loaded attempt scores from", scoresKey, ":", scoreList);
-            return scoreList.length > 0 ? scoreList[0] : 0;
-        });
-        const attemptLabels = updatedAttemptIds.map(id => `Attempt ${id}`);
+    const reviewContainer = document.getElementById("quizReviewContainer");
+    if (quizReview.length > 0) {
+        const table = document.createElement("table");
+        table.style.borderCollapse = "collapse";
+        table.style.width = "100%";
+        table.innerHTML = `
+            <thead>
+                <tr>
+                    <th style="text-align:left; padding: 8px;">Question</th>
+                    <th style="text-align:left; padding: 8px;">Your Answer</th>
+                    <th style="text-align:left; padding: 8px;">Correct Answer</th>
+                    <th style="text-align:left; padding: 8px;">Result</th>
+                </tr>
+            </thead>
+            <tbody>
+                ${quizReview.map(q => `
+                    <tr>
+                        <td style="padding: 8px;">${q.question}</td>
+                        <td style="padding: 8px;">${q.userAnswer}</td>
+                        <td style="padding: 8px;">${q.correctAnswer}</td>
+                        <td style="padding: 8px; color: ${q.isCorrect ? 'green' : 'red'};">
+                            ${q.isCorrect ? 'Correct' : 'Incorrect'}
+                        </td>
+                    </tr>
+                `).join("")}
+            </tbody>
+        `;
+        reviewContainer.appendChild(table);
+    }
 
-        const attemptCtx = document.getElementById('attemptChart').getContext('2d');
-        new Chart(attemptCtx, {
-            type: 'bar',
-            data: {
-                labels: attemptLabels,
-                datasets: [{
-                    label: 'Score',
-                    data: attemptScores,
-                    backgroundColor: '#42a5f5'
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        precision: 0
-                    }
+    const attemptCtx = document.getElementById('attemptChart').getContext('2d');
+    new Chart(attemptCtx, {
+        type: 'bar',
+        data: {
+            labels: attemptLabels,
+            datasets: [{
+                label: 'Score',
+                data: attemptScores,
+                backgroundColor: '#42a5f5'
+            }]
+        },
+        options: {
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    precision: 0
                 }
             }
-        });
-    }
+        }
+    });
 
 </script>
 

@@ -69,21 +69,6 @@
 
     <script>
     $(document).ready(function () {
-        // Clear all localStorage data associated with the current quizId when the page loads
-        const quizId = sessionStorage.getItem("quiz_id");
-        if (quizId) {
-            Object.keys(localStorage).forEach((key) => {
-                if (
-                    key.startsWith(`quiz_durations_${quizId}_`) ||
-                    key.startsWith(`quiz_review_${quizId}_`) ||
-                    key.startsWith(`quiz_attempts_${quizId}_`) ||
-                    key === `quiz_attempt_index_${quizId}`
-                ) {
-                    localStorage.removeItem(key);
-                }
-            });
-            sessionStorage.removeItem("attempt_id"); // ensure fresh attempt
-        }
         $('#upload-file').change(function () {
             $('#ai-prompt').prop('disabled', !!$(this).val());
         });

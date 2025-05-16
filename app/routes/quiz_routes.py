@@ -20,7 +20,8 @@ def take_quiz():
         current_question=session.get("current_question", 0),
         time_remaining=session.get("time_remaining", 0),
         quiz_id=session.get("quiz_id"),
-        attempt_id=session.get("attempt_id")
+        attempt_id=session.get("attempt_id"),
+        total_questions=len(session.get("quiz", []))
     )
 
 @quiz_routes.route('/store_quiz', methods=['POST'])
@@ -49,9 +50,7 @@ def store_quiz():
             quiz.folders.append(folder)
         db.session.add(quiz)
         db.session.commit()
-        
         session['quiz_id'] = quiz.id
-        session['quiz_session_id'] = f"{quiz.id}_{datetime.utcnow().timestamp()}"
         session['topic'] = topic  # Or whatever type you use
 
     return '', 204
@@ -73,7 +72,6 @@ def redo_quiz(quiz_id):
     session['current_question'] = 0
     session['answers'] = {}
     session['quiz_id'] = quiz.id
-    session['quiz_session_id'] = f"{quiz.id}_{datetime.utcnow().timestamp()}"
     session['quiz_type'] = quiz.title
     session['topic'] = quiz.title
     session.pop('attempt_id', None)  # Clear existing attempt_id
@@ -103,10 +101,7 @@ def delete_quiz(quiz_id):
     db.session.delete(quiz)
     db.session.commit()
 
-    # Inject a cookie to signal the frontend to clear relevant localStorage for this quiz
-    response = redirect(url_for('stats_bp.dashboard'))
-    response.set_cookie(f"clearLocalStorage_quiz_{quiz_id}", "true", max_age=10)
-    return response
+    return redirect(url_for('stats_bp.dashboard'))
 
 @quiz_routes.route('/rename_quiz/<int:quiz_id>', methods=['POST'])
 def rename_quiz(quiz_id):
@@ -176,8 +171,6 @@ def submit_answer():
             total_questions = len(quiz)
             timestamp = datetime.utcnow()
 
-            print("Session contents before saving QuizResult:", dict(session))
-
             quiz_result = QuizResult(
                 user_id=user_id,
                 quiz_id=quiz_id,
@@ -218,7 +211,7 @@ def submit_answer():
 
             db.session.commit()
 
-            time_data = session.get('time_per_question', {})
+            time_data = request.json.get("time_per_question", {})
             if not isinstance(time_data, dict):
                 time_data = {}
             existing_summary = QuizSummary.query.filter_by(result_id=quiz_result.id).first()
@@ -398,6 +391,30 @@ def quiz_summary(attempt_id):
     answers = QuizAnswer.query.filter_by(attempt_id=attempt_id).all()
     user_answers = {a.question_index: a.answer for a in answers}
 
+    # Construct quiz review data
+    quiz_review_data = []
+    for i, q in enumerate(quiz_questions):
+        user_ans = str(user_answers.get(i, '')).strip().lower()
+        correct_ans = str(q.get('answer', '')).strip().lower()
+        quiz_review_data.append({
+            "question": q.get("question", ""),
+            "userAnswer": user_ans,
+            "correctAnswer": correct_ans,
+            "isCorrect": user_ans == correct_ans
+        })
+
+    # Time per question list
+    time_per_question_list = [v for k, v in sorted(time_per_question.items())]
+
+    # Attempt scores for comparison chart
+    previous_attempts = QuizResult.query.filter_by(
+        user_id=attempt.user_id,
+        quiz_id=quiz.id,
+        completed=True
+    ).order_by(QuizResult.timestamp.asc()).all()
+    attempt_scores = [r.score for r in previous_attempts]
+    attempt_labels = [f"Attempt {i + 1}" for i in range(len(previous_attempts))]
+
     return render_template(
         'quiz_summary.html',
         score=score,
@@ -413,7 +430,11 @@ def quiz_summary(attempt_id):
         quiz_title=quiz.title if quiz else 'Untitled',
         quiz_questions=quiz_questions,
         time_per_question=time_per_question,
-        user_answers=user_answers
+        user_answers=user_answers,
+        quiz_review_data=quiz_review_data,
+        time_per_question_list=time_per_question_list,
+        attempt_scores=attempt_scores,
+        attempt_labels=attempt_labels
     )
 
 # Endpoint to get the full quiz from the session for review
