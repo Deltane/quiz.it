@@ -41,6 +41,8 @@ def dashboard():
     folders = Folder.query.filter_by(user_id=user_id).all()
     unfinished_attempts = QuizResult.query.filter_by(user_id=user_id, completed=False).order_by(QuizResult.timestamp.desc()).all()
 
+    show_shared_quiz_modal = session.pop('show_shared_quiz_modal', False)
+
     stats = {
         'quizzes_completed': quizzes_completed,
         'quizzes_above_80': quizzes_above_80,
@@ -48,7 +50,7 @@ def dashboard():
         'most_frequent_quiz_type': most_frequent_quiz_type[0] if most_frequent_quiz_type else None
     }
 
-    return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders, unfinished_attempts=unfinished_attempts)
+    return render_template('dashboard.html', stats=stats, recent_quizzes=recent_quizzes, folders=folders, unfinished_attempts=unfinished_attempts, show_shared_quiz_modal=show_shared_quiz_modal)
 
 @stats_bp.route('/filter_stats', methods=['POST'])
 @login_required
