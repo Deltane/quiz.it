@@ -151,6 +151,15 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     });
+
+    // Show shared quiz modal if session flag is set
+    const showSharedQuizModal = {{ show_shared_quiz_modal|tojson }};
+    if (showSharedQuizModal) {
+        const sharedQuizModal = document.getElementById('shared-quiz-modal');
+        if (sharedQuizModal) {
+            sharedQuizModal.style.display = 'block';
+        }
+    }
 });
 
 function toggleRenameForm(type, id) {

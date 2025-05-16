@@ -1,7 +1,7 @@
 from app.models import QuizResult
 from app import db
 from datetime import datetime
-from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for, flash
+from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for, flash, current_app
 from flask import render_template, session, request
 from app.models import QuizShare, User, Quiz, PendingQuizShare  # Add PendingQuizShare to imports
 from flask_login import current_user, login_required
