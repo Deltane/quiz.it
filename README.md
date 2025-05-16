@@ -15,7 +15,7 @@ custom input or files, complete and review their results, and share quizzes with
 
 ## 🚀 Technologies
 
-- **Frontend**: HTML, CSS, JavaScript, jQuery, Bootstrap/Tailwind (choose one)
+- **Frontend**: HTML, CSS, JavaScript, jQuery, Bootstrap/Tailwind 
 - **Backend**: Flask (Python), SQLAlchemy (with SQLite)
 - **Other**: AJAX for dynamic interactivity, Chart.js for data visualisation, OpenAI API for AI quiz generation
 
@@ -24,8 +24,8 @@ custom input or files, complete and review their results, and share quizzes with
 | UWA ID   | Name                      | GitHub Username |
 |----------|---------------------------|-----------------|
 | 23991179 | Amanda Putri Devi Siagian | mandasgn        |
-| 23456789 | Rayhan Rayhan             | rayhannm        |
-| 34567890 | Gaby Tedjosurjono         | gabrielajt10    |
+| 23487417 | Rayhan Rayhan             | rayhannm        |
+| 23918912 | Gaby Tedjosurjono         | gabrielajt10    |
 | 24211939 | Serena McPherson          | Deltane         |
 
 ---
