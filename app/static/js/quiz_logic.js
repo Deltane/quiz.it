@@ -99,6 +99,11 @@ $(document).ready(function () {
                 }
 
                 $('#next-question').show();
+                if (currentQuestionIndex + 1 === quizLength) {
+                    $('#next-question').text('Submit');
+                } else {
+                    $('#next-question').text('Next Question');
+                }
                 // Show/hide previous-question button
                 if (currentQuestionIndex > 0) {
                     $('#prev-question').show();
