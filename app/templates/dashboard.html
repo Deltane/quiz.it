@@ -20,6 +20,7 @@
             {% if session.get('user_email') %}
                 <a href="/" class="nav-button">Home</a>
                 <a href="/create_quiz" class="nav-button">Create Quiz</a>
+                <a href="/my_quizzes" class="nav-button">My Quizzes</a>
                 <div class="user-info">
                     <span>{{ session.get('user_name', session['user_email']) }}</span>
                     <img src="{{ session['user_pic'] }}" alt="Profile"

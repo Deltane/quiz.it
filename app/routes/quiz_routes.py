@@ -432,6 +432,7 @@ def quiz_summary(attempt_id):
         time_per_question_list=time_per_question_list,
         attempt_scores=attempt_scores,
         attempt_labels=attempt_labels
+    )
 
 # Route for viewing "My Quizzes" history page
 @quiz_routes.route('/my_quizzes')
