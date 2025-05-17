@@ -275,7 +275,8 @@ def submit_answer():
             quiz_id = session.get('quiz_id')
             quiz_title = session.get('topic') or 'Untitled'
             total_questions = len(quiz)
-            timestamp = datetime.now(datetime.timezone.utc) # Changed from datetime.utcnow()
+            from datetime import timezone
+            timestamp = datetime.now(timezone.utc)  # Fixed timestamp creation
 
             quiz_result = QuizResult(
                 user_id=user_id,
@@ -380,12 +381,13 @@ def exit_quiz():
     if not user_id or not quiz_id:
         return jsonify(success=False, message="Missing session info"), 400
 
+    from datetime import timezone
     quiz_result = QuizResult(
         user_id=user_id,
         quiz_id=quiz_id,
         score=0,  # Will be calculated on resume
         total_questions=len(session.get("quiz", [])),
-        timestamp=datetime.now(datetime.timezone.utc), # Changed from datetime.utcnow()
+        timestamp=datetime.now(timezone.utc),  # Fixed timestamp creation
         quiz_type=topic,
         completed=False,
         title=topic,

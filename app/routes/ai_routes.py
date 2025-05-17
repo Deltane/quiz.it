@@ -168,9 +168,9 @@ def generate_quiz():
                 "For numeric answers, use digits (e.g., '6' instead of 'six'). "
                 "Do not provide explanations. "
                 "Return only a JSON array in this format: "
-                "[{\"question\": \"The process of _____ is used to convert analog signals to digital.\", "
-                "\"answer\": \"digitization\"}, ...]"
-                "DO NOT INCLUDE THE ABOVE QUESTION IN THE QUIZ"
+                "[{\"question\": \"A specific term should be replaced with blank like: The _____ is a fundamental concept in OOP.\", "
+                "\"answer\": \"correct_term\"}]"
+                "\nIMPORTANT: Create NEW questions based on the content. DO NOT use my example in your generated questions."
             )
         elif quiz_type == "Short Answer":
             system_prompt = (
@@ -180,8 +180,9 @@ def generate_quiz():
                 "For numeric answers, use digits (e.g., '6' instead of 'six'). "
                 "Do not provide explanations. "
                 "Return only a JSON array in this format: "
-                "[{\"question\": \"What protocol is used for secure web browsing?\", "
-                "\"answer\": \"HTTPS\"}, ...]"
+                "[{\"question\": \"What is a specific concept or definition from the provided content?\", "
+                "\"answer\": \"correct_answer\"}]"
+                "\nIMPORTANT: Create NEW questions based on the content. DO NOT use my example in your generated questions."
             )
         elif quiz_type == "Multiple Choice":
             system_prompt = (
@@ -192,7 +193,8 @@ def generate_quiz():
                 "Each question should have 4 options, and one correct answer. "
                 "Do not provide any explanations or preambles. "
                 "Only return a JSON array in the following format: "
-                "[{\"question\": \"...\", \"options\": [\"...\", \"...\", \"...\", \"...\"], \"answer\": \"...\"}, ...]"
+                "[{\"question\": \"A question about the provided content?\", \"options\": [\"option1\", \"option2\", \"option3\", \"option4\"], \"answer\": \"correct_option\"}]"
+                "\nIMPORTANT: Create NEW questions based on the content. DO NOT use my example in your generated questions."
             )
 
         response = client.chat.completions.create(
