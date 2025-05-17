@@ -132,6 +132,20 @@ body {
     border: 2px solid #ffffff; /* Matches landing_page.css */
 }
 
+/* Styles for navigation user info */
+.nav-right .user-info {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Spacing between elements */
+}
+
+.nav-profile-pic {
+    height: 30px;
+    width: 30px;
+    border-radius: 50%;
+    object-fit: cover;
+    transition: transform 0.2s ease-in-out; /* Smooth transition for hover */
+}
 
 /* Main layout */
 .dashboard-container {
@@ -162,6 +176,53 @@ body {
 .stat-card li {
     font-weight: bold;
     color: #333;
+}
+
+.stat-card.recent-quizzes {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.stat-card.recent-quizzes h2 {
+    font-size: 1.5rem;
+    color: #9a503b;
+    margin-bottom: 1rem;
+}
+
+.recent-quizzes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+}
+
+.quiz-entry {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    background-color: #f9f9f9;
+    transition: background-color 0.3s ease;
+}
+
+.quiz-entry:hover {
+    background-color: #f1f1f1;
+}
+
+.quiz-entry h3 {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0;
+}
+
+.quiz-entry .action-button {
+    margin-left: 0.5rem;
 }
 
 .chart-section {
@@ -361,6 +422,219 @@ body {
     background-color: #7f3f2d;
 }
 
+/* Modal styles from share-quiz-implementation */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    width: 90%;
+    max-width: 500px;
+    position: relative;
+}
+
+.modal-content label {
+    font-size: 1rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+    display: block;
+}
+
+.modal-content input {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.modal-content button {
+    padding: 0.5rem 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    background-color: #9a503b;
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.modal-content button:hover {
+    background-color: #7f3f2d;
+}
+
+.modal-content .close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    font-size: 1.5rem;
+    color: #333;
+    cursor: pointer;
+    transition: color 0.3s ease;
+}
+
+.modal-content .close:hover {
+    color: #9a503b;
+}
+
+.share-message {
+    margin-top: 10px;
+    padding: 8px;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.share-message.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.share-message.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.email-notification-info {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #6c757d;
+}
+
+.email-notification-info p {
+    margin: 3px 0;
+}
+
+/* Shared Quizzes Section */
+.shared-quizzes {
+    margin-top: 2rem;
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 1rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.shared-quizzes h2 {
+    margin-bottom: 1rem;
+    border-bottom: 1px solid #e1e1e1;
+    padding-bottom: 0.5rem;
+    color: #333;
+}
+
+.shared-quiz-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.shared-quiz-list .quiz-entry {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background-color: white;
+    border-radius: 6px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.shared-quiz-list .quiz-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.shared-quiz-list .quiz-title {
+    font-weight: bold;
+    flex: 1;
+}
+
+.shared-quiz-list .quiz-sender {
+    font-style: italic;
+    color: #666;
+}
+
+/* Modal styles for shared quiz confirmation */
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    overflow: auto;
+}
+
+.modal-content {
+    background-color: #fff;
+    margin: 15% auto;
+    padding: 20px;
+    border-radius: 8px;
+    width: 50%;
+    max-width: 500px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    position: relative;
+    animation: modalFadeIn 0.3s;
+}
+
+@keyframes modalFadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.close-button {
+    color: #aaa;
+    float: right;
+    font-size: 28px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.close-button:hover,
+.close-button:focus {
+    color: #333;
+    text-decoration: none;
+}
+
+/* Button for starting shared quiz */
+#start-shared-quiz {
+    display: block;
+    width: 80%;
+    margin: 1rem auto;
+    padding: 0.75rem;
+    background-color: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+#start-shared-quiz:hover {
+    background-color: #45a049;
+}
+
+/* Additional styles from main that don't conflict with quiz sharing features */
 .attempt-history {
     background-color: #f8f8f8;
     border-left: 4px solid #9a503b;

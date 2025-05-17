@@ -40,26 +40,25 @@ custom input or files, complete and review their results, and share quizzes with
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Deltane/CITS3403-Group-Project.git
-cd CITS3403-Group-Project
+git clone https://github.com/Deltane/quiz.it
+cd quiz.it
 ```
 
 ### 2. Create a Virtual Environment
 
 #### macOS/Linux
-
 ```bash
 python3 -m venv venv  
 source venv/bin/activate  
 pip install --upgrade pip  
 pip install -r requirements.txt
-
-# If you make any changes to requirements.txt, run this command to update the file
-pip freeze > requirements.txt
 ```
 
+# If you make any changes to requirements.txt, run this command to update the file
+```bash
+pip freeze > requirements.txt
+```
 #### Windows
-
 ```bash
 python3 -m venv venv  
 venv\Scripts\activate  
@@ -71,7 +70,7 @@ pip freeze > requirements.txt
 pip freeze > requirements.txt
 ```
 
-### 3. Set Up Environment Variables
+### 3. Set Up Environment Variables and Initialise Database
 
 Create a `.env` file in the root directory of the project and add the following:
 
@@ -82,7 +81,18 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 OAUTHLIB_INSECURE_TRANSPORT=1
 ```
 
-Replace `your_secret_key_here`, `your_google_client_id_here`, and `your_google_client_secret_here` with your actual values.
+Replace `your_secret_key_here`, `your_google_client_id_here`, and `your_google_client_secret_here` with your actual values
+
+Before running the app for the first time, set up the database with Flask-Migrate:
+```bash
+flask db init         # Only needed the first time to initialize migrations
+flask db migrate -m "Initial migration"
+flask db upgrade
+
+If you make changes to your models in the future, run:
+flask db migrate -m "Describe your change"
+flask db upgrade
+```
 
 ### 4. Run the App
 

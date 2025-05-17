@@ -35,9 +35,45 @@ def store_quiz():
         validate_csrf(csrf_token)
     except CSRFError:
         return jsonify({'error': 'Invalid CSRF token'}), 400
+    # Check if the user session is valid
+    if not session.get('user_id'):
+        return jsonify({'error': 'Session expired. Please log in again.'}), 401
 
-    session['quiz'] = data.get('quiz')
-    return jsonify({'message': 'Quiz stored successfully'})
+    data = request.json
+    session['quiz'] = data['quiz']
+    session['quiz_duration'] = data.get('quiz_duration', 5)  # in minutes
+    session['time_remaining'] = session['quiz_duration'] * 60        # in seconds
+    session['score'] = 0
+    session['current_question'] = 0
+    session['answers'] = {}
+
+    # Save to DB
+    from app.models import Quiz, db, User, Folder # Make sure Folder is imported if used
+    import json
+    user_email = session.get("user_email")
+    user = User.query.filter_by(email=user_email).first()
+    if user:
+        # Use quiz_title and is_public from session if available (set during form submission)
+        topic_title = session.pop('quiz_title_from_form', data.get('quiz_title', data.get('title', 'Untitled')))
+        is_public = session.pop('is_public_from_form', data.get('is_public', True))
+        questions = data['quiz']
+        folder_id = session.pop("folder_id", None) 
+        
+        quiz = Quiz(
+            title=topic_title, 
+            questions_json=json.dumps(questions), 
+            user_id=user.id,
+            is_public=is_public # Save visibility status
+        )
+        if folder_id:
+            folder = Folder.query.get(folder_id)
+            if folder:
+                quiz.folders.append(folder)
+        db.session.add(quiz)
+        db.session.commit()
+        return jsonify({'message': 'Quiz data stored in session and saved to database.'}), 200
+    else:
+        return jsonify({'error': 'User not found for saving the quiz.'}), 404
 
 @ai_routes.route('/create_quiz')
 def create_quiz():
@@ -57,8 +93,16 @@ def generate_quiz():
         session['quiz_duration'] = timer_minutes
         quiz_type = form.quiz_type.data
         uploaded_file = form.upload_file.data
-        topic = form.topic.data if hasattr(form, 'topic') else 'general'
-        session['topic'] = topic
+        # Capture quiz name and visibility from the form
+        session['quiz_title_from_form'] = form.quiz_name.data
+        session['is_public_from_form'] = form.visibility.data == 'public'
+        
+        # For 'topic' / 'most_frequent_quiz_type' from origin/main, using quiz_name as per user's preference
+        # This local variable will be used later to set session['most_frequent_quiz_type']
+        current_quiz_topic_for_session = form.quiz_name.data
+        # If origin/main's logic relied on session['topic'] directly, set it here:
+        session['topic'] = current_quiz_topic_for_session
+        
     else:
         return render_template('create_quiz.html', form=form)
 
@@ -181,7 +225,7 @@ def generate_quiz():
                     question['answer'] = normalise_answer(answer)
 
             session['quiz'] = quiz_data
-            session['most_frequent_quiz_type'] = topic
+            session['most_frequent_quiz_type'] = current_quiz_topic_for_session
             return jsonify({"quiz": quiz_data})
 
         except json.JSONDecodeError as je:

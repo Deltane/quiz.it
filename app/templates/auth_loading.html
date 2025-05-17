@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Authorizing Access to Shared Quiz</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f8f8f8;
+            color: #333;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+            padding: 2rem;
+            border-radius: 8px;
+            background-color: white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        h1 {
+            margin-bottom: 1.5rem;
+            color: #4285F4;
+        }
+        
+        p {
+            margin-bottom: 2rem;
+            font-size: 1.1rem;
+            line-height: 1.5;
+        }
+        
+        .loader {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+        }
+        
+        /* Google Dots Animation */
+        .google-dots-container {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .google-dot {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            margin: 0 5px;
+            animation: bounce 1.5s infinite ease-in-out;
+        }
+        
+        .dot1 {
+            background-color: #4285F4; /* Google Blue */
+            animation-delay: 0s;
+        }
+        
+        .dot2 {
+            background-color: #DB4437; /* Google Red */
+            animation-delay: 0.3s;
+        }
+        
+        .dot3 {
+            background-color: #F4B400; /* Google Yellow */
+            animation-delay: 0.6s;
+        }
+        
+        .dot4 {
+            background-color: #0F9D58; /* Google Green */
+            animation-delay: 0.9s;
+        }
+        
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .status-message {
+            font-style: italic;
+            color: #666;
+        }
+        
+        .google-signin {
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #4285F4;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            text-decoration: none;
+        }
+        
+        .google-logo {
+            background-color: white;
+            border-radius: 2px;
+            padding: 5px;
+            margin-right: 10px;
+        }
+        
+        .google-signin:hover {
+            background-color: #357ae8;
+        }
+        
+        .visually-hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Authorizing Access to Shared Quiz</h1>
+        <p>Please wait while we verify your access to the shared quiz...</p>
+        
+        <div class="loader">
+            <div class="google-dot dot1"></div>
+            <div class="google-dot dot2"></div>
+            <div class="google-dot dot3"></div>
+            <div class="google-dot dot4"></div>
+        </div>
+        
+        <p class="status-message">Checking your Google authentication status...</p>
+        
+        <div id="signin-button" class="visually-hidden">
+            <a href="{{ url_for('auth.login') }}" class="google-signin">
+                <span class="google-logo">
+                    <svg width="18" height="18" xmlns="http://www.w3.org/2000/svg">
+                        <g fill="#000" fill-rule="evenodd">
+                            <path d="M9 3.48c1.69 0 2.83.73 3.48 1.34l2.54-2.48C13.46.89 11.43 0 9 0 5.48 0 2.44 2.02.96 4.96l2.91 2.26C4.6 5.05 6.62 3.48 9 3.48z" fill="#EA4335"></path>
+                            <path d="M17.64 9.2c0-.74-.06-1.28-.19-1.84H9v3.34h4.96c-.1.83-.64 2.08-1.84 2.92l2.84 2.2c1.7-1.57 2.68-3.88 2.68-6.62z" fill="#4285F4"></path>
+                            <path d="M3.88 10.78A5.54 5.54 0 0 1 3.58 9c0-.62.11-1.22.29-1.78L.96 4.96A9.008 9.008 0 0 0 0 9c0 1.45.35 2.82.96 4.04l2.92-2.26z" fill="#FBBC05"></path>
+                            <path d="M9 18c2.43 0 4.47-.8 5.96-2.18l-2.84-2.2c-.76.53-1.78.9-3.12.9-2.38 0-4.4-1.57-5.12-3.74L.97 13.04C2.45 15.98 5.48 18 9 18z" fill="#34A853"></path>
+                        </g>
+                    </svg>
+                </span>
+                Sign in with Google
+            </a>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Display a status animation with multiple messages
+            const statusMessages = [
+                "Checking authentication status...",
+                "Verifying shared quiz access...",
+                "Preparing Google authentication...",
+                "Redirecting to Google Sign-in..."
+            ];
+            
+            const statusElement = document.querySelector('.status-message');
+            let messageIndex = 0;
+            
+            // Show messages in sequence
+            const messageInterval = setInterval(function() {
+                if (messageIndex < statusMessages.length) {
+                    statusElement.textContent = statusMessages[messageIndex++];
+                } else {
+                    clearInterval(messageInterval);
+                }
+            }, 1200);
+            
+            // Auto-redirect to Google authentication after showing all messages
+            setTimeout(function() {
+                window.location.href = "{{ auth_url }}";
+            }, 5000);
+            
+            // This will show the sign-in button as a fallback if automatic redirect fails
+            setTimeout(function() {
+                document.getElementById('signin-button').classList.remove('visually-hidden');
+                document.querySelector('.status-message').textContent = 'Please sign in with Google to access the shared quiz.';
+            }, 8000);
+        });
+    </script>
+</body>
+</html>

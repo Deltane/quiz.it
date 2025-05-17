@@ -1,6 +1,5 @@
 from dotenv import load_dotenv
 import os
-# import shutil
 
 load_dotenv()  # Load environment variables from .env
 
@@ -11,9 +10,11 @@ from flask_session import Session
 from authlib.integrations.flask_client import OAuth
 import requests
 from flask_login import LoginManager
+# Removed Flask-Mail import
 
 # Initialize extensions globally
 db = SQLAlchemy()
+# Removed mail = Mail()
 migrate = Migrate()
 session_manager = Session()
 oauth = OAuth()
@@ -30,6 +31,15 @@ def create_app():
     # Database config
     app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL', 'sqlite:///app.db')
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # SendGrid Email config
+    app.config['SENDGRID_API_KEY'] = os.getenv('SENDGRID_API_KEY')
+    app.config['MAIL_DEFAULT_SENDER'] = os.getenv('MAIL_DEFAULT_SENDER', 'quiz.it <quiz.it@outlook.com>')
+    
+    # Log email configuration status
+    app.logger.info("SendGrid API configured")
+    app.logger.info(f"API Key provided: {'Yes' if app.config['SENDGRID_API_KEY'] else 'No'}")
+    app.logger.info(f"Default sender: {app.config['MAIL_DEFAULT_SENDER']}")
 
     # Flask-Session config
     app.config['SESSION_TYPE'] = 'filesystem'  # <- Important for server-side sessions
@@ -38,6 +48,7 @@ def create_app():
     migrate.init_app(app, db)
     oauth.init_app(app)
     login_manager.init_app(app)
+    # Removed Flask-Mail initialization
 
     # Log app initialization
     app.logger.info("Flask app initialized with configuration:")
@@ -64,13 +75,14 @@ def create_app():
     from app.routes.ai_routes import ai_routes
     from app.routes.stats_routes import stats_bp
     from app.routes.dashboard_routes import dashboard_bp
+    # from app.routes.profile_routes import profile_bp # Profile feature removed
 
     app.register_blueprint(quiz_routes)
     app.register_blueprint(auth_bp, url_prefix='/auth')
     app.register_blueprint(ai_routes)
     app.register_blueprint(stats_bp)
     app.register_blueprint(dashboard_bp)
-
+    # app.register_blueprint(profile_bp) # Profile feature removed
 
     from datetime import timedelta
     from flask import session

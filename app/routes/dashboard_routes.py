@@ -1,62 +1,90 @@
 import json
+from flask import Blueprint, render_template, session, redirect, url_for, request, flash, jsonify
+from flask_login import current_user, login_required
+from app.models import User, Quiz, Folder, db, QuizShare, QuizResult
+from app.utils.email_utils import send_email
 from datetime import datetime
-from flask import Blueprint, render_template, session, redirect, url_for, request, flash
-from app.models import User, Quiz, Folder, QuizResult, QuizSummary, db
+from sqlalchemy import func
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
 @dashboard_bp.route("/dashboard")
 def dashboard_view():
-    if 'user_email' not in session:
+    if not current_user.is_authenticated:
         return redirect(url_for('auth.login'))
 
-    user = User.query.filter_by(email=session['user_email']).first()
+    user = User.query.filter_by(email=current_user.email).first()
     if not user:
         return redirect(url_for('auth.login'))
 
-    attempts = QuizResult.query.filter_by(user_id=user.id, completed=True).order_by(QuizResult.timestamp.desc()).all()
-    quiz_attempts_map = {}
-    scores = []
-    quiz_type_count = {}
-    for attempt in attempts:
-        quiz_id = attempt.quiz_id
-        if quiz_id not in quiz_attempts_map:
-            quiz_attempts_map[quiz_id] = {
-                "quiz": attempt.quiz,
-                "attempts": []
-            }
-        quiz_attempts_map[quiz_id]["attempts"].append(attempt)
-
-        if attempt.completed:
-            scores.append(attempt.score / attempt.total_questions if attempt.total_questions else 0)
-            quiz_type = attempt.quiz_type
-            quiz_type_count[quiz_type] = quiz_type_count.get(quiz_type, 0) + 1
-
-    quizzes_completed = len({attempt.quiz_id for attempts in quiz_attempts_map.values() for attempt in attempts["attempts"] if attempt.completed})
-    quizzes_above_80 = sum(1 for s in scores if s >= 0.8)
-    most_frequent_quiz_type = max(quiz_type_count, key=quiz_type_count.get) if quiz_type_count else None
-    recent_topics = [quiz_data['quiz'].title for quiz_data in quiz_attempts_map.values() if quiz_data['attempts']]
-
-    # Ensure recent_quizzes and past_quizzes are constructed from unique quizzes with their attempts, sorted by most recent attempt
-    recent_quizzes = sorted(
-        quiz_attempts_map.values(),
-        key=lambda x: x["attempts"][-1].timestamp if x["attempts"] else datetime.min,
-        reverse=True
-    )
-    past_quizzes = recent_quizzes[3:]
-    recent_quizzes = recent_quizzes[:3]
-
+    user_quizzes = Quiz.query.filter_by(user_id=user.id).order_by(Quiz.created_at.desc()).all()
+    recent_quizzes = user_quizzes[:3] if user_quizzes else []
+    past_quizzes = user_quizzes[3:] if len(user_quizzes) > 3 else []
     user_folders = Folder.query.filter_by(user_id=user.id).all()
+
+    shared_quizzes = []
+    quiz_shares = QuizShare.query.filter_by(shared_with_user_id=user.id).all()
+    for share in quiz_shares:
+        quiz = Quiz.query.get(share.quiz_id)
+        if quiz:
+            shared_quiz = {
+                'quiz': quiz,
+                'sender': User.query.get(share.shared_by_user_id)
+            }
+            shared_quizzes.append(shared_quiz)
+
+    show_shared_quiz_modal = session.pop('show_shared_quiz_modal', False)
+    shared_quiz = None
+    sender = None
+
+    if show_shared_quiz_modal and 'shared_quiz_id' in session:
+        shared_quiz_id = session.get('shared_quiz_id')
+        sender_id = session.get('shared_quiz_sender_id')
+
+        shared_quiz = Quiz.query.get(shared_quiz_id)
+        sender = User.query.get(sender_id)
+
+        session.pop('shared_quiz_id', None)
+        session.pop('shared_quiz_sender_id', None)
+
+    unfinished_attempts = QuizResult.query.filter_by(user_id=user.id, completed=False).all()
+
+    stats = {
+        'quizzes_completed': QuizResult.query.filter_by(user_id=user.id, completed=True).count(),
+        'quizzes_above_80': QuizResult.query.filter_by(user_id=user.id, completed=True)
+            .filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
+    }
+
+    best_score = QuizResult.query.filter_by(user_id=user.id, completed=True) \
+        .order_by((QuizResult.score * 100 / QuizResult.total_questions).desc()).first()
+
+    if best_score:
+        stats['best_score'] = {
+            'score': best_score.score,
+            'total': best_score.total_questions,
+            'type': best_score.quiz_type
+        }
+
+    most_frequent = db.session.query(
+        QuizResult.quiz_type,
+        func.count(QuizResult.quiz_type).label('type_count')
+    ).filter_by(user_id=user.id).group_by(QuizResult.quiz_type) \
+     .order_by(func.count(QuizResult.quiz_type).desc()).first()
+
+    stats['most_frequent_quiz_type'] = most_frequent[0] if most_frequent else 'None'
 
     return render_template(
         "dashboard.html",
         recent_quizzes=recent_quizzes,
         past_quizzes=past_quizzes,
         folders=user_folders,
-        quizzes_completed=quizzes_completed,
-        quizzes_above_80=quizzes_above_80,
-        most_frequent_quiz_type=most_frequent_quiz_type,
-        recent_topics=recent_topics
+        all_quizzes=user_quizzes,
+        shared_quizzes=shared_quizzes,
+        unfinished_attempts=unfinished_attempts,
+        stats=stats,
+        show_shared_quiz_modal=show_shared_quiz_modal,
+        shared_quiz=shared_quiz,
+        sender=sender
     )
 
 @dashboard_bp.route('/redo_quiz/<int:quiz_id>')
@@ -192,8 +220,6 @@ def create_quiz_in_folder(folder_id):
     session['selected_folder_id'] = folder_id
     return redirect(url_for('quiz_routes.create_quiz'))
 
-from flask import jsonify
-
 @dashboard_bp.route('/assign_quiz_to_folder', methods=['POST'])
 def assign_quiz_to_folder():
     if 'user_email' not in session:
@@ -256,6 +282,94 @@ def unassign_quiz_from_folder():
         flash("Quiz was not assigned to this folder.", "error")
 
     return redirect(url_for('dashboard.dashboard_view'))
+
+@dashboard_bp.route('/share_quiz', methods=['POST'])
+def share_quiz():
+    if 'user_email' not in session:
+        return jsonify({'error': 'You must be logged in to share quizzes.'}), 401
+
+    current_user_model = User.query.filter_by(email=session['user_email']).first()
+    if not current_user_model:
+        return jsonify({'error': 'User not found. Please log in again.'}), 401
+
+    if not request.is_json:
+        return jsonify({'error': 'Unsupported Media Type: Request must be JSON.'}), 415
+
+    data = request.get_json()
+    quiz_id_str = data.get('quiz_id')
+    recipient_email = data.get('recipient_email')
+
+    if not quiz_id_str or not recipient_email:
+        return jsonify({'error': 'Quiz ID and recipient email are required.'}), 400
+
+    try:
+        quiz_id = int(quiz_id_str)
+    except ValueError:
+        return jsonify({'error': 'Invalid Quiz ID format.'}), 400
+
+    quiz = Quiz.query.get(quiz_id)
+    if not quiz:
+        return jsonify({'error': 'Quiz not found.'}), 404
+
+    # Check if the current user owns the quiz
+    if quiz.user_id != current_user_model.id:
+        return jsonify({'error': 'You do not have permission to share this quiz.'}), 403
+
+    recipient = User.query.filter_by(email=recipient_email).first()
+    if not recipient:
+        return jsonify({'error': 'Recipient user not found.'}), 404 # Or 400 if considered a validation error
+
+    if recipient.id == current_user_model.id:
+        return jsonify({'error': 'You cannot share a quiz with yourself.'}), 400
+
+    # Check if the quiz is already shared with the recipient
+    existing_share = QuizShare.query.filter_by(
+        quiz_id=quiz.id,
+        shared_with_user_id=recipient.id
+    ).first()
+
+    if existing_share:
+        return jsonify({'error': 'This quiz is already shared with the specified user.'}), 400
+
+    # Create a new QuizShare entry
+    new_share = QuizShare(
+        quiz_id=quiz.id,
+        shared_with_user_id=recipient.id,
+        shared_by_user_id=current_user_model.id  # Record who shared the quiz
+    )
+    db.session.add(new_share)
+    db.session.commit()
+
+    return jsonify({'success': f'Quiz successfully shared with {recipient_email}.'}), 200
+
+@dashboard_bp.route('/unshare_quiz/<int:share_id>', methods=['POST'])
+def unshare_quiz(share_id):
+    share = QuizShare.query.get(share_id)
+    if not share or share.shared_by_user_id != current_user.id:
+        flash('Invalid share or permission denied.', 'error')
+        return redirect(url_for('dashboard.dashboard_view'))
+
+    db.session.delete(share)
+    db.session.commit()
+
+    flash('Quiz unshared successfully.', 'success')
+    return redirect(url_for('dashboard.dashboard_view'))
+
+@dashboard_bp.route('/shared_quizzes', methods=['GET'])
+def shared_quizzes():
+    received_quizzes = QuizShare.query.filter_by(shared_with_user_id=current_user.id).all()
+    return render_template('shared_quizzes.html', received_quizzes=received_quizzes)
+
+@dashboard_bp.route('/search_users')
+def search_users():
+    query = request.args.get('query', '')
+    if not query:
+        return jsonify(users=[])
+
+    users = User.query.filter(User.email.ilike(f"%{query}%")).all()
+    user_data = [{'id': user.id, 'email': user.email} for user in users]
+
+    return jsonify(users=user_data)
 
 @dashboard_bp.route('/quiz_summary/<int:attempt_id>', methods=['GET'])
 def quiz_summary(attempt_id):

@@ -39,5 +39,5 @@ document.getElementById("learn-more-button").addEventListener("click", function(
   // Check once on load and every 2 minutes
   document.addEventListener('DOMContentLoaded', () => {
     checkSessionStatus();
-    setInterval(checkSessionStatus, 2 * 60 * 1000);  // every 2 minutes
+    setInterval(checkSessionStatus, 60 * 60 * 1000);  // every hour
   });

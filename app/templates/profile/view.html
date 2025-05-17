@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{{ profile_user.username }}'s Profile</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}"> {# Assuming similar styling to dashboard #}
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/profile.css') }}"> {# Specific profile styles #}
+</head>
+<body>
+    <header>
+        <nav class="fixed-nav">
+            <div class="nav-left">
+                <a href="{{ url_for('dashboard.dashboard_view') }}" class="nav-link">Dashboard</a>
+            </div>
+            <div class="nav-right">
+                {% if current_user.is_authenticated %}
+                    <a href="{{ url_for('profile.view_profile', username=current_user.username) }}" class="nav-link">My Profile</a>
+                    <a href="{{ url_for('auth.logout') }}" class="nav-link">Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="nav-link">Login</a>
+                {% endif %}
+            </div>
+        </nav>
+    </header>
+
+    <main class="profile-container">
+        <section class="profile-header">
+            <img src="{{ profile_user.picture if profile_user.picture else url_for('static', filename='photos/default_avatar.png') }}" alt="{{ profile_user.username }}'s profile picture" class="profile-picture">
+            <h1>{{ profile_user.username }}</h1>
+            {% if is_own_profile %}
+                <p><a href="#">Edit Profile (Not Implemented)</a></p>
+            {% endif %}
+        </section>
+
+        <section class="profile-stats">
+            <h2>Profile Stats</h2>
+            <div class="stat-grid">
+                <div class="stat-item">
+                    <h3>Total Quizzes Created</h3>
+                    <p>{{ profile_stats.total_quizzes_created }}</p>
+                </div>
+                <div class="stat-item">
+                    <h3>Public Quizzes</h3>
+                    <p>{{ profile_stats.public_quizzes_count }}</p>
+                </div>
+                {# Add more stats here as they are implemented in the route #}
+            </div>
+        </section>
+
+        <section class="profile-quizzes">
+            <h2>Quizzes</h2>
+            {% if quizzes %}
+                <div class="quiz-list">
+                    {% for quiz in quizzes %}
+                        <div class="quiz-entry {% if not quiz.is_public and is_own_profile %}private-quiz-entry{% endif %}">
+                            <h3>
+                                <a href="{{ url_for('quiz_routes.take_quiz', quiz_id=quiz.id) }}">{{ quiz.title }}</a> 
+                                {% if not quiz.is_public and is_own_profile %}
+                                    <span class="privacy-tag">(Private)</span>
+                                {% elif not quiz.is_public and not is_own_profile %}
+                                    {# This case should not happen due to route logic, but as a fallback #}
+                                    <span class="privacy-tag">(Private - Not Viewable)</span>
+                                {% endif %}
+                            </h3>
+                            <p>Created: {{ quiz.created_at.strftime('%Y-%m-%d') }}</p>
+                            {# Add more quiz details or actions if needed #}
+                            {% if is_own_profile %}
+                                <a href="#">Edit Quiz (Not Implemented)</a>
+                                <!-- Share button can be added here if desired -->
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% else %}
+                <p>No quizzes to display.</p>
+            {% endif %}
+        </section>
+    </main>
+
+    <footer>
+        <p>&copy; {{ "now"|date("Y") }} Quiz.it</p>
+    </footer>
+</body>
+</html>

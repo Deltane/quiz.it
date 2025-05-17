@@ -1,10 +1,8 @@
-from app.models import Quiz, QuizResult, User, Folder, QuizAnswer, QuizSummary
+from app.models import Quiz, QuizResult, User, Folder, QuizAnswer, QuizSummary, QuizShare, PendingQuizShare
 from app import db
 from datetime import datetime
-from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for
-from flask import render_template, session, request
-from pytz import timezone
-
+from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for, flash
+from flask_login import current_user, login_required
 import json
 
 quiz_routes = Blueprint('quiz_routes', __name__)
@@ -12,6 +10,112 @@ quiz_routes = Blueprint('quiz_routes', __name__)
 @quiz_routes.route('/')
 def home():
     return render_template('landing_page.html')
+
+# Direct quiz link handler - new route
+@quiz_routes.route('/<int:quiz_id>')
+def direct_quiz_link(quiz_id):
+    if not current_user.is_authenticated:
+        session.permanent = True
+        session['shared_quiz_id'] = quiz_id
+        session.modified = True
+        auth_url = url_for('auth.login', next=f'/{quiz_id}')
+        return render_template('auth_loading.html', auth_url=auth_url)
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+
+    if quiz.user_id == current_user.id:
+        return redirect(url_for('quiz_routes.redo_quiz', quiz_id=quiz_id))
+
+    quiz_share = QuizShare.query.filter_by(
+        quiz_id=quiz_id,
+        shared_with_user_id=current_user.id
+    ).first()
+
+    pending_share = None
+    if not quiz_share:
+        pending_share = PendingQuizShare.query.filter_by(
+            quiz_id=quiz_id,
+            recipient_email=current_user.email
+        ).first()
+
+        if pending_share:
+            quiz_share = QuizShare(
+                quiz_id=quiz_id,
+                shared_with_user_id=current_user.id,
+                shared_by_user_id=pending_share.shared_by_user_id
+            )
+            db.session.add(quiz_share)
+            db.session.delete(pending_share)
+            db.session.commit()
+
+    if quiz_share:
+        sender = User.query.get(quiz_share.shared_by_user_id)
+        return render_template(
+            'dashboard.html',
+            show_shared_quiz_modal=True,
+            shared_quiz=quiz,
+            sender=sender,
+            recent_quizzes=Quiz.query.filter_by(user_id=current_user.id).order_by(Quiz.created_at.desc()).limit(3).all(),
+            shared_quizzes=[{'quiz': quiz, 'sender': sender}],
+            stats={
+                'quizzes_completed': 0,
+                'quizzes_above_80': 0,
+                'most_frequent_quiz_type': 'None'
+            }
+        )
+
+    flash("This quiz hasn't been shared with you or doesn't exist.", "error")
+    return redirect(url_for('dashboard.dashboard_view'))
+
+@quiz_routes.route('/start_shared_quiz/<int:quiz_id>', methods=['GET'])
+@login_required
+def start_shared_quiz(quiz_id):
+    """Start a quiz that was shared with the current user"""
+    from flask import current_app
+    quiz = Quiz.query.get_or_404(quiz_id)
+    
+    # Verify the quiz is shared with this user
+    quiz_share = QuizShare.query.filter_by(
+        quiz_id=quiz_id,
+        shared_with_user_id=current_user.id
+    ).first()
+    
+    if not quiz_share and quiz.user_id != current_user.id:
+        flash("This quiz hasn't been shared with you.", "error")
+        return redirect(url_for('dashboard.dashboard_view'))
+    
+    # Log access for debugging
+    current_app.logger.info(f"User {current_user.email} ({current_user.id}) accessing shared quiz {quiz_id}")
+    
+    try:
+        # Set up the quiz session
+        import json
+        quiz_data = json.loads(quiz.questions_json)
+        current_app.logger.info(f"Quiz {quiz_id} loaded with {len(quiz_data)} questions")
+        
+        # Store all necessary quiz data in session
+        session['quiz'] = quiz_data
+        session['score'] = 0
+        session['current_question'] = 0
+        session['answers'] = {}
+        session['quiz_id'] = quiz.id
+        session['topic'] = quiz.title
+        
+        # Ensure we have sensible defaults for quiz configuration
+        if 'quiz_duration' not in session or not session['quiz_duration']:
+            session['quiz_duration'] = 5  # Default duration in minutes
+            
+        if 'time_remaining' not in session or not session['time_remaining']:
+            session['time_remaining'] = session['quiz_duration'] * 60  # Time in seconds
+            
+        # Make sure session is saved
+        session.modified = True
+        
+        return redirect(url_for('quiz_routes.take_quiz'))
+    except Exception as e:
+        current_app.logger.error(f"Error starting shared quiz: {e}")
+        flash("There was a problem loading the quiz. Please try again.", "error")
+        return redirect(url_for('dashboard.dashboard_view'))
 
 @quiz_routes.route('/take_quiz')
 def take_quiz():
@@ -110,7 +214,7 @@ def rename_quiz(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)
 
     # Authorization check
-    if quiz.user_id != session.get("user_id"):
+    if quiz.user_id != session.get('user_id'):
         return "Unauthorized", 403
 
     if new_title:
@@ -351,6 +455,283 @@ def delete_quiz_attempt(attempt_id):
     db.session.delete(attempt)
     db.session.commit()
     return redirect(url_for('stats_bp.dashboard'))
+
+@quiz_routes.route('/share_quiz/<int:quiz_id>', methods=['POST'])
+def share_quiz(quiz_id):
+    """Share a quiz with a recipient email."""
+    from flask import current_app
+    from app.utils.email_utils import send_email
+    import os
+    import traceback
+    
+    if not current_user.is_authenticated:
+        return jsonify({'error': 'You must be logged in to share a quiz.'}), 401
+
+    recipient_email = request.json.get('email')
+    if not recipient_email:
+        return jsonify({'error': 'Recipient email is required.'}), 400
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    if quiz.user_id != current_user.id:
+        return jsonify({'error': 'You can only share your own quizzes.'}), 403
+
+    # Check if the user is trying to share with themselves
+    if recipient_email == current_user.email:
+        return jsonify({'error': 'You cannot share a quiz with yourself.'}), 400
+
+    # Check if recipient exists in the system
+    recipient = User.query.filter_by(email=recipient_email).first()
+    
+    # Variable to track if this is a new share (for sending email)
+    is_new_share = False
+    
+    if recipient:
+        # If recipient exists, check if quiz is already shared
+        existing_share = QuizShare.query.filter_by(
+            quiz_id=quiz.id,
+            shared_with_user_id=recipient.id
+        ).first()
+        
+        if existing_share:
+            return jsonify({'message': 'This quiz is already shared with the specified user.'}), 200
+        
+        # Share with existing user
+        quiz_share = QuizShare(
+            quiz_id=quiz.id,
+            shared_with_user_id=recipient.id,
+            shared_by_user_id=current_user.id
+        )
+        db.session.add(quiz_share)
+        is_new_share = True
+    else:
+        # If recipient doesn't exist, check for pending share
+        from app.models import PendingQuizShare
+        
+        existing_pending = PendingQuizShare.query.filter_by(
+            quiz_id=quiz.id,
+            recipient_email=recipient_email
+        ).first()
+        
+        if existing_pending:
+            return jsonify({'message': 'This quiz is already shared with the specified email.'}), 200
+        
+        # Create a pending share for non-existent user
+        pending_share = PendingQuizShare(
+            quiz_id=quiz.id,
+            recipient_email=recipient_email,
+            shared_by_user_id=current_user.id
+        )
+        db.session.add(pending_share)
+        is_new_share = True
+    
+    db.session.commit()
+    
+    # Send email notification for new shares
+    if is_new_share:
+        try:
+            # Generate absolute URLs
+            base_url = request.host_url.rstrip('/')
+            login_url = f"{base_url}{url_for('auth.login')}"
+            quiz_url = f"{base_url}/{quiz.id}"  # Direct link to the quiz
+            
+            current_app.logger.info(f"Attempting to send email to {recipient_email} via SendGrid")
+            
+            # Send email with HTML template
+            send_email(
+                subject=f"{current_user.username} shared a quiz with you on quiz.it",
+                recipients=[recipient_email],
+                body=f"Hi there! {current_user.username} has shared a quiz titled '{quiz.title}' with you on quiz.it. Sign in with Google using this email to access it.",
+                template='emails/quiz_share.html',
+                sender_name=current_user.username,
+                quiz_title=quiz.title,
+                login_url=login_url,
+                quiz_url=quiz_url
+            )
+            current_app.logger.info(f"✅ Quiz share email sent to {recipient_email}")
+        except Exception as e:
+            import traceback
+            current_app.logger.error(f"❌ Failed to send quiz share email: {str(e)}")
+            current_app.logger.error(traceback.format_exc())
+            # Note: We don't return an error to the user if email fails
+            # The quiz is still shared, even if notification fails
+
+    return jsonify({
+        'success': True,
+        'message': 'Quiz shared successfully. An invitation email has been sent.'
+    }), 200
+
+@quiz_routes.route('/view_quiz/<int:quiz_id>', methods=['GET'])
+def view_quiz(quiz_id):
+    """View a quiz if access conditions are met."""
+    if not current_user.is_authenticated:
+        return redirect(url_for('auth.login'))
+
+    quiz = Quiz.query.get_or_404(quiz_id)
+    
+    # Check if the user is the creator of the quiz
+    if quiz.user_id == current_user.id:
+        return render_template('take_quiz.html', quiz=quiz)
+    
+    # Check if the quiz is shared with this user through QuizShare
+    quiz_share = QuizShare.query.filter_by(
+        quiz_id=quiz.id,
+        shared_with_user_id=current_user.id
+    ).first()
+
+    if quiz_share:
+        return render_template('take_quiz.html', quiz=quiz)
+        
+    # Check if there's a pending share for this user's email
+    from app.models import PendingQuizShare
+    pending_share = PendingQuizShare.query.filter_by(
+        quiz_id=quiz.id,
+        recipient_email=current_user.email
+    ).first()
+    
+    if pending_share:
+        # Convert the pending share to a regular share now that the user has registered
+        new_share = QuizShare(
+            quiz_id=quiz.id,
+            shared_with_user_id=current_user.id,
+            shared_by_user_id=pending_share.shared_by_user_id
+        )
+        db.session.add(new_share)
+        db.session.delete(pending_share)  # Remove the pending share
+        db.session.commit()
+        return render_template('take_quiz.html', quiz=quiz)
+    
+    return jsonify({'error': 'You do not have access to this quiz.'}), 403
+
+@quiz_routes.route('/share_quiz', methods=['POST'])
+def share_quiz_root():
+    """
+    Root-level endpoint for sharing quizzes with any email address.
+    The quiz will be accessible only if the recipient logs in with the shared email.
+    """
+    from flask import current_app
+    from app.utils.email_utils import send_email
+    import os
+    
+    if not current_user.is_authenticated:
+        return jsonify({'error': 'You must be logged in to share quizzes.'}), 401
+
+    if not request.is_json:
+        return jsonify({'error': 'Request must be JSON.'}), 415
+
+    data = request.get_json()
+    quiz_id = data.get('quiz_id')
+    recipient_email = data.get('recipient_email')
+
+    if not quiz_id or not recipient_email:
+        return jsonify({'error': 'Quiz ID and recipient email are required.'}), 400
+
+    try:
+        quiz_id = int(quiz_id)
+    except ValueError:
+        return jsonify({'error': 'Invalid Quiz ID format.'}), 400
+
+    # Get the quiz
+    quiz = Quiz.query.get(quiz_id)
+    if not quiz:
+        return jsonify({'error': 'Quiz not found.'}), 404
+
+    # Authorization check
+    if quiz.user_id != current_user.id:
+        return jsonify({'error': 'You can only share your own quizzes.'}), 403
+
+    # Check if the user is trying to share with themselves
+    if recipient_email == current_user.email:
+        return jsonify({'error': 'You cannot share a quiz with yourself.'}), 400
+
+    # Variable to track if this is a new share (for sending email)
+    is_new_share = False
+    
+    # Check if recipient exists in the system
+    recipient = User.query.filter_by(email=recipient_email).first()
+    
+    if recipient:
+        # If recipient exists, check if quiz is already shared
+        existing_share = QuizShare.query.filter_by(
+            quiz_id=quiz.id,
+            shared_with_user_id=recipient.id
+        ).first()
+        
+        if existing_share:
+            return jsonify({'message': 'This quiz is already shared with the specified user.'}), 200
+        
+        # Share with existing user
+        quiz_share = QuizShare(
+            quiz_id=quiz.id,
+            shared_with_user_id=recipient.id,
+            shared_by_user_id=current_user.id
+        )
+        db.session.add(quiz_share)
+        is_new_share = True
+    else:
+        # If recipient doesn't exist, check for pending share
+        from app.models import PendingQuizShare
+        
+        existing_pending = PendingQuizShare.query.filter_by(
+            quiz_id=quiz.id,
+            recipient_email=recipient_email
+        ).first()
+        
+        if existing_pending:
+            return jsonify({'message': 'This quiz is already shared with the specified email.'}), 200
+        
+        # Create a pending share for non-existent user
+        pending_share = PendingQuizShare(
+            quiz_id=quiz.id,
+            recipient_email=recipient_email,
+            shared_by_user_id=current_user.id
+        )
+        db.session.add(pending_share)
+        is_new_share = True
+    
+    db.session.commit()
+    
+    # Send email notification for new shares
+    if is_new_share:
+        try:
+            # Generate absolute URLs
+            base_url = request.host_url.rstrip('/')
+            login_url = f"{base_url}{url_for('auth.login')}"
+            quiz_url = f"{base_url}/{quiz.id}"  # Direct link to the quiz
+            
+            # Send email with HTML template
+            send_email(
+                subject=f"{current_user.username} shared a quiz with you on quiz.it",
+                recipients=[recipient_email],
+                body=f"Hi there! {current_user.username} has shared a quiz titled '{quiz.title}' with you on quiz.it. Sign in with Google using this email to access it.",
+                template='emails/quiz_share.html',
+                sender_name=current_user.username,
+                quiz_title=quiz.title,
+                login_url=login_url,
+                quiz_url=quiz_url
+            )
+            current_app.logger.info(f"Sent quiz share email to {recipient_email}")
+        except Exception as e:
+            current_app.logger.error(f"Failed to send quiz share email: {str(e)}")
+            # Note: We don't return an error to the user if email fails
+            # The quiz is still shared, even if notification fails
+    
+    return jsonify({'success': True, 'message': f'Quiz successfully shared with {recipient_email}.'}), 200
+
+@quiz_routes.route('/check_login')
+def check_login():
+    """
+    Root-level endpoint to check login status for frontend requests.
+    Returns whether the user is currently authenticated.
+    """
+    return jsonify({
+        'logged_in': current_user.is_authenticated,
+        'user_info': {
+            'id': current_user.id,
+            'name': session.get('user_name'),
+            'email': current_user.email if current_user.is_authenticated else None,
+            'picture': session.get('user_pic')
+        } if current_user.is_authenticated else None
+    })
 
 @quiz_routes.route('/quiz_summary/<int:attempt_id>')
 def quiz_summary(attempt_id):
