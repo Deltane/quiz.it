@@ -1,4 +1,6 @@
 let answers = [];
+let questionTimestamps = [];
+
 $(document).ready(function () {
     // Add pause state
     let isPaused = false;
@@ -7,6 +9,8 @@ $(document).ready(function () {
     let remainingTime = parseInt($('#timer-container').data('total-time')) || fullQuizTime;
     let currentQuestionIndex = typeof INITIAL_QUESTION_INDEX !== 'undefined' ? INITIAL_QUESTION_INDEX : 0;
     let score = 0;
+    const quizLength = parseInt($('#question-container').data('question-count')) || 0;
+    console.log("Detected quizLength:", quizLength);
     let timerInterval;
 
     function resetQuiz() {
@@ -69,6 +73,7 @@ $(document).ready(function () {
 
     function loadQuestion() {
         if (currentQuestionIndex === 0) resetQuiz();
+        questionTimestamps.push(Date.now());
         $.getJSON(`/get_question/${currentQuestionIndex}`, function (data) {
             const $questionContainer = $('#question-container').empty();
 
@@ -94,6 +99,11 @@ $(document).ready(function () {
                 }
 
                 $('#next-question').show();
+                if (currentQuestionIndex + 1 === quizLength) {
+                    $('#next-question').text('Submit');
+                } else {
+                    $('#next-question').text('Next Question');
+                }
                 // Show/hide previous-question button
                 if (currentQuestionIndex > 0) {
                     $('#prev-question').show();
@@ -145,67 +155,51 @@ $(document).ready(function () {
     });
 
     function submitAnswer(selectedAnswer) {
-
-        // Store answer in the answers array
+        // Store answer
         answers[currentQuestionIndex] = selectedAnswer;
+
+        const isFinalQuestion = currentQuestionIndex + 1 === quizLength;
+
+        const payload = {
+            questionIndex: currentQuestionIndex,
+            answer: selectedAnswer
+        };
+
+        if (isFinalQuestion) {
+            questionTimestamps.push(Date.now());
+            const durations = [];
+            for (let i = 1; i < questionTimestamps.length; i++) {
+                durations.push((questionTimestamps[i] - questionTimestamps[i - 1]) / 1000);
+            }
+            const timePerQuestion = {};
+            durations.forEach((duration, index) => {
+                timePerQuestion[`Q${index + 1}`] = duration;
+            });
+            payload.time_per_question = timePerQuestion;
+        }
 
         $.ajax({
             url: '/submit_answer',
             method: 'POST',
             contentType: 'application/json',
-            data: JSON.stringify({ questionIndex: currentQuestionIndex, answer: selectedAnswer }),
+            data: JSON.stringify(payload),
             success: function (data) {
                 if (data.completed) {
                     stopTimer();
                     $('#timer-container').hide();
-                    $('#countdown-timer').hide();
+                    const redirectURL = data.redirect_url || '/';
                     $('#question-container').html(`
                         <div class="result">
-                            <p>Quiz completed! Your score is: ${data.score}</p>
-                            <canvas id="resultChart" width="400" height="200" style="margin-top: 20px;"></canvas>
+                            <p><b>Quiz completed! Your score is: ${data.score}</b></p>
                             <div class="button-group" style="margin-top: 20px; display: flex; justify-content: center; gap: 15px;">
                                 <a href="/create_quiz" class="btn">Redo</a>
                                 <a href="/" class="btn">Home</a>
                                 <a href="/dashboard" class="btn">Quiz Dashboard</a>
+                                <a href="${redirectURL}" class="btn">Quiz Summary</a>
                             </div>
                         </div>
                     `);
-                    const correctCount = data.score;
-                    const incorrectCount = data.total - data.score;
-
-                    const $chartCanvas = $('#resultChart');
-                    if ($chartCanvas.length > 0) {
-                        const chartCtx = $chartCanvas[0].getContext('2d');
-                        new Chart(chartCtx, {
-                            type: 'bar',
-                            data: {
-                                labels: ['Correct', 'Incorrect'],
-                                datasets: [{
-                                    label: 'Answers Summary',
-                                    data: [correctCount, incorrectCount],
-                                    backgroundColor: ['#82b74b', '#bc5a45']
-                                }]
-                            },
-                            options: {
-                                indexAxis: 'y',
-                                plugins: {
-                                    legend: {
-                                        display: false
-                                    }
-                                },
-                                scales: {
-                                    x: {
-                                        beginAtZero: true,
-                                        precision: 0
-                                    }
-                                }
-                            }
-                        });
-                    }
-                    $('#prev-question').hide();
-                    $('#next-question').hide();
-                    $('#pause-resume-btn').hide();
-                    $('#exit-quiz-btn').hide();
+                    $('#countdown-timer, #prev-question, #next-question, #pause-resume-btn, #exit-quiz-btn').hide();
                 } else {
                     currentQuestionIndex++;
                     loadQuestion();

@@ -21,6 +21,7 @@
             {% if session.get('user_email') %}
                 <a href="/" class="nav-button">Home</a>
                 <a href="/create_quiz" class="nav-button">Create Quiz</a>
+                <a href="/my_quizzes" class="nav-button">My Quizzes</a>
                 <div class="user-info"> <!-- Groups pic, name, sign out -->
                     <div class="profile-trigger"> <!-- Hover target for dropdown -->
                         <img src="{{ session['user_pic'] }}" alt="Profile" class="nav-profile-pic"> <!-- Moved pic to left, added class -->
@@ -178,11 +179,41 @@
         <div class="recent-quizzes-list">
             {% for quiz in recent_quizzes %}
             <div class="quiz-entry">
-                <h3>{{ quiz.title }}</h3>
-                <div>
+                <span class="quiz-title">{{ quiz.title }}</span>
+                {% if quiz.attempts %}
+                  <div class="attempt-history">
+                    <strong>Attempt History:</strong>
+                    <ul>
+                      {% for attempt in quiz.attempts | sort(attribute='timestamp') %}
+                        {% if attempt.completed %}
+                          <li>
+                            Attempt {{ loop.index }}:
+                            Finished at {{ attempt.timestamp.strftime('%Y-%m-%d %H:%M:%S') }},
+                            Score: {{ attempt.score }}/{{ attempt.total_questions }}
+                            <form action="/quiz_summary/{{ attempt.id }}" method="GET" style="display:inline;">
+                              <button class="action-button" type="submit">View Summary</button>
+                            </form>
+                          </li>
+                        {% endif %}
+                      {% endfor %}
+                    </ul>
+                  </div>
+                {% endif %}
+                <div class="action-button-wrapper">
                     <button class="action-button" onclick="openShareModal('{{ quiz.id }}')">Share</button>
-                    <button class="action-button">Rename</button>
-                    <button class="action-button">Redo</button>
+                    <button class="action-button" data-action="rename" data-type="quiz" data-id="{{ quiz.id }}">Rename</button>
+                    <div id="quiz-rename-form-{{ quiz.id }}" class="rename-form" style="display: none;">
+                        <form action="/rename_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+                            <input type="text" name="new_title" placeholder="New Title" required>
+                            <button class="action-button" type="submit">Save</button>
+                        </form>
+                    </div>
+                    <form action="/redo_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+                        <button class="action-button" type="submit">Redo</button>
+                    </form>
+                    <form action="/delete_quiz/{{ quiz.id }}" method="POST" style="display:inline;">
+                        <button class="action-button" type="submit">Delete</button>
+                    </form>
                 </div>
             </div>
 
@@ -240,7 +271,7 @@
         <label for="filter-type">Filter by:</label>
         <select id="filter-type" name="filter_type">
           <option value="all">All</option>
-          <option value="quizzes_above_80">Above 80%</option>
+          <option value="quizzes_above_80">Above 80%</</option>
           <option value="recent_quizzes">Recent Quizzes</option>
           <option value="most_frequent_quiz_type">Frequent Type</option>
         </select>

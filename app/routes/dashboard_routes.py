@@ -1,9 +1,10 @@
 import json
-
 from flask import Blueprint, render_template, session, redirect, url_for, request, flash, jsonify
 from flask_login import current_user, login_required
-from app.models import User, Quiz, Folder, db, QuizShare
+from app.models import User, Quiz, Folder, db, QuizShare, QuizResult
 from app.utils.email_utils import send_email
+from datetime import datetime
+from sqlalchemy import func
 
 dashboard_bp = Blueprint("dashboard", __name__)
 
@@ -21,10 +22,8 @@ def dashboard_view():
     past_quizzes = user_quizzes[3:] if len(user_quizzes) > 3 else []
     user_folders = Folder.query.filter_by(user_id=user.id).all()
 
-    # Query quizzes shared with the current user
     shared_quizzes = []
     quiz_shares = QuizShare.query.filter_by(shared_with_user_id=user.id).all()
-    
     for share in quiz_shares:
         quiz = Quiz.query.get(share.quiz_id)
         if quiz:
@@ -33,55 +32,45 @@ def dashboard_view():
                 'sender': User.query.get(share.shared_by_user_id)
             }
             shared_quizzes.append(shared_quiz)
-            
-    # Check if we should show the shared quiz modal
+
     show_shared_quiz_modal = session.pop('show_shared_quiz_modal', False)
     shared_quiz = None
     sender = None
-    
+
     if show_shared_quiz_modal and 'shared_quiz_id' in session:
         shared_quiz_id = session.get('shared_quiz_id')
         sender_id = session.get('shared_quiz_sender_id')
-        
-        # Get the shared quiz and sender details
+
         shared_quiz = Quiz.query.get(shared_quiz_id)
         sender = User.query.get(sender_id)
-        
-        # Clear the session variables
+
         session.pop('shared_quiz_id', None)
         session.pop('shared_quiz_sender_id', None)
 
-    # Get any unfinished quiz attempts
-    from app.models import QuizResult
     unfinished_attempts = QuizResult.query.filter_by(user_id=user.id, completed=False).all()
 
-    # Get stats
-    from sqlalchemy import func
-    
     stats = {
         'quizzes_completed': QuizResult.query.filter_by(user_id=user.id, completed=True).count(),
-        'quizzes_above_80': QuizResult.query.filter_by(user_id=user.id, completed=True) \
+        'quizzes_above_80': QuizResult.query.filter_by(user_id=user.id, completed=True)
             .filter(QuizResult.score / QuizResult.total_questions >= 0.8).count()
     }
-    
-    # Best score
+
     best_score = QuizResult.query.filter_by(user_id=user.id, completed=True) \
         .order_by((QuizResult.score * 100 / QuizResult.total_questions).desc()).first()
-    
+
     if best_score:
         stats['best_score'] = {
             'score': best_score.score,
             'total': best_score.total_questions,
             'type': best_score.quiz_type
         }
-    
-    # Most frequent type
+
     most_frequent = db.session.query(
-        QuizResult.quiz_type, 
+        QuizResult.quiz_type,
         func.count(QuizResult.quiz_type).label('type_count')
     ).filter_by(user_id=user.id).group_by(QuizResult.quiz_type) \
      .order_by(func.count(QuizResult.quiz_type).desc()).first()
-    
+
     stats['most_frequent_quiz_type'] = most_frequent[0] if most_frequent else 'None'
 
     return render_template(
@@ -101,9 +90,32 @@ def dashboard_view():
 @dashboard_bp.route('/redo_quiz/<int:quiz_id>')
 def redo_quiz(quiz_id):
     quiz = Quiz.query.get_or_404(quiz_id)
+    user_id = session.get("user_id")
+
+    # Create a new attempt
+    new_attempt = QuizResult(
+        user_id=user_id,
+        quiz_id=quiz.id,
+        title=quiz.title,
+        total_questions=len(json.loads(quiz.questions_json)),
+        quiz_type=quiz.title,
+        completed=False,
+        current_index=0,
+        score=0,
+        start_time=datetime.utcnow()
+    )
+    db.session.add(new_attempt)
+    db.session.commit()
+
+    # Initialize session for the new attempt
     session['quiz'] = json.loads(quiz.questions_json)
     session['score'] = 0
     session['current_question'] = 0
+    session['attempt_id'] = new_attempt.id
+    session['quiz_id'] = quiz.id
+    session['topic'] = quiz.title
+    session['time_remaining'] = session.get("quiz_duration", 5) * 60
+
     return redirect(url_for('quiz_routes.take_quiz'))
 
 @dashboard_bp.route('/create_folder', methods=['GET','POST'])
@@ -358,3 +370,8 @@ def search_users():
     user_data = [{'id': user.id, 'email': user.email} for user in users]
 
     return jsonify(users=user_data)
+
+@dashboard_bp.route('/quiz_summary/<int:attempt_id>', methods=['GET'])
+def quiz_summary(attempt_id):
+    summary = QuizSummary.query.filter_by(result_id=attempt_id).first_or_404()
+    return render_template('quiz_summary.html', summary=summary)

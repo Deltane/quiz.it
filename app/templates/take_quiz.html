@@ -27,7 +27,7 @@
         <div id="pause-message" style="display: none;">
             This quiz is currently paused.
         </div>
-        <div id="question-container" style="margin-top: 20px;"></div>
+        <div id="question-container" data-question-count="{{ total_questions }}" style="margin-top: 20px;"></div>
         <div style="display: flex; justify-content: space-between; margin-top: 20px;">
             <button id="prev-question" class="btn btn-secondary" style="display: none; flex: 1; margin-right: 10px;">Previous Question</button>
             <button id="next-question" class="btn btn-primary" style="display: none; flex: 1;">Next Question</button>
@@ -41,7 +41,4 @@
         </div>
     </div>
 </body>
-<script>
-    const INITIAL_QUESTION_INDEX = {{ current_question | default(0) | int }};
-</script>
 </html>

@@ -422,6 +422,7 @@ body {
     background-color: #7f3f2d;
 }
 
+/* Modal styles from share-quiz-implementation */
 .modal {
     position: fixed;
     top: 0;
@@ -631,4 +632,25 @@ body {
 
 #start-shared-quiz:hover {
     background-color: #45a049;
+}
+
+/* Additional styles from main that don't conflict with quiz sharing features */
+.attempt-history {
+    background-color: #f8f8f8;
+    border-left: 4px solid #9a503b;
+    padding: 0.75rem 1rem;
+    margin-top: 0.5rem;
+    border-radius: 0.5rem;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.attempt-history ul {
+    list-style: disc;
+    margin-left: 1.5rem;
+    padding-left: 0;
+}
+
+.attempt-history li {
+    margin-bottom: 0.3rem;
 }

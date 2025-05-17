@@ -1,0 +1,203 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;700&display=swap');
+
+body {
+  margin: 0;
+  font-family: 'Syne', sans-serif;
+  background: radial-gradient(#e0e0e0 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+.fixed-nav {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    background-color: #9a503b;
+    padding: 1rem 2rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: 1000;
+}
+
+.nav-right {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+    margin-right: 3rem;
+}
+
+.nav-button {
+    position: relative;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    font-weight: bold;
+    border: none;
+    border-radius: 2rem;
+    cursor: pointer;
+    font-family: 'Syne', sans-serif;
+    background-color: #7f3f2d;
+    color: #ffffff;
+    overflow: hidden;
+    z-index: 1;
+    text-decoration: none;
+    transition: background-color 0.3s ease;
+}
+
+.nav-button:before {
+    content: "";
+    background: linear-gradient(
+        45deg,
+        #ff0000,
+        #ff7300,
+        #fffb00,
+        #48ff00,
+        #00ffd5,
+        #002bff,
+        #7a00ff,
+        #ff00c8,
+        #ff0000
+    );
+    position: absolute;
+    top: -0.125rem;
+    left: -0.125rem;
+    background-size: 400%;
+    z-index: -1;
+    filter: blur(0.3125rem);
+    width: calc(100% + 0.25rem);
+    height: calc(100% + 0.25rem);
+    animation: glowingbn5 20s linear infinite;
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+    border-radius: 2.125rem;
+}
+
+.nav-button:after {
+    z-index: -1;
+    content: "";
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background: #ffffff00;
+    left: 0;
+    top: 0;
+    border-radius: 2rem;
+    box-shadow: 0 0.75rem 0.75rem rgba(0, 0, 0, 0.2);
+}
+
+.nav-button:hover:before {
+    opacity: 1;
+}
+
+@keyframes glowingbn5 {
+    0% {
+        background-position: 0 0;
+    }
+    50% {
+        background-position: 400% 0;
+    }
+    100% {
+        background-position: 0 0;
+    }
+}
+
+.user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background-color: #ffffff;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    color: #333;
+    font-weight: bold;
+    font-size: 1rem;
+}
+
+.user-info span {
+    font-family: "Syne", serif;
+    font-size: 1rem;
+    color: #333; /* Gold color for contrast */
+}
+
+.user-info img {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    border: 2px solid #ffffff; /* Matches landing_page.css */
+}
+
+.my-quizzes-title {
+    font-size: 2rem;
+    color: #ffffff;
+    font-weight: bold;
+}
+
+.my-quizzes-header {
+  background-color: #9a503b;
+  padding: 1.5rem 2rem;
+  color: white;
+  text-align: center;
+  font-size: 2rem;
+  font-weight: bold;
+}
+
+.my-quizzes-container {
+  margin-top: 2rem;
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+  width: 100%;
+}
+
+.quiz-box {
+  background: white;
+  border-radius: 0.75rem;
+  padding: 1.5rem;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.quiz-box h3 {
+  margin-bottom: 0.8rem;
+  color: #9a503b;
+  font-size: 1.2rem;
+}
+
+.attempt-history {
+  background-color: #f8f8f8;
+  border-left: 4px solid #9a503b;
+  padding: 0.75rem 1rem;
+  margin-top: 0.5rem;
+  border-radius: 0.5rem;
+  font-size: 0.95rem;
+  color: #333;
+}
+
+.attempt-history ul {
+  list-style: disc;
+  margin-left: 1.5rem;
+  padding-left: 0;
+}
+
+.attempt-history li {
+  margin-bottom: 0.3rem;
+}
+
+.quiz-box form {
+  display: inline-block;
+  margin-right: 0.5rem;
+}
+
+.quiz-box button {
+  background-color: #9a503b;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  font-family: 'Syne', sans-serif;
+  transition: background-color 0.3s ease;
+}
+
+.quiz-box button:hover {
+  background-color: #7f3f2d;
+}
