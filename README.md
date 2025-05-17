@@ -1,23 +1,25 @@
 # quiz.it 🧠📚
 
-A web-based AI-assisted quiz creation and practice platform built with Flask and SQLite. Users can generate quizzes from
-custom input or files, complete and review their results, and share quizzes with friends or groups.
+A web-based, AI-assisted quiz creation and practice platform built with Flask and SQLite. quiz.it empowers users to generate quizzes from custom input or uploaded files, complete and review their results, and share quizzes with friends or groups.
 
 ## 🌟 Features
 
-- User registration and login
-- Manual and AI-generated quiz creation
+- User registration and login (including Google OAuth)
+- Manual and AI-generated quiz creation (OpenAI integration)
 - Import and upload documents for quiz generation via PDF
-- Support for MCQ, short answer, and fill-in-the-blank types
-- Real-time scoring and quiz attempt history
-- Visual statistics with charts (time spent, scores, question review)
-- Quiz sharing with individuals or groups.
+- Support for multiple question types: MCQ, short answer, fill-in-the-blank
+- Real-time scoring, quiz attempt history, and review
+- Visual statistics and analytics with interactive charts (time spent, scores, question review)
+- Quiz sharing with individuals or groups (invite via email)
+- Personal dashboard and user profile pages
+- Responsive design for desktop and mobile
 
 ## 🚀 Technologies
 
-- **Frontend**: HTML, CSS, JavaScript, jQuery, Bootstrap/Tailwind 
+- **Frontend**: HTML, CSS, JavaScript, jQuery, Bootstrap (and/or Tailwind)
 - **Backend**: Flask (Python), SQLAlchemy (with SQLite)
-- **Other**: AJAX for dynamic interactivity, Chart.js for data visualisation, OpenAI API for AI quiz generation
+- **Other**: Flask-Login, Flask-Mail, Flask-Migrate, Flask-Session, WTForms, Chart.js (for statistics), OpenAI API (for AI quiz generation), PyPDF2, PyMuPDF, pytesseract (for document import), OAuth (Google)
+- **Testing**: pytest, Selenium (optional, for browser automation)
 
 ## 👥 Team Members
 
@@ -48,31 +50,25 @@ cd quiz.it
 
 #### macOS/Linux
 ```bash
-python3 -m venv venv  
-source venv/bin/activate  
-pip install --upgrade pip  
+python3 -m venv venv
+source venv/bin/activate
+pip install --upgrade pip
 pip install -r requirements.txt
 ```
 
-# If you make any changes to requirements.txt, run this command to update the file
-```bash
-pip freeze > requirements.txt
-```
 #### Windows
 ```bash
-python3 -m venv venv  
-venv\Scripts\activate  
-pip install --upgrade pip  
+python3 -m venv venv
+venv\Scripts\activate
+pip install --upgrade pip
 pip install -r requirements.txt
-pip freeze > requirements.txt
-
-# If you make any changes to requirements.txt, run this command to update the file
-pip freeze > requirements.txt
 ```
+
+> If you add or update dependencies, run `pip freeze > requirements.txt` to update the requirements file.
 
 ### 3. Set Up Environment Variables and Initialise Database
 
-Create a `.env` file in the root directory of the project and add the following:
+Create a `.env` file in the root directory of the project with the following:
 
 ```dotenv
 SECRET_KEY=your_secret_key_here
@@ -81,15 +77,18 @@ GOOGLE_CLIENT_SECRET=your_google_client_secret_here
 OAUTHLIB_INSECURE_TRANSPORT=1
 ```
 
-Replace `your_secret_key_here`, `your_google_client_id_here`, and `your_google_client_secret_here` with your actual values
+Replace the placeholder values with your actual credentials.
 
 Before running the app for the first time, set up the database with Flask-Migrate:
+
 ```bash
-flask db init         # Only needed the first time to initialize migrations
+flask db init         # Only needed once to initialize migrations
 flask db migrate -m "Initial migration"
 flask db upgrade
+```
 
 If you make changes to your models in the future, run:
+```bash
 flask db migrate -m "Describe your change"
 flask db upgrade
 ```
@@ -98,7 +97,7 @@ flask db upgrade
 
 #### Using `flask run`
 
-Set the `FLASK_APP` environment variable and run the app:
+Set the `FLASK_APP` environment variable and run:
 
 ```bash
 export FLASK_APP=run.py  # For macOS/Linux
@@ -106,14 +105,12 @@ set FLASK_APP=run.py     # For Windows
 flask run
 ```
 
-#### Using `python run.py`
-
-Alternatively, you can run the app directly:
+#### Or, using `python run.py`
 
 ```bash
 python run.py
 ```
 
-The app will be available at `http://127.0.0.1:5000`.
+The app will be available at [http://127.0.0.1:5000](http://127.0.0.1:5000).
 
 ---
