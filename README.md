@@ -40,8 +40,8 @@ custom input or files, complete and review their results, and share quizzes with
 ### 1. Clone the repository
 
 ```bash
-git clone https://github.com/Deltane/CITS3403-Group-Project.git
-cd CITS3403-Group-Project
+git clone https://github.com/Deltane/quiz.it
+cd quiz.it
 ```
 
 ### 2. Create a Virtual Environment
