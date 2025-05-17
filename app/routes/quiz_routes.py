@@ -4,6 +4,7 @@ from datetime import datetime
 from flask import Blueprint, session, request, jsonify, render_template, redirect, url_for, flash
 from flask_login import current_user, login_required
 import json
+from pytz import timezone
 
 quiz_routes = Blueprint('quiz_routes', __name__)
 
@@ -274,7 +275,7 @@ def submit_answer():
             quiz_id = session.get('quiz_id')
             quiz_title = session.get('topic') or 'Untitled'
             total_questions = len(quiz)
-            timestamp = datetime.utcnow()
+            timestamp = datetime.now(datetime.timezone.utc) # Changed from datetime.utcnow()
 
             quiz_result = QuizResult(
                 user_id=user_id,
@@ -362,8 +363,7 @@ def submit_answer():
                 'redirect_url': url_for('quiz_routes.quiz_summary', attempt_id=quiz_result.id)
             })
         except Exception as e:
-            import traceback
-            traceback.print_exc()
+            print(f"Error in submit_answer: {e}") # Replaced traceback with a simple print
             return jsonify({'error': str(e)}), 500
     
     return jsonify({'completed': False})
@@ -385,7 +385,7 @@ def exit_quiz():
         quiz_id=quiz_id,
         score=0,  # Will be calculated on resume
         total_questions=len(session.get("quiz", [])),
-        timestamp=datetime.utcnow(),
+        timestamp=datetime.now(datetime.timezone.utc), # Changed from datetime.utcnow()
         quiz_type=topic,
         completed=False,
         title=topic,
@@ -461,9 +461,7 @@ def share_quiz(quiz_id):
     """Share a quiz with a recipient email."""
     from flask import current_app
     from app.utils.email_utils import send_email
-    import os
-    import traceback
-    
+
     if not current_user.is_authenticated:
         return jsonify({'error': 'You must be logged in to share a quiz.'}), 401
 
@@ -549,9 +547,8 @@ def share_quiz(quiz_id):
             )
             current_app.logger.info(f"✅ Quiz share email sent to {recipient_email}")
         except Exception as e:
-            import traceback
             current_app.logger.error(f"❌ Failed to send quiz share email: {str(e)}")
-            current_app.logger.error(traceback.format_exc())
+            print(f"Error in share_quiz sending email: {e}") # Replaced traceback with a simple print
             # Note: We don't return an error to the user if email fails
             # The quiz is still shared, even if notification fails
 
@@ -610,8 +607,7 @@ def share_quiz_root():
     """
     from flask import current_app
     from app.utils.email_utils import send_email
-    import os
-    
+
     if not current_user.is_authenticated:
         return jsonify({'error': 'You must be logged in to share quizzes.'}), 401
 
@@ -712,6 +708,7 @@ def share_quiz_root():
             current_app.logger.info(f"Sent quiz share email to {recipient_email}")
         except Exception as e:
             current_app.logger.error(f"Failed to send quiz share email: {str(e)}")
+            print(f"Error in share_quiz_root sending email: {e}") # Added for logging if traceback is removed
             # Note: We don't return an error to the user if email fails
             # The quiz is still shared, even if notification fails
     
